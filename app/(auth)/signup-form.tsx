@@ -44,7 +44,7 @@ export default function SignupForm() {
           onClick={initiateGoogleAuth}
         >
           <Image
-            src="/assets/google-logo.png"
+            src="/assets/google-logo.svg"
             alt="Google"
             width={40}
             height={40}
@@ -60,7 +60,7 @@ export default function SignupForm() {
           onClick={initiateDropboxAuth}
         >
           <Image
-            src="/assets/dropbox-logo.png"
+            src="/assets/dropbox-logo.svg"
             alt="Dropbox"
             width={24}
             height={24}

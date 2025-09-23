@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useRef, useEffect, Suspense } from "react";
+import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -12,14 +13,40 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { useCurrentUser } from "@/hooks/use-auth";
+import {
+  useCurrentUser,
+  useGoogleAuth,
+  useDropboxAuth,
+} from "@/hooks/use-auth";
+import { useDropboxStatus } from "@/hooks/use-dropbox-status";
 import { getUserInitials } from "@/lib/user-utils";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Camera, Save, Loader } from "lucide-react";
+import { Camera, Save, Loader, Link, Unlink, ExternalLink } from "lucide-react";
 import { toast } from "sonner";
+import { useQuery } from "@tanstack/react-query";
 
 function AccountContent() {
   const { user, isLoading } = useCurrentUser();
+  const { initiateGoogleAuth } = useGoogleAuth();
+  const { initiateDropboxAuth } = useDropboxAuth();
+  const { data: dropboxStatus, refetch: refetchDropboxStatus } =
+    useDropboxStatus();
+
+  // Google Drive status check
+  const { data: googleStatus, refetch: refetchGoogleStatus } = useQuery({
+    queryKey: ["google-drive-status"],
+    queryFn: async () => {
+      const response = await fetch("/api/auth/google-drive-token");
+      if (response.ok) {
+        const data = await response.json();
+        return { hasAccess: true, accessToken: data.accessToken };
+      }
+      return { hasAccess: false };
+    },
+    staleTime: 5 * 60 * 1000,
+    retry: false,
+  });
+
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [phone, setPhone] = useState("");
@@ -131,6 +158,50 @@ function AccountContent() {
     setEmail(user?.email || "");
     setPhone(user?.phone || "");
     setAvatarUrl(user?.avatarUrl || "");
+  };
+
+  const handleConnectDropbox = () => {
+    initiateDropboxAuth();
+  };
+
+  const handleDisconnectDropbox = async () => {
+    try {
+      const response = await fetch("/api/auth/dropbox/disconnect", {
+        method: "POST",
+      });
+
+      if (response.ok) {
+        toast.success("Dropbox disconnected successfully!");
+        refetchDropboxStatus();
+      } else {
+        throw new Error("Failed to disconnect Dropbox");
+      }
+    } catch (error) {
+      console.error("Dropbox disconnect error:", error);
+      toast.error("Failed to disconnect Dropbox. Please try again.");
+    }
+  };
+
+  const handleConnectGoogle = () => {
+    initiateGoogleAuth();
+  };
+
+  const handleDisconnectGoogle = async () => {
+    try {
+      const response = await fetch("/api/auth/google/disconnect", {
+        method: "POST",
+      });
+
+      if (response.ok) {
+        toast.success("Google Drive disconnected successfully!");
+        refetchGoogleStatus();
+      } else {
+        throw new Error("Failed to disconnect Google Drive");
+      }
+    } catch (error) {
+      console.error("Google disconnect error:", error);
+      toast.error("Failed to disconnect Google Drive. Please try again.");
+    }
   };
 
   if (isLoading) {
@@ -279,6 +350,103 @@ function AccountContent() {
                   <>Save Changes</>
                 )}
               </Button>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle>Integrations</CardTitle>
+            <CardDescription>
+              Connect your cloud storage accounts to save and share your
+              recordings.
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            {/* Dropbox Integration */}
+            <div className="flex items-center justify-between p-4 border rounded-lg">
+              <div className="flex items-center space-x-3">
+                <Image
+                  src="/assets/dropbox-logo.svg"
+                  alt="Dropbox"
+                  width={32}
+                  height={32}
+                />
+                <div>
+                  <h3 className="font-medium">Dropbox</h3>
+                  {dropboxStatus?.hasAccess && (
+                    <div className="flex items-center space-x-1 text-green-600">
+                      <span className="text-sm font-medium">• Connected</span>
+                    </div>
+                  )}
+                </div>
+              </div>
+              <div className="flex items-center space-x-2">
+                {dropboxStatus?.hasAccess ? (
+                  <>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={handleDisconnectDropbox}
+                    >
+                      <Unlink className="h-4 w-4" />
+                      Disconnect
+                    </Button>
+                  </>
+                ) : (
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={handleConnectDropbox}
+                  >
+                    <ExternalLink className="h-4 w-4" />
+                    Connect
+                  </Button>
+                )}
+              </div>
+            </div>
+
+            {/* Google Drive Integration */}
+            <div className="flex items-center justify-between p-4 border rounded-lg">
+              <div className="flex items-center space-x-3">
+                <Image
+                  src="/assets/google-logo.svg"
+                  alt="Google Drive"
+                  width={32}
+                  height={32}
+                />
+                <div>
+                  <h3 className="font-medium">Google Drive</h3>
+                  {googleStatus?.hasAccess && (
+                    <div className="flex items-center space-x-1 text-green-600">
+                      <span className="text-sm font-medium">• Connected</span>
+                    </div>
+                  )}
+                </div>
+              </div>
+              <div className="flex items-center space-x-2">
+                {googleStatus?.hasAccess ? (
+                  <>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={handleDisconnectGoogle}
+                    >
+                      <Unlink className="h-4 w-4" />
+                      Disconnect
+                    </Button>
+                  </>
+                ) : (
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={handleConnectGoogle}
+                  >
+                    <ExternalLink className="h-4 w-4" />
+                    Connect
+                  </Button>
+                )}
+              </div>
             </div>
           </CardContent>
         </Card>
