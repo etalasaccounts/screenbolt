@@ -75,7 +75,7 @@ export async function POST(request: NextRequest) {
     console.log("Duration value:", validatedData.duration);
 
     // Generate title if not provided, using user's timestamp if available
-    const title = validatedData.title || generateVideoTitleWithTimestamp(validatedData.userTimestamp);
+    const title = validatedData.title || generateVideoTitleWithTimestamp();
 
     // Create the video record in the database
     const video = await db.video.create({

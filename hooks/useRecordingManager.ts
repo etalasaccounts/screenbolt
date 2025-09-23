@@ -241,12 +241,11 @@ export function useRecordingManager() {
               },
               body: JSON.stringify({
                 userId: user.id,
-                workspaceId: user.active_workspace,
-                duration: duration > 0 ? duration : undefined,
-                thumbnailUrl, // Include thumbnail URL if available
-                source: selectedStorage === 'dropbox' ? 'Dropbox' : 'Bunny',
-                // Pass user's local timestamp for title generation
-                userTimestamp: new Date().toISOString(),
+                workspaceId: workspace.id,
+                duration: Math.round(duration),
+                thumbnailUrl: thumbnailUrl,
+                source: 'screen_recording',
+                title: generateVideoTitleWithLocalTime(), // Use client-generated title with local time
               }),
             });
 
@@ -600,3 +599,17 @@ export function useRecordingManager() {
     clearCountdownTimeouts,
   };
 }
+
+// Generate video title with user's local time
+const generateVideoTitleWithLocalTime = (): string => {
+  const now = new Date();
+  const formattedDate = now.toLocaleDateString('en-US', {
+    year: 'numeric',
+    month: 'short',
+    day: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit',
+    hour12: true
+  });
+  return `Screen Recording ${formattedDate}`;
+};
