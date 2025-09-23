@@ -31,9 +31,11 @@ export function getDirectVideoUrl(playerUrl: string): string {
   }
 }
 
-export function generateVideoTitleWithTimestamp(): string {
+export function generateVideoTitleWithTimestamp(userTimestamp?: string): string {
   const baseTitle = `Recording`;
-  const now = new Date();
+  
+  // If userTimestamp is provided, use it; otherwise fall back to server time
+  const now = userTimestamp ? new Date(userTimestamp) : new Date();
   const timestamp = now.toLocaleDateString("en-US", {
     month: "short",
     day: "numeric",

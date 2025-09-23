@@ -16,6 +16,7 @@ const createVideoSchema = z.object({
   duration: z.number().positive("Duration must be positive").optional(),
   thumbnailUrl: z.string().url("Invalid thumbnail URL").optional(),
   source: z.enum(["Dropbox", "Local", "Bunny"]).optional(),
+  userTimestamp: z.string().optional(), // Add user timestamp field
 });
 
 // Schema for updating a video URL
@@ -73,8 +74,8 @@ export async function POST(request: NextRequest) {
     console.log("Validated data:", validatedData);
     console.log("Duration value:", validatedData.duration);
 
-    // Generate title if not provided
-    const title = validatedData.title || generateVideoTitleWithTimestamp();
+    // Generate title if not provided, using user's timestamp if available
+    const title = validatedData.title || generateVideoTitleWithTimestamp(validatedData.userTimestamp);
 
     // Create the video record in the database
     const video = await db.video.create({

@@ -245,6 +245,8 @@ export function useRecordingManager() {
                 duration: duration > 0 ? duration : undefined,
                 thumbnailUrl, // Include thumbnail URL if available
                 source: selectedStorage === 'dropbox' ? 'Dropbox' : 'Bunny',
+                // Pass user's local timestamp for title generation
+                userTimestamp: new Date().toISOString(),
               }),
             });
 
