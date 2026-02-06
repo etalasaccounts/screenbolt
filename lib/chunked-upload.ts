@@ -3,19 +3,14 @@
  * Implements resumable upload with progress tracking
  */
 
-// Centralized upload configuration - modify these values to change limits across the app
-// NOTE: When changing MAX_FILE_SIZE_MB, also update next.config.js api.bodyParser.sizeLimit
-export const UPLOAD_CONFIG = {
-  // File size limits
-  MAX_FILE_SIZE: 200 * 1024 * 1024, // 100MB in bytes
-  MAX_FILE_SIZE_MB: 100, // 100MB (also update next.config.js when changing this)
-  LARGE_FILE_WARNING_MB: 50, // Show warning for files > 50MB
+import {
+  getProviderConfig,
+  validateFileSize,
+  calculateUploadTimeout,
+  UPLOAD_CONFIG,
+} from "./storage-config";
 
-  // Upload behavior
-  CHUNK_SIZE: 5 * 1024 * 1024, // 5MB chunks for large files
-  MIN_TIMEOUT: 3 * 60 * 1000, // 3 minutes minimum timeout
-  TIMEOUT_PER_MB: 2000, // 2 seconds per MB for dynamic timeout calculation
-} as const;
+// Legacy UPLOAD_CONFIG is now imported from storage-config.ts for backward compatibility
 
 interface ChunkUploadOptions {
   onProgress?: (progress: number) => void;
@@ -37,9 +32,10 @@ export async function uploadLargeVideoToBunny(
   blob: Blob,
   options: ChunkUploadOptions = {}
 ): Promise<string | null> {
+  const bunnyConfig = getProviderConfig("bunny");
   const {
     onProgress,
-    chunkSize = 10 * 1024 * 1024, // 10MB chunks
+    chunkSize = bunnyConfig.chunkSize || 10 * 1024 * 1024, // Use config or fallback to 10MB
     maxRetries = 3,
   } = options;
 
@@ -79,11 +75,11 @@ export async function uploadVideoToBunnyWithTimeout(
 
     // Create abort controller for timeout
     const controller = new AbortController();
-    const fileSizeMB = blob.size / (1024 * 1024);
 
-    // Dynamic timeout based on file size (minimum 2 minutes, +30s per 10MB)
-    const timeoutMinutes = Math.max(2, Math.ceil(fileSizeMB / 10) * 0.5 + 2);
-    const timeoutMs = timeoutMinutes * 60 * 1000;
+    // Use centralized timeout calculation
+    const timeoutMs = calculateUploadTimeout(blob.size, "bunny");
+    const timeoutMinutes = Math.round(timeoutMs / (60 * 1000));
+    const fileSizeMB = blob.size / (1024 * 1024);
 
     console.log(
       `Setting upload timeout to ${timeoutMinutes} minutes for ${fileSizeMB.toFixed(
@@ -209,33 +205,14 @@ function uploadWithProgress(
 }
 
 /**
- * Validate file size before upload
+ * Validate video file size against Bunny CDN limits
  */
-export function validateVideoFileSize(blob: Blob): {
-  valid: boolean;
+export function validateVideoFileSize(fileSize: number): {
+  isValid: boolean;
   error?: string;
+  warning?: string;
 } {
-  const fileSizeMB = blob.size / (1024 * 1024);
-  const maxSizeMB = 100; // Same as Next.js config
-
-  if (fileSizeMB > maxSizeMB) {
-    return {
-      valid: false,
-      error: `File terlalu besar (${fileSizeMB.toFixed(
-        1
-      )}MB). Maksimum ${maxSizeMB}MB. Silakan kompres video terlebih dahulu.`,
-    };
-  }
-
-  if (fileSizeMB > 50) {
-    console.warn(
-      `Large file detected: ${fileSizeMB.toFixed(
-        1
-      )}MB. Upload may take several minutes.`
-    );
-  }
-
-  return { valid: true };
+  return validateFileSize(fileSize, "bunny");
 }
 
 // Re-export the original function for backward compatibility

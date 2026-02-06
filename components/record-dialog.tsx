@@ -375,25 +375,34 @@ export function RecordDialog({
                   </SelectTrigger>
                   <SelectContent>
                     <SelectGroup>
-                      <SelectItem value="screenbolt">
+                      <SelectItem value="dropbox">
                         <div className="flex items-center gap-2">
-                          <HardDrive className="h-4 w-4" />
-                          Screenbolt
+                          <Cloud className="h-4 w-4" />
+                          Dropbox
                         </div>
                       </SelectItem>
-                      {dropboxStatus?.hasAccess && (
-                        <SelectItem value="dropbox">
-                          <div className="flex items-center gap-2">
-                            <Cloud className="h-4 w-4" />
-                            Dropbox
-                          </div>
-                        </SelectItem>
-                      )}
                     </SelectGroup>
                   </SelectContent>
                 </Select>
               </div>
             </div>
+
+            {/* Dropbox Login Prompt */}
+            {selectedStorage === "dropbox" && !dropboxStatus?.hasAccess && (
+              <div className="bg-neutral-800 rounded-lg p-3 text-sm text-white">
+                <p className="mb-2">
+                  Please connect your Dropbox account to upload recordings.
+                </p>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="w-full bg-blue-600 hover:bg-blue-700 text-white border-0"
+                  onClick={() => (window.location.href = "/api/auth/dropbox")}
+                >
+                  Connect Dropbox
+                </Button>
+              </div>
+            )}
           </div>
 
           <div className="flex justify-end">
@@ -401,6 +410,9 @@ export function RecordDialog({
               variant={"secondary"}
               className="w-full text-lg rounded-xl"
               onClick={handleStartRecord}
+              disabled={
+                selectedStorage === "dropbox" && !dropboxStatus?.hasAccess
+              }
             >
               Start Record
             </Button>

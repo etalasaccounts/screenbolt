@@ -11,15 +11,23 @@ import { useScreenRecording } from "@/hooks/useScreenRecording";
 import { mediaStreamManager } from "@/lib/services/MediaStreamManager";
 import { useRouter } from "next/navigation";
 import { useCurrentUser } from "@/hooks/use-auth";
-import { useDropbox } from "@/hooks/useDropbox";
+import { useWorkspace } from "@/hooks/use-workspace";
 import { generateThumbnailFromVideoBlob } from "@/lib/video-utils";
-import { uploadVideoToBunny, validateVideoFileSize } from "@/lib/upload-video";
+import { uploadVideoWithFallback } from "@/lib/universal-upload";
+import { compressVideo, shouldCompress } from "@/lib/video-compression";
+import type { StorageProvider } from "@/lib/storage-config";
 
 export function useRecordingManager() {
   const dispatch = useAppDispatch();
-  const { isRecording, countdownState, isCountdownPaused, cameraActive, selectedStorage } =
-    useAppSelector((state) => state.media);
+  const {
+    isRecording,
+    countdownState,
+    isCountdownPaused,
+    cameraActive,
+    selectedStorage,
+  } = useAppSelector((state) => state.media);
   const { user } = useCurrentUser();
+  const { data: workspace } = useWorkspace();
   const router = useRouter();
 
   const {
@@ -31,7 +39,6 @@ export function useRecordingManager() {
   } = useScreenRecording();
 
   const { deactivateCamera } = useMediaRedux();
-  const { uploadToDropbox } = useDropbox();
 
   const countdownTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
@@ -43,10 +50,9 @@ export function useRecordingManager() {
     }
   }, []);
 
-  // Start the recording process with countdown
+  // Start recording with countdown
   const startRecordingProcess = useCallback(async () => {
     if (isRecording) {
-      console.log("Recording already in progress");
       return false;
     }
 
@@ -65,6 +71,7 @@ export function useRecordingManager() {
 
           // Add event listener for when user stops sharing
           screenStream.getVideoTracks()[0].addEventListener("ended", () => {
+            console.log("Screen sharing ended by user");
             mediaStreamManager.setScreenStream(null);
           });
         } catch (error) {
@@ -76,22 +83,62 @@ export function useRecordingManager() {
         }
       }
 
+      // Verify screen stream is still active before proceeding
+      if (!screenStream || !screenStream.active) {
+        console.error("Screen stream is not active:", screenStream);
+        toast.error("Screen stream is not available. Please try again.");
+        return false;
+      }
+
+      console.log("Screen stream captured successfully:", screenStream);
+      console.log("Screen stream tracks:", screenStream.getTracks().map(t => ({ 
+        kind: t.kind, 
+        enabled: t.enabled, 
+        readyState: t.readyState 
+      })));
+
       // Get microphone stream if mic is active
       const micStream = mediaStreamManager.microphoneStream;
+      console.log("Microphone stream:", micStream);
 
       // Start countdown sequence: standby -> rolling -> action -> recording
       dispatch(setCountdownState("standby"));
 
       // Standby phase (1 second)
       countdownTimeoutRef.current = setTimeout(() => {
+        // Verify stream is still active before continuing
+        if (!screenStream || !screenStream.active) {
+          console.error("Screen stream became inactive during countdown");
+          toast.error("Screen sharing was stopped. Please try again.");
+          dispatch(setCountdownState("inactive"));
+          return;
+        }
+
         dispatch(setCountdownState("rolling"));
 
         // Rolling phase (1 second)
         countdownTimeoutRef.current = setTimeout(() => {
+          // Verify stream is still active before continuing
+          if (!screenStream || !screenStream.active) {
+            console.error("Screen stream became inactive during countdown");
+            toast.error("Screen sharing was stopped. Please try again.");
+            dispatch(setCountdownState("inactive"));
+            return;
+          }
+
           dispatch(setCountdownState("action"));
 
           // Action phase (1 second)
           countdownTimeoutRef.current = setTimeout(async () => {
+            // Final verification before starting recording
+            if (!screenStream || !screenStream.active) {
+              console.error("Screen stream became inactive before recording start");
+              toast.error("Screen sharing was stopped. Please try again.");
+              dispatch(setCountdownState("inactive"));
+              return;
+            }
+
+            console.log("Starting actual recording with verified stream");
             dispatch(setCountdownState("inactive"));
             await startActualRecording(screenStream, micStream);
           }, 1000);
@@ -114,8 +161,38 @@ export function useRecordingManager() {
   // Start actual recording without countdown
   const startActualRecording = useCallback(
     async (screenStream: MediaStream, micStream?: MediaStream | null) => {
+      console.log('startActualRecording called with:');
+      console.log('- screenStream:', screenStream);
+      console.log('- screenStream tracks:', screenStream?.getTracks());
+      console.log('- micStream:', micStream);
+      console.log('- micStream tracks:', micStream?.getTracks());
+      
+      // Final validation before starting recording
+      if (!screenStream || !screenStream.active) {
+        console.error("Screen stream is not available or inactive");
+        toast.error("Screen stream is not available. Please try again.");
+        dispatch(setRecording(false));
+        dispatch(setCountdownState("inactive"));
+        return false;
+      }
+      
       try {
-        await startRecording(screenStream, micStream);
+        console.log('=== CALLING startRecording ===');
+        console.log('About to call startRecording with:');
+        console.log('- screenStream:', screenStream);
+        console.log('- screenStream active:', screenStream?.active);
+        console.log('- micStream:', micStream);
+        console.log('- micStream active:', micStream?.active);
+        
+        try {
+          await startRecording(screenStream, micStream);
+          console.log('=== startRecording COMPLETED ===');
+          console.log('✅ startRecording completed without throwing');
+        } catch (error) {
+          console.error('❌ startRecording threw an error:', error);
+          throw error;
+        }
+        
         dispatch(setRecording(true));
         toast.success("Recording started!");
         return true;
@@ -124,6 +201,7 @@ export function useRecordingManager() {
           "Error starting actual recording:",
           error instanceof Error ? error.message : String(error)
         );
+        console.error("Full error object:", error);
         toast.error("Error starting recording");
         dispatch(setRecording(false));
         dispatch(setCountdownState("inactive"));
@@ -154,30 +232,6 @@ export function useRecordingManager() {
             "seconds"
           );
 
-          // Validate file size before proceeding
-          const validation = validateVideoFileSize(blob);
-          if (!validation.valid) {
-            toast.error("File terlalu besar", {
-              description: validation.error,
-            });
-            
-            // Still allow download as fallback
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement("a");
-            a.href = url;
-            a.download = `recording-${Date.now()}.webm`;
-            document.body.appendChild(a);
-            a.click();
-            document.body.removeChild(a);
-            URL.revokeObjectURL(url);
-            
-            // Reset state
-            dispatch(setRecording(false));
-            dispatch(setCountdownState("inactive"));
-            dispatch(setStandby(false));
-            return false;
-          }
-
           // Reset recording state
           dispatch(setRecording(false));
           dispatch(setCountdownState("inactive"));
@@ -188,322 +242,167 @@ export function useRecordingManager() {
             deactivateCamera();
           }
 
-          // Use the timer duration instead of extracting from blob
-          const duration =
-            recordingDuration && recordingDuration > 0 ? recordingDuration : 0;
-          console.log("Duration being used for video creation:", duration);
-          console.log(
-            "Original recordingDuration parameter:",
-            recordingDuration
-          );
+          // Generate thumbnail
+          const thumbnailUrl = await generateThumbnailFromVideoBlob(blob);
 
-          // Show a loading toast for the create video process
-          const createVideoToast = toast.loading(
-            "Processing your recording..."
-          );
+          // Create temporary video record in database
+          const createVideoToast = toast.loading("Creating video record...");
+          const response = await fetch("/api/videos", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              userId: user.id,
+              workspaceId: workspace?.id,
+              title: generateVideoTitleWithLocalTime(),
+              duration: recordingDuration,
+              thumbnailUrl,
+              source: 'Local',
+            }),
+          });
 
-          try {
-            // Generate thumbnail from the video blob
-            const thumbnailBlob = await generateThumbnailFromVideoBlob(blob);
+          const data = await response.json();
+          toast.dismiss(createVideoToast);
 
-            // If we have a thumbnail, upload it to Bunny.net
-            let thumbnailUrl: string | undefined;
-            if (thumbnailBlob) {
-              try {
-                // Upload thumbnail to Bunny.net using dedicated thumbnail endpoint
-                const thumbnailResponse = await fetch("/api/upload-thumbnail", {
-                  method: "POST",
-                  body: (() => {
-                    const formData = new FormData();
-                    formData.append(
-                      "thumbnail",
-                      thumbnailBlob,
-                      `thumbnail-${Date.now()}.jpg`
-                    );
-                    return formData;
-                  })(),
-                });
+          if (data.success) {
+            console.log("Video record created:", data.video);
 
-                const thumbnailData = await thumbnailResponse.json();
-                if (thumbnailData.success) {
-                  thumbnailUrl = thumbnailData.url;
-                }
-              } catch (thumbnailError) {
-                console.error("Error uploading thumbnail:", thumbnailError);
-              }
+            // Redirect to watch page immediately BEFORE uploading
+            router.push(`/watch/${data.video.id}`);
+
+            // Determine storage provider based on user selection
+            let provider: StorageProvider;
+            switch (selectedStorage) {
+              case "dropbox":
+                provider = "dropbox";
+                break;
+              case "google-drive":
+                provider = "google-drive";
+                break;
+              default:
+                provider = "bunny"; // Default to Bunny CDN (Screenbolt)
             }
 
-            // Create temporary video record in database without URL
-            const response = await fetch("/api/videos", {
-              method: "POST",
-              headers: {
-                "Content-Type": "application/json",
-              },
-              body: JSON.stringify({
-                userId: user.id,
-                workspaceId: workspace.id,
-                duration: Math.round(duration),
-                thumbnailUrl: thumbnailUrl,
-                source: 'screen_recording',
-                title: generateVideoTitleWithLocalTime(), // Use client-generated title with local time
-              }),
+            // Convert blob to file for upload
+            const videoFile = new File([blob], `recording-${Date.now()}.webm`, {
+              type: blob.type || 'video/webm',
+              lastModified: Date.now(),
             });
 
-            const data = await response.json();
+            // Check if compression is recommended
+            const shouldCompressVideo = shouldCompress(videoFile.size, 100 * 1024 * 1024, "high"); // 100MB threshold
+            let finalFile = videoFile;
 
-            if (data.success && data.video) {
-              toast.dismiss(createVideoToast);
+            if (shouldCompressVideo) {
+              const compressionToast = toast.loading("Optimizing video...", {
+                description: "Compressing video for faster upload...",
+              });
 
-              // Redirect to watch page immediately BEFORE uploading
-              router.push(`/watch/${data.video.id}`);
-
-              // Try Dropbox upload only if user selected Dropbox storage
-              if (selectedStorage === 'dropbox') {
-                try {
-                  const tokenResponse = await fetch("/api/auth/dropbox-token");
-
-                if (tokenResponse.ok) {
-                  const tokenData = await tokenResponse.json();
-                  const accessToken = tokenData.accessToken;
-
-                  if (accessToken) {
-                    // Show upload progress toast
-                    toast.loading("Uploading to Dropbox...", {
-                      description:
-                        "Please wait while your video is being uploaded...",
-                      id: "dropbox-upload",
-                    });
-
-                    try {
-                      // Upload to Dropbox
-                      const uploadResult = await uploadToDropbox(
-                        accessToken,
-                        blob,
-                        `recording-${Date.now()}.webm`
-                      );
-
-                      if (uploadResult) {
-                        // Update video record with Dropbox URL
-                        const updateResponse = await fetch("/api/videos", {
-                          method: "PUT",
-                          headers: {
-                            "Content-Type": "application/json",
-                          },
-                          body: JSON.stringify({
-                            videoId: data.video.id,
-                            videoUrl: uploadResult.url,
-                            thumbnailUrl, // Include thumbnail URL in update
-                            source: "Dropbox", // Dropbox uses Dropbox storage
-                          }),
-                        });
-
-                        const updateData = await updateResponse.json();
-                        console.log("Database update response:", updateData);
-
-                        if (updateData.success) {
-                          toast.success("Video uploaded successfully!", {
-                            description:
-                              "Your video is now available for viewing.",
-                            id: "dropbox-upload",
-                          });
-                        } else {
-                          // Even if we couldn't update the database, the file was uploaded to Dropbox
-                          toast.success("Video uploaded to Dropbox!", {
-                            description:
-                              "Note: There was an issue updating the database record.",
-                            id: "dropbox-upload",
-                          });
-                          console.warn(
-                            "Failed to update video record in database:",
-                            updateData.error
-                          );
-                        }
-                      } else {
-                        throw new Error("Failed to upload video to Dropbox");
-                      }
-                    } catch (uploadError: any) {
-                      console.error("Dropbox upload error:", uploadError);
-
-                      // Check if it's a specific error we can handle
-                      let errorMessage =
-                        "Your video is saved but not uploaded to Dropbox.";
-                      if (uploadError.error && uploadError.error.path) {
-                        errorMessage = `Dropbox error: ${uploadError.error.path.reason}`;
-                      } else if (uploadError.message) {
-                        errorMessage = uploadError.message;
-                      }
-
-                      toast.error("Upload to Dropbox failed", {
-                        description: errorMessage,
-                        id: "dropbox-upload",
-                      });
-
-                      // Create a download link for the user
-                      const url = URL.createObjectURL(blob);
-                      const a = document.createElement("a");
-                      a.href = url;
-                      a.download = `recording-${Date.now()}.webm`;
-                      document.body.appendChild(a);
-                      a.click();
-                      document.body.removeChild(a);
-                      URL.revokeObjectURL(url);
-                    }
-                  } else {
-                    // Dropbox token not available
-                    toast.error("Dropbox access not authorized", {
-                      description:
-                        "Please authenticate with Dropbox to enable cloud uploads.",
-                      id: "dropbox-upload",
-                    });
-
-                    // Create a download link for the user
-                    const url = URL.createObjectURL(blob);
-                    const a = document.createElement("a");
-                    a.href = url;
-                    a.download = `recording-${Date.now()}.webm`;
-                    document.body.appendChild(a);
-                    a.click();
-                    document.body.removeChild(a);
-                    URL.revokeObjectURL(url);
-                  }
-                } else {
-                  // Dropbox token API returned error
-                  const errorData = await tokenResponse.json();
-                  console.error("Dropbox token API error:", errorData);
-
-                  toast.error("Dropbox access error", {
-                    description:
-                      errorData.error || "Failed to get Dropbox access token.",
-                    id: "dropbox-upload",
+              try {
+                const compressedFile = await compressVideo(videoFile, "high", (progress) => {
+                  toast.loading(`Optimizing video... ${Math.round(progress.percentage)}%`, {
+                    description: "Compressing video for faster upload...",
+                    id: compressionToast,
                   });
+                });
+                
+                finalFile = compressedFile;
+                toast.dismiss(compressionToast);
+                toast.success("Video optimized successfully!");
+              } catch (compressionError) {
+                console.warn("Video compression failed, using original:", compressionError);
+                toast.dismiss(compressionToast);
+                // Continue with original file if compression fails
+              }
+            }
 
-                  // Create a download link for the user
-                  const url = URL.createObjectURL(blob);
-                  const a = document.createElement("a");
-                  a.href = url;
-                  a.download = `recording-${Date.now()}.webm`;
-                  document.body.appendChild(a);
-                  a.click();
-                  document.body.removeChild(a);
-                  URL.revokeObjectURL(url);
-                }
-                } catch (tokenError) {
-                console.error("Failed to get Dropbox token:", tokenError);
-                toast.error("Dropbox service unavailable", {
-                  description:
-                    "Video saved locally. Dropbox upload temporarily unavailable.",
-                  id: "dropbox-upload",
+            // Upload using unified system with fallback
+            const uploadToast = toast.loading(`Uploading to ${provider === "bunny" ? "Screenbolt" : provider === "dropbox" ? "Dropbox" : "Google Drive"}...`, {
+              description: "Please wait while your video is being uploaded...",
+            });
+
+            try {
+              const uploadResult = await uploadVideoWithFallback(finalFile, [provider], {
+                filename: `recording-${Date.now()}.webm`,
+                onProgress: (progress: any) => {
+                  const providerName = progress.provider === "bunny" ? "Screenbolt" : 
+                                     progress.provider === "dropbox" ? "Dropbox" : "Google Drive";
+                  
+                  toast.loading(`Uploading to ${providerName}... ${Math.round(progress.percentage)}%`, {
+                    description: `${progress.loaded ? `${Math.round(progress.loaded / 1024 / 1024)}MB` : ""} uploaded${progress.total ? ` of ${Math.round(progress.total / 1024 / 1024)}MB` : ""}`,
+                    id: uploadToast,
+                  });
+                },
+              });
+
+              if (uploadResult.success && uploadResult.url) {
+                // Update video record with upload URL
+                const updateResponse = await fetch("/api/videos", {
+                  method: "PUT",
+                  headers: {
+                    "Content-Type": "application/json",
+                  },
+                  body: JSON.stringify({
+                    videoId: data.video.id,
+                    videoUrl: uploadResult.url,
+                    thumbnailUrl,
+                    source: uploadResult.provider === "bunny" ? "Bunny" : 
+                           uploadResult.provider === "dropbox" ? "Dropbox" : "Google Drive",
+                  }),
                 });
 
-                // Create a download link for the user
-                const url = URL.createObjectURL(blob);
-                const a = document.createElement("a");
-                a.href = url;
-                a.download = `recording-${Date.now()}.webm`;
-                document.body.appendChild(a);
-                a.click();
-                document.body.removeChild(a);
-                URL.revokeObjectURL(url);
+                const updateData = await updateResponse.json();
+                console.log("Database update response:", updateData);
+
+                if (updateData.success) {
+                  const providerName = uploadResult.provider === "bunny" ? "Screenbolt" : 
+                                     uploadResult.provider === "dropbox" ? "Dropbox" : "Google Drive";
+                  
+                  toast.success("Video uploaded successfully!", {
+                    description: `Your video is now available for viewing on ${providerName}.`,
+                    id: uploadToast,
+                  });
+                } else {
+                  const providerName = uploadResult.provider === "bunny" ? "Screenbolt" : 
+                                     uploadResult.provider === "dropbox" ? "Dropbox" : "Google Drive";
+                  
+                  toast.success(`Video uploaded to ${providerName}!`, {
+                    description: "Note: There was an issue updating the database record.",
+                    id: uploadToast,
+                  });
+                  console.warn("Failed to update video record in database:", updateData.error);
                 }
               } else {
-                // User selected Screenbolt storage - upload to Bunny.net
-                toast.loading("Uploading to Screenbolt...", {
-                  description: "Please wait while your video is being uploaded...",
-                  id: "bunny-upload",
-                });
-
-                try {
-                  // Upload to Bunny.net with progress tracking
-                  let uploadProgress = 0;
-                  const bunnyUrl = await uploadVideoToBunny(blob, (progress) => {
-                    uploadProgress = progress;
-                    // Update toast with progress
-                    toast.loading(`Uploading to Screenbolt... ${progress}%`, {
-                      description: "Please wait while your video is being uploaded...",
-                      id: "bunny-upload",
-                    });
-                  });
-
-                  if (bunnyUrl) {
-                    // Update video record with Bunny.net URL
-                    const updateResponse = await fetch("/api/videos", {
-                      method: "PUT",
-                      headers: {
-                        "Content-Type": "application/json",
-                      },
-                      body: JSON.stringify({
-                        videoId: data.video.id,
-                        videoUrl: bunnyUrl,
-                        thumbnailUrl,
-                        source: "Bunny", // Bunny Stream service
-                      }),
-                    });
-
-                    const updateData = await updateResponse.json();
-                    console.log("Database update response:", updateData);
-
-                    if (updateData.success) {
-                      toast.success("Video uploaded successfully!", {
-                        description: "Your video is now available for viewing.",
-                        id: "bunny-upload",
-                      });
-                    } else {
-                      toast.success("Video uploaded to Screenbolt!", {
-                        description: "Note: There was an issue updating the database record.",
-                        id: "bunny-upload",
-                      });
-                      console.warn("Failed to update video record in database:", updateData.error);
-                    }
-                  } else {
-                    throw new Error("Failed to upload video to Bunny.net");
-                  }
-                } catch (uploadError: any) {
-                  console.error("Bunny.net upload error:", uploadError);
-
-                  toast.error("Upload to Screenbolt failed", {
-                    description: "Your video is saved but not uploaded. Please try again.",
-                    id: "bunny-upload",
-                  });
-
-                  // Create a download link for the user as fallback
-                  const url = URL.createObjectURL(blob);
-                  const a = document.createElement("a");
-                  a.href = url;
-                  a.download = `recording-${Date.now()}.webm`;
-                  document.body.appendChild(a);
-                  a.click();
-                  document.body.removeChild(a);
-                  URL.revokeObjectURL(url);
-                }
+                throw new Error(uploadResult.error || "Upload failed");
               }
-            } else {
-              throw new Error(
-                data.error || "Failed to create temporary video record"
-              );
+            } catch (uploadError: any) {
+              console.error("Upload error:", uploadError);
+
+              toast.error("Upload failed", {
+                description: "Your video is saved but not uploaded. Please try again.",
+                id: uploadToast,
+              });
+
+              // Create a download link for the user as fallback
+              const url = URL.createObjectURL(finalFile);
+              const a = document.createElement("a");
+              a.href = url;
+              a.download = `recording-${Date.now()}.webm`;
+              document.body.appendChild(a);
+              a.click();
+              document.body.removeChild(a);
+              URL.revokeObjectURL(url);
             }
-          } catch (error) {
-            console.error("Error processing video:", error);
-            toast.dismiss(createVideoToast);
-            toast.error("Failed to process video");
-
-            // Fallback: download the video locally if processing fails
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement("a");
-            a.href = url;
-            a.download = `recording-${Date.now()}.webm`;
-            document.body.appendChild(a);
-            a.click();
-            document.body.removeChild(a);
-            URL.revokeObjectURL(url);
+          } else {
+            throw new Error(
+              data.error || "Failed to create temporary video record"
+            );
           }
-
-          return true;
+        } else {
+          console.warn("No blob or user available");
         }
 
-        // Reset state
-        dispatch(setRecording(false));
-        dispatch(setCountdownState("inactive"));
-        dispatch(setStandby(false));
         return true;
       } catch (error: unknown) {
         console.error(
@@ -519,70 +418,58 @@ export function useRecordingManager() {
         return false;
       }
     },
-    [isRecording, stopRecording, dispatch, user, router, uploadToDropbox, selectedStorage, cameraActive, deactivateCamera]
+    [
+      isRecording,
+      stopRecording,
+      dispatch,
+      user,
+      router,
+      selectedStorage,
+      cameraActive,
+      deactivateCamera,
+      workspace,
+    ]
   );
 
-  const togglePauseRecording = useCallback(async () => {
-    if (!isRecording) {
-      console.log("No recording in progress to pause/resume");
+  // Resume recording
+  const resumeRecordingProcess = useCallback(async () => {
+    if (!isPaused) {
       return false;
     }
 
     try {
-      if (isPaused) {
-        await resumeRecording();
-        toast.success("Recording resumed");
-      } else {
-        await pauseRecording();
-        toast.success("Recording paused");
-      }
+      await resumeRecording();
+      toast.success("Recording resumed!");
       return true;
     } catch (error: unknown) {
       console.error(
-        "Error toggling pause:",
+        "Error resuming recording:",
         error instanceof Error ? error.message : String(error)
       );
-      toast.error("Error pausing/resuming recording");
+      toast.error("Error resuming recording");
       return false;
     }
-  }, [isRecording, isPaused, resumeRecording, pauseRecording]);
+  }, [isPaused, resumeRecording]);
 
-  // Handle countdown pause/resume
-  useEffect(() => {
-    if (countdownState === "recording") {
-      if (isCountdownPaused) {
-        // Pause countdown
-        if (countdownTimeoutRef.current) {
-          clearTimeout(countdownTimeoutRef.current);
-          countdownTimeoutRef.current = null;
-        }
-      } else {
-        // Resume countdown if it was paused
-        // This would need more complex logic to resume from where it left off
-        // For now, we'll just clear the timeouts when paused
-      }
+  // Pause recording
+  const pauseRecordingProcess = useCallback(async () => {
+    if (isPaused) {
+      return false;
     }
-  }, [isCountdownPaused, countdownState, dispatch, clearCountdownTimeouts]);
 
-  // Listen for screen sharing ended event
-  useEffect(() => {
-    const handleScreenSharingEnded = async (recordingTime?: number) => {
-      if (isRecording) {
-        console.log("Screen sharing ended by user, stopping recording...");
-        console.log("Recording time from event:", recordingTime);
-        await stopRecordingProcess(recordingTime);
-      }
-    };
-
-    mediaStreamManager.on("screenSharingEnded", handleScreenSharingEnded);
-
-    return () => {
-      mediaStreamManager.removeListener(
-        "screenSharingEnded",
-        handleScreenSharingEnded
+    try {
+      await pauseRecording();
+      toast.success("Recording paused!");
+      return true;
+    } catch (error: unknown) {
+      console.error(
+        "Error pausing recording:",
+        error instanceof Error ? error.message : String(error)
       );
-    };
-  }, [isRecording, stopRecordingProcess]);
+      toast.error("Error pausing recording");
+      return false;
+    }
+  }, [isPaused, pauseRecording]);
 
   // Cleanup on unmount
   useEffect(() => {
@@ -593,23 +480,27 @@ export function useRecordingManager() {
 
   return {
     startRecordingProcess,
-    startActualRecording,
     stopRecordingProcess,
-    togglePauseRecording,
+    resumeRecordingProcess,
+    pauseRecordingProcess,
     clearCountdownTimeouts,
+    isRecording,
+    isPaused,
+    countdownState,
+    isCountdownPaused,
   };
 }
 
-// Generate video title with user's local time
 const generateVideoTitleWithLocalTime = (): string => {
   const now = new Date();
-  const formattedDate = now.toLocaleDateString('en-US', {
-    year: 'numeric',
-    month: 'short',
-    day: 'numeric',
-    hour: '2-digit',
-    minute: '2-digit',
-    hour12: true
+  const localTime = now.toLocaleString("en-US", {
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+    hour: "2-digit",
+    minute: "2-digit",
+    second: "2-digit",
+    hour12: false,
   });
-  return `Screen Recording ${formattedDate}`;
+  return `Recording ${localTime}`;
 };

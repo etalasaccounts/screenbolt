@@ -1,4 +1,4 @@
-import { UPLOAD_CONFIG } from "./chunked-upload";
+import { calculateUploadTimeout, validateFileSize } from "./storage-config";
 
 /**
  * Uploads a video blob to Bunny.net via the API route
@@ -23,21 +23,30 @@ export async function uploadVideoToBunny(
     // Create abort controller for timeout
     const controller = new AbortController();
     const fileSizeMB = blob.size / (1024 * 1024);
-    
-    // Calculate timeout based on file size using config
-     const timeoutMs = Math.max(UPLOAD_CONFIG.MIN_TIMEOUT, fileSizeMB * UPLOAD_CONFIG.TIMEOUT_PER_MB);
-     const timeoutMinutes = Math.round(timeoutMs / (60 * 1000));
-     
-     console.log(`Uploading ${fileSizeMB.toFixed(1)}MB file with ${timeoutMinutes} minute timeout`);
-    
+
+    // Calculate timeout based on file size using centralized config
+    const timeoutMs = calculateUploadTimeout(blob.size, "bunny");
+    const timeoutMinutes = Math.round(timeoutMs / (60 * 1000));
+
+    console.log(
+      `Uploading ${fileSizeMB.toFixed(
+        1
+      )}MB file with ${timeoutMinutes} minute timeout`
+    );
+
     const timeoutId = setTimeout(() => {
-      console.log('Upload timeout reached, aborting...');
+      console.log("Upload timeout reached, aborting...");
       controller.abort();
     }, timeoutMs);
 
     // Track upload progress if XMLHttpRequest is available and callback provided
-    if (onProgress && typeof XMLHttpRequest !== 'undefined') {
-      const result = await uploadWithProgress(formData, controller.signal, onProgress, timeoutId);
+    if (onProgress && typeof XMLHttpRequest !== "undefined") {
+      const result = await uploadWithProgress(
+        formData,
+        controller.signal,
+        onProgress,
+        timeoutId
+      );
       return result;
     }
 
@@ -52,7 +61,9 @@ export async function uploadVideoToBunny(
 
     if (!response.ok) {
       const errorText = await response.text();
-      throw new Error(`Upload failed with status ${response.status}: ${errorText}`);
+      throw new Error(
+        `Upload failed with status ${response.status}: ${errorText}`
+      );
     }
 
     const data = await response.json();
@@ -64,9 +75,11 @@ export async function uploadVideoToBunny(
     return data.url;
   } catch (error: unknown) {
     if (error instanceof Error) {
-      if (error.name === 'AbortError') {
-        console.error('Upload timeout - file too large or connection slow');
-        throw new Error('Upload timeout. File mungkin terlalu besar atau koneksi lambat. Coba kompres video atau gunakan koneksi yang lebih stabil.');
+      if (error.name === "AbortError") {
+        console.error("Upload timeout - file too large or connection slow");
+        throw new Error(
+          "Upload timeout. File mungkin terlalu besar atau koneksi lambat. Coba kompres video atau gunakan koneksi yang lebih stabil."
+        );
       }
       console.error("Error uploading video to Bunny:", error.message);
       throw error;
@@ -89,48 +102,52 @@ function uploadWithProgress(
     const xhr = new XMLHttpRequest();
 
     // Handle abort signal
-    signal.addEventListener('abort', () => {
+    signal.addEventListener("abort", () => {
       xhr.abort();
-      reject(new Error('Upload aborted due to timeout'));
+      reject(new Error("Upload aborted due to timeout"));
     });
 
-    xhr.upload.addEventListener('progress', (event) => {
+    xhr.upload.addEventListener("progress", (event) => {
       if (event.lengthComputable) {
         const progress = Math.round((event.loaded / event.total) * 100);
         onProgress(progress);
       }
     });
 
-    xhr.addEventListener('load', () => {
+    xhr.addEventListener("load", () => {
       clearTimeout(timeoutId);
-      
+
       if (xhr.status >= 200 && xhr.status < 300) {
         try {
           const data = JSON.parse(xhr.responseText);
           if (data.success) {
             resolve(data.url);
           } else {
-            reject(new Error(data.error || 'Upload failed'));
+            reject(new Error(data.error || "Upload failed"));
           }
         } catch (e) {
-          reject(new Error('Invalid response from server'));
+          reject(new Error("Invalid response from server"));
         }
       } else {
-        reject(new Error(`Upload failed with status ${xhr.status}: ${xhr.responseText}`));
+        reject(
+          new Error(
+            `Upload failed with status ${xhr.status}: ${xhr.responseText}`
+          )
+        );
       }
     });
 
-    xhr.addEventListener('error', () => {
+    xhr.addEventListener("error", () => {
       clearTimeout(timeoutId);
-      reject(new Error('Network error during upload'));
+      reject(new Error("Network error during upload"));
     });
 
-    xhr.addEventListener('timeout', () => {
+    xhr.addEventListener("timeout", () => {
       clearTimeout(timeoutId);
-      reject(new Error('Upload timeout'));
+      reject(new Error("Upload timeout"));
     });
 
-    xhr.open('POST', '/api/upload');
+    xhr.open("POST", "/api/upload");
     xhr.send(formData);
   });
 }
@@ -138,20 +155,22 @@ function uploadWithProgress(
 /**
  * Validate file size before upload
  */
-export function validateVideoFileSize(blob: Blob): { valid: boolean; error?: string } {
-  const fileSizeMB = blob.size / (1024 * 1024);
-  const maxSizeMB = UPLOAD_CONFIG.MAX_FILE_SIZE_MB;
-  
-  if (fileSizeMB > maxSizeMB) {
+export function validateVideoFileSize(blob: Blob): {
+  valid: boolean;
+  error?: string;
+} {
+  const validation = validateFileSize(blob.size, "bunny");
+
+  if (!validation.isValid) {
     return {
       valid: false,
-      error: `File terlalu besar (${fileSizeMB.toFixed(1)}MB). Maksimum ${maxSizeMB}MB. Silakan kompres video terlebih dahulu.`
+      error: validation.error || "File size validation failed",
     };
   }
-  
-  if (fileSizeMB > UPLOAD_CONFIG.LARGE_FILE_WARNING_MB) {
-    console.warn(`Large file detected: ${fileSizeMB.toFixed(1)}MB. Upload may take several minutes.`);
+
+  if (validation.warning) {
+    console.warn(validation.warning);
   }
-  
+
   return { valid: true };
 }

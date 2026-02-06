@@ -1,4 +1,4 @@
-import { createSlice, PayloadAction } from '@reduxjs/toolkit';
+import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 
 interface MediaDevice {
   deviceId: string;
@@ -6,8 +6,8 @@ interface MediaDevice {
 }
 
 interface MediaState {
-  micPermission: 'granted' | 'denied' | 'prompt';
-  cameraPermission: 'granted' | 'denied' | 'prompt';
+  micPermission: "granted" | "denied" | "prompt";
+  cameraPermission: "granted" | "denied" | "prompt";
   micActive: boolean;
   cameraActive: boolean;
   screenActive: boolean;
@@ -15,38 +15,44 @@ interface MediaState {
   videoDevices: MediaDevice[];
   selectedAudioDevice: string;
   selectedVideoDevice: string;
-  selectedStorage: 'screenbolt' | 'dropbox';
+  selectedStorage: "screenbolt" | "dropbox" | "google-drive";
   isStandby: boolean;
   isRecording: boolean;
-  countdownState: 'inactive' | 'standby' | 'rolling' | 'action' | 'recording';
+  countdownState: "inactive" | "standby" | "rolling" | "action" | "recording";
   isCountdownPaused: boolean;
 }
 
 const initialState: MediaState = {
-  micPermission: 'prompt',
-  cameraPermission: 'prompt',
+  micPermission: "prompt",
+  cameraPermission: "prompt",
   micActive: false,
   cameraActive: false,
   screenActive: false,
   audioDevices: [],
   videoDevices: [],
-  selectedAudioDevice: '',
-  selectedVideoDevice: '',
-  selectedStorage: 'screenbolt',
+  selectedAudioDevice: "",
+  selectedVideoDevice: "",
+  selectedStorage: "dropbox",
   isStandby: false,
   isRecording: false,
-  countdownState: 'inactive',
+  countdownState: "inactive",
   isCountdownPaused: false,
 };
 
 export const mediaSlice = createSlice({
-  name: 'media',
+  name: "media",
   initialState,
   reducers: {
-    setMicPermission: (state, action: PayloadAction<'granted' | 'denied' | 'prompt'>) => {
+    setMicPermission: (
+      state,
+      action: PayloadAction<"granted" | "denied" | "prompt">,
+    ) => {
       state.micPermission = action.payload;
     },
-    setCameraPermission: (state, action: PayloadAction<'granted' | 'denied' | 'prompt'>) => {
+    setCameraPermission: (
+      state,
+      action: PayloadAction<"granted" | "denied" | "prompt">,
+    ) => {
       state.cameraPermission = action.payload;
     },
     setMicActive: (state, action: PayloadAction<boolean>) => {
@@ -70,7 +76,10 @@ export const mediaSlice = createSlice({
     setSelectedVideoDevice: (state, action: PayloadAction<string>) => {
       state.selectedVideoDevice = action.payload;
     },
-    setSelectedStorage: (state, action: PayloadAction<'screenbolt' | 'dropbox'>) => {
+    setSelectedStorage: (
+      state,
+      action: PayloadAction<"screenbolt" | "dropbox" | "google-drive">,
+    ) => {
       state.selectedStorage = action.payload;
     },
     setStandby: (state, action: PayloadAction<boolean>) => {
@@ -79,7 +88,12 @@ export const mediaSlice = createSlice({
     setRecording: (state, action: PayloadAction<boolean>) => {
       state.isRecording = action.payload;
     },
-    setCountdownState: (state, action: PayloadAction<'inactive' | 'standby' | 'rolling' | 'action' | 'recording'>) => {
+    setCountdownState: (
+      state,
+      action: PayloadAction<
+        "inactive" | "standby" | "rolling" | "action" | "recording"
+      >,
+    ) => {
       state.countdownState = action.payload;
     },
     setCountdownPaused: (state, action: PayloadAction<boolean>) => {
@@ -91,7 +105,7 @@ export const mediaSlice = createSlice({
       state.screenActive = false;
       state.isStandby = false;
       state.isRecording = false;
-      state.countdownState = 'inactive';
+      state.countdownState = "inactive";
       state.isCountdownPaused = false;
     },
   },

@@ -48,9 +48,9 @@ export default function LoginForm() {
           <Image
             src="/assets/google-logo.svg"
             alt="Google"
-            width={40}
-            height={40}
-            className=""
+            width={24}
+            height={24}
+            className="mr-2"
           />
           Continue with Google
         </Button>

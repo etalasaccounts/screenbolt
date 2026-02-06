@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { UPLOAD_CONFIG } from "@/lib/chunked-upload";
+import { UPLOAD_CONFIG } from "@/lib/storage-config";
 
 // Bunny.net Stream Configuration
 const BUNNY_STREAM_API_KEY = process.env.BUNNY_STREAM_API_KEY || "";

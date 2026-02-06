@@ -56,9 +56,9 @@ export function RecordControls() {
   // Use the recording manager
   const {
     startRecordingProcess,
-    startActualRecording,
     stopRecordingProcess,
-    togglePauseRecording,
+    resumeRecordingProcess,
+    pauseRecordingProcess,
     clearCountdownTimeouts,
   } = useRecordingManager();
 
@@ -142,6 +142,12 @@ export function RecordControls() {
     // Reset local pause state
     setLocalIsPaused(false);
 
+    // IMPORTANT: Stop recording FIRST before cleaning up streams
+    // This ensures MediaRecorder can finalize the recording and generate the blob
+    const result = await stopRecordingProcess(finalRecordingTime);
+    console.log("Stop recording result:", result);
+
+    // Only clean up streams AFTER recording has been processed
     // Explicitly stop the screen stream to remove browser's screen sharing UI
     if (mediaStreamManager.screenStream) {
       mediaStreamManager.screenStream
@@ -158,10 +164,6 @@ export function RecordControls() {
     // Trigger the same event that browser 'Stop sharing' triggers
     // This ensures consistent behavior between custom stop button and browser stop
     mediaStreamManager.emit("screenSharingEnded", finalRecordingTime);
-
-    // Use the centralized function to stop recording, passing the timer duration
-    const result = await stopRecordingProcess(finalRecordingTime);
-    console.log("Stop recording result:", result);
   }, [recordingTime, cameraActive, deactivateCamera, stopRecordingProcess]);
 
   // Effect to start timer when recording actually begins
@@ -181,7 +183,7 @@ export function RecordControls() {
       toast.info("Recording telah mencapai batas maksimal 10 menit dan akan dihentikan otomatis.");
       handleStopRecording();
     }
-  }, [isRecording, timerInterval, localIsPaused, startTimer, recordingTime, handleStopRecording]);
+  }, [isRecording, timerInterval, localIsPaused, startTimer, recordingTime]);
 
   // Effect to clear timer on unmount
   useEffect(() => {
@@ -216,7 +218,7 @@ export function RecordControls() {
     // Check current state before toggling
     const wasRecording = !localIsPaused;
 
-    const success = await togglePauseRecording();
+    const success = wasRecording ? await pauseRecordingProcess() : await resumeRecordingProcess();
 
     // Handle timer and local state based on what the state was before toggle
     if (success) {

@@ -1,6 +1,7 @@
 import { useState, useCallback } from "react";
 import { Dropbox } from "dropbox";
 import { useCurrentUser } from "@/hooks/use-auth";
+import { validateFileSize, getProviderConfig } from "@/lib/storage-config";
 
 interface DropboxUploadResult {
   url: string;
@@ -58,12 +59,15 @@ export function useDropbox() {
         console.log("File size:", file.size, "bytes");
         console.log("File type:", file.type);
 
-        // Validate file size (Dropbox has a 150MB limit for direct uploads)
-        const MAX_FILE_SIZE = 150 * 1024 * 1024; // 150MB in bytes
-        if (file.size > MAX_FILE_SIZE) {
-          throw new Error(
-            `File size (${file.size} bytes) exceeds Dropbox's 150MB limit for direct uploads. Please use a smaller file or implement chunked upload.`
-          );
+        // Validate file size using centralized configuration
+        const validation = validateFileSize(file.size, 'dropbox', true); // true for direct upload
+        if (!validation.isValid) {
+          throw new Error(validation.error);
+        }
+        
+        // Log warning if file is large
+        if (validation.warning) {
+          console.warn(validation.warning);
         }
 
         // Upload the file
