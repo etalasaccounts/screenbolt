@@ -136,7 +136,7 @@ export function RecordDialog({
   };
 
   // Handle storage selection
-  const handleSelectStorage = (storage: "screenbolt" | "dropbox") => {
+  const handleSelectStorage = (storage: "screenbolt" | "dropbox" | "google-drive") => {
     console.log("Selected storage:", storage);
     dispatch(setSelectedStorage(storage));
   };
@@ -375,6 +375,12 @@ export function RecordDialog({
                   </SelectTrigger>
                   <SelectContent>
                     <SelectGroup>
+                      <SelectItem value="screenbolt">
+                        <div className="flex items-center gap-2">
+                          <Cloud className="h-4 w-4" />
+                          Screenbolt (Bunny.net)
+                        </div>
+                      </SelectItem>
                       <SelectItem value="dropbox">
                         <div className="flex items-center gap-2">
                           <Cloud className="h-4 w-4" />

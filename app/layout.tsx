@@ -2,6 +2,7 @@ import "./globals.css";
 
 // Next
 import type { Metadata, Viewport } from "next";
+import Script from "next/script";
 
 // Provider
 import { ThemeProvider } from "@/providers/theme-provider";
@@ -108,6 +109,11 @@ export default function RootLayout({ children }: any) {
             </ThemeProvider>
           </AuthProvider>
         </QueryProvider>
+      <Script
+        defer
+        src="https://cloud.umami.is/script.js"
+        data-website-id="23fd50ff-5c52-4563-b815-acb8c28d0205"
+      />
       </body>
     </html>
   );

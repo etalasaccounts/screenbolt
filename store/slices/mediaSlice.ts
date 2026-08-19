@@ -32,7 +32,7 @@ const initialState: MediaState = {
   videoDevices: [],
   selectedAudioDevice: "",
   selectedVideoDevice: "",
-  selectedStorage: "dropbox",
+  selectedStorage: "screenbolt",
   isStandby: false,
   isRecording: false,
   countdownState: "inactive",
