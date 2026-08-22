@@ -1,0 +1,59 @@
+#!/bin/sh
+#
+# Enforces the Component -> Hook -> API -> Service -> Database layer pattern.
+# See CLAUDE.md and PATTERN.md.
+#
+# Checks STAGED files only, so pre-existing violations elsewhere in the repo
+# don't block unrelated commits. Bypass in an emergency with `git commit -n`.
+
+set -e
+
+REPO_ROOT=$(git rev-parse --show-toplevel)
+WEB_DIR="$REPO_ROOT/apps/web"
+
+# Staged, still-present files under apps/web (A=added, C=copied, M=modified).
+staged=$(git diff --cached --name-only --diff-filter=ACM -z \
+  | tr '\0' '\n' \
+  | grep '^apps/web/.*\.\(ts\|tsx\|mjs\)$' || true)
+
+if [ -z "$staged" ]; then
+  exit 0
+fi
+
+# Rewrite repo-relative paths to be relative to apps/web, where the scripts run.
+web_relative=$(printf '%s\n' "$staged" | sed 's|^apps/web/||')
+
+# Route files get the extra shape checks; everything else is lint-only.
+routes=$(printf '%s\n' "$web_relative" | grep '^app/api/.*/route\.ts$' || true)
+
+cd "$WEB_DIR"
+
+status=0
+
+echo "pre-commit: checking layer boundaries on staged files..."
+# shellcheck disable=SC2086
+# Block on errors only. Warnings still print, but failing a commit over a
+# pre-existing warning in a file you merely touched trains people to reach for
+# `git commit -n`, which costs more than the warning does.
+if ! printf '%s\n' "$web_relative" | xargs npx eslint; then
+  status=1
+fi
+
+if [ -n "$routes" ]; then
+  echo "pre-commit: checking API route pattern compliance..."
+  # shellcheck disable=SC2086
+  if ! printf '%s\n' "$routes" | xargs node scripts/check-pattern.mjs; then
+    status=1
+  fi
+fi
+
+if [ "$status" -ne 0 ]; then
+  echo ""
+  echo "pre-commit FAILED: staged changes violate the layer pattern."
+  echo "See CLAUDE.md for the rules. Fix the violations above, or bypass with"
+  echo "  git commit -n   (only for work that is already known-noncompliant)"
+  exit 1
+fi
+
+echo "pre-commit: layer pattern OK."
+exit 0

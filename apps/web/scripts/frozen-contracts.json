@@ -1,0 +1,15 @@
+{
+  "app/api/extension/pair/init/route.ts": {
+    "topLevelKeys": ["code", "expiresAt", "success", "error"],
+    "statusCodes": [201, 400, 409, 500]
+  },
+  "app/api/extension/pair/status/route.ts": {
+    "topLevelKeys": ["status", "token", "error"],
+    "statusCodes": [200, 400, 404, 500],
+    "hasImplicitStatus200": true
+  },
+  "app/api/upload/route.ts": {
+    "topLevelKeys": ["success", "url", "video", "service", "error", "details"],
+    "statusCodes": [201, 400, 401, 413, 500, 503]
+  }
+}

@@ -1,0 +1,100 @@
+@use '../../../styles/_variables' as *;
+
+.camera-toolbar {
+	display: flex;
+	align-items: center;
+	padding: 6px;
+	transition: opacity .25s cubic-bezier(.61,.11,.08,.96);
+	min-width: max-content;
+	background: $sb-glass-bg;
+	-webkit-backdrop-filter: $sb-glass-blur;
+	backdrop-filter: $sb-glass-blur;
+	border: 1px solid $sb-glass-border;
+	box-shadow: $sb-glass-shadow;
+	height: auto;
+	position: absolute;
+	bottom: -8px;
+	right: -16px;
+	border-radius: 999px;
+	z-index: $z-index-max;
+	opacity: 0;
+	gap: 4px;
+}
+.camera-draggable:hover {
+	.camera-toolbar, .camera-resize {
+		opacity: 1!important;
+	}
+}
+.camera-toolbar:hover, .camera-resize:hover {
+	opacity: 1!important;
+}
+
+.CameraToolbarSeparator {
+  width: 1px;
+	height: 18px;
+  background-color: rgba(255, 255, 255, .3);
+  margin: 0 4px;
+}
+.CameraToggleItem, .CameraToolbarButton {
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	color: rgba(255, 255, 255, 0.72);
+	height: 32px;
+	width: 32px;
+	text-align: center;
+	font-size: 13px;
+	line-height: 1;
+	border-radius: 50%;
+	transition: background-color .25s ease-in-out, color .25s ease-in-out;
+	background-color: transparent;
+
+	svg {
+		color: rgba(255, 255, 255, 0.72);
+		width: 16px;
+		height: 16px;
+	}
+
+	&:hover {
+		background-color: rgba(255, 255, 255, 0.1)!important;
+		cursor: pointer;
+		color: #fff;
+
+		svg {
+			color: #fff;
+		}
+	}
+
+	&:disabled {
+		opacity: 0.32;
+		pointer-events: none;
+	}
+
+	&[data-state='on'] {
+		color: #fff;
+		background-color: rgba(255, 255, 255, 0.1);
+
+		svg {
+			color: #fff;
+		}
+	}
+}
+
+
+.CameraToggleItem:hover, .CameraToggleButton:hover {
+	cursor: pointer;
+}
+.CameraToggleItem:focus-visible, .CameraToggleButton:focus-visible {
+  position: relative;
+  box-shadow: $focus-border;
+}
+
+.CameraToggleGroup {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+}
+
+.CameraToggleGroup, .CameraToolbarSeparator {
+	display: none;
+}

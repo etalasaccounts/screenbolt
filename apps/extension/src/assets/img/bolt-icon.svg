@@ -1,0 +1,20 @@
+<svg viewBox="0 0 128 128" xmlns="http://www.w3.org/2000/svg" width="128" height="128">
+  <defs>
+    <style>
+      @media (prefers-color-scheme: light) {
+        .bolt-mark { fill: #090b0c; }
+      }
+      @media (prefers-color-scheme: dark) {
+        .bolt-mark { fill: #ffffff; }
+      }
+    </style>
+  </defs>
+  <!-- Fallback: white on dark (toolbar default) -->
+  <style>
+    .bolt-mark { fill: #ffffff; }
+  </style>
+  <!-- Top bolt triangle -->
+  <path class="bolt-mark" d="M63.5 7.2L14.5 55.2C13.3 56.5 14.1 58.7 15.8 58.7H63.2C63.7 58.7 64.2 58.5 64.5 58.1L113.5 10.1C114.7 8.8 113.9 6.6 112.2 6.6H64.8C64.3 6.6 63.8 6.8 63.5 7.2Z"/>
+  <!-- Bottom bolt triangle -->
+  <path class="bolt-mark" d="M76.9 46.9L27.9 94.9C26.7 96.2 27.5 98.4 29.2 98.4H76.6C77.1 98.4 77.6 98.2 77.9 97.8L126.9 49.8C128.1 48.5 127.3 46.3 125.6 46.3H78.2C77.7 46.3 77.2 46.5 76.9 46.9Z"/>
+</svg>

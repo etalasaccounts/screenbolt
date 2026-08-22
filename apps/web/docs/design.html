@@ -1,0 +1,965 @@
+<!doctype html>
+<html lang="en">
+<head><script id="aura-preview-performance-controller">
+(function() {
+if (window.__auraPreviewPerformanceController) return;
+const nativeRequestAnimationFrame = window.requestAnimationFrame
+? window.requestAnimationFrame.bind(window)
+: function(callback) { return window.setTimeout(function() { callback(Date.now()); }, 16); };
+const nativeCancelAnimationFrame = window.cancelAnimationFrame
+? window.cancelAnimationFrame.bind(window)
+: window.clearTimeout.bind(window);
+const nativeSetInterval = window.setInterval.bind(window);
+let paused = false;
+let nextFrameId = 1;
+const frameRecords = new Map();
+const pausedFrameCallbacks = new Map();
+const style = document.createElement('style');
+style.id = 'aura-preview-performance-style';
+style.textContent = [
+'html[data-aura-preview-paused="true"] *,',
+'html[data-aura-preview-paused="true"] *::before,',
+'html[data-aura-preview-paused="true"] *::after {',
+'  animation-play-state: paused !important;',
+'  transition-duration: 0s !important;',
+'  scroll-behavior: auto !important;',
+'}'
+].join('\n');
+document.head.appendChild(style);
+window.requestAnimationFrame = function(callback) {
+const frameId = nextFrameId++;
+if (paused) {
+pausedFrameCallbacks.set(frameId, callback);
+frameRecords.set(frameId, { paused: true });
+return frameId;
+}
+const nativeFrameId = nativeRequestAnimationFrame(function(timestamp) {
+frameRecords.delete(frameId);
+callback(timestamp);
+});
+frameRecords.set(frameId, { nativeFrameId: nativeFrameId });
+return frameId;
+};
+window.cancelAnimationFrame = function(frameId) {
+const record = frameRecords.get(frameId);
+pausedFrameCallbacks.delete(frameId);
+if (record && typeof record.nativeFrameId !== 'undefined') {
+nativeCancelAnimationFrame(record.nativeFrameId);
+}
+frameRecords.delete(frameId);
+};
+window.setInterval = function(callback, delay) {
+const args = Array.prototype.slice.call(arguments, 2);
+return nativeSetInterval(function() {
+if (paused) return;
+callback.apply(this, args);
+}, delay);
+};
+const flushPausedFrames = function() {
+const callbacks = Array.from(pausedFrameCallbacks.entries());
+pausedFrameCallbacks.clear();
+callbacks.forEach(function(entry) {
+const frameId = entry[0];
+const callback = entry[1];
+const nativeFrameId = nativeRequestAnimationFrame(function(timestamp) {
+frameRecords.delete(frameId);
+callback(timestamp);
+});
+frameRecords.set(frameId, { nativeFrameId: nativeFrameId });
+});
+};
+const setPaused = function(nextPaused) {
+const shouldPause = Boolean(nextPaused);
+if (paused === shouldPause) return;
+paused = shouldPause;
+document.documentElement.toggleAttribute('data-aura-preview-paused', paused);
+if (!paused) {
+flushPausedFrames();
+}
+};
+window.__auraPreviewPerformanceController = {
+setPaused: setPaused,
+get paused() {
+return paused;
+}
+};
+window.addEventListener('message', function(event) {
+if (event.source !== window.parent) return;
+if (!event.data || event.data.type !== 'aura-preview-performance-mode') return;
+setPaused(event.data.paused);
+});
+})();
+</script>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Screenbolt</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Inter+Tight:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
+<script src="https://code.iconify.design/iconify-icon/2.1.0/iconify-icon.min.js"></script>
+<style>@keyframes recPulse{0%,100%{transform:scale(1);opacity:1}50%{transform:scale(1.5);opacity:.45}}</style>
+</head>
+
+<body class="bg-[#f5f5f2] text-[#090b0c] antialiased" style="font-family:'Inter Tight',system-ui,sans-serif;">
+  <main>
+    <section id="hero" class="relative min-h-screen overflow-hidden bg-black">
+      <video id="heroVideo" class="absolute inset-0 z-0 h-full w-full object-cover" autoplay muted loop playsinline webkit-playsinline src="assets/video.mp4"></video>
+      <div class="absolute inset-0 z-[1]" style="background:linear-gradient(to bottom,rgba(0,0,0,.60) 0%,rgba(0,0,0,.15) 50%,rgba(0,0,0,.65) 100%);"></div>
+
+      <nav class="fixed left-0 right-0 top-0 z-50 px-4 py-4 md:px-8">
+        <div class="relative flex h-12 items-center">
+          <a href="#" class="flex items-center">
+            <img src="assets/logo.svg" alt="Screenbolt" class="h-[22px] w-auto">
+          </a>
+
+          <div class="absolute left-1/2 hidden -translate-x-1/2 items-center gap-1 rounded-full border px-2 py-1.5 md:flex" style="background:rgba(28,28,28,.75);border-color:rgba(255,255,255,.10);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);">
+            <a href="#" class="nav-pill rounded-full px-4 py-2 text-[0.875rem] font-normal text-white/80">Product</a>
+            <a href="#analytics" class="nav-pill rounded-full px-4 py-2 text-[0.875rem] font-normal text-white/80">Features</a>
+            <a href="#" class="nav-pill rounded-full px-4 py-2 text-[0.875rem] font-normal text-white/80">Pricing</a>
+          </div>
+
+          <div class="ml-auto flex items-center gap-2">
+            <a href="#" class="hidden rounded-full px-4 py-2 text-[0.875rem] text-white/80 sm:block">Login</a>
+            <a href="#" class="rounded-full bg-white px-5 py-2.5 text-[0.875rem] font-normal text-black">Start recording</a>
+          </div>
+        </div>
+      </nav>
+
+      <div class="absolute inset-0 z-10 flex flex-col items-center justify-center px-5">
+        <h1 data-reveal data-y="-40" data-duration="900" class="text-center text-[4rem] font-normal leading-[0.94] tracking-tight text-white opacity-0 md:text-[6.375rem]" style="transform:translateY(-40px);">
+          <span class="block">Record your screen</span>
+          <span class="block">
+            <span>share it in </span><span style="font-family:'Instrument Serif',serif;font-style:italic;">seconds</span>
+          </span>
+        </h1>
+
+        <button data-reveal data-y="30" data-delay="250" data-duration="800" class="mt-8 flex items-center gap-2 rounded-full bg-white py-1.5 pl-6 pr-2 text-[0.9375rem] font-normal text-black opacity-0" style="transform:translateY(30px);">
+          Start recording free
+          <span class="flex h-6 w-6 items-center justify-center rounded-full bg-black text-white">
+            <iconify-icon icon="solar:arrow-right-up-linear" style="font-size:.875rem;stroke-width:1.5;"></iconify-icon>
+          </span>
+        </button>
+      </div>
+
+      <div class="absolute bottom-10 left-10 z-10 hidden lg:block">
+        <h2 class="mb-[18px] text-[1.3125rem] font-normal leading-[1.2] text-white/60 tracking-tight">Trusted by teams everywhere</h2>
+        <div class="w-[430px] overflow-hidden">
+          <div id="marquee" class="flex w-max gap-[54px]">
+            <img src="https://qclay.design/lovable/synergy/logo-taa.png" class="h-[30px] w-auto shrink-0 object-contain" style="filter:brightness(0) invert(1) opacity(.55);" alt="">
+            <img src="https://qclay.design/lovable/synergy/logo-harris.png" class="h-[30px] w-auto shrink-0 object-contain" style="filter:brightness(0) invert(1) opacity(.55);" alt="">
+            <img src="https://qclay.design/lovable/synergy/logo-siemens.png" class="h-[30px] w-auto shrink-0 object-contain" style="filter:brightness(0) invert(1) opacity(.55);" alt="">
+            <img src="https://qclay.design/lovable/synergy/logo-summit.png" class="h-[30px] w-auto shrink-0 object-contain" style="filter:brightness(0) invert(1) opacity(.55);" alt="">
+            <img src="https://qclay.design/lovable/synergy/logo-taa.png" class="h-[30px] w-auto shrink-0 object-contain" style="filter:brightness(0) invert(1) opacity(.55);" alt="">
+            <img src="https://qclay.design/lovable/synergy/logo-harris.png" class="h-[30px] w-auto shrink-0 object-contain" style="filter:brightness(0) invert(1) opacity(.55);" alt="">
+            <img src="https://qclay.design/lovable/synergy/logo-siemens.png" class="h-[30px] w-auto shrink-0 object-contain" style="filter:brightness(0) invert(1) opacity(.55);" alt="">
+            <img src="https://qclay.design/lovable/synergy/logo-summit.png" class="h-[30px] w-auto shrink-0 object-contain" style="filter:brightness(0) invert(1) opacity(.55);" alt="">
+          </div>
+        </div>
+      </div>
+
+      <div class="absolute bottom-10 right-10 z-10 hidden max-w-[430px] lg:block">
+        <p class="mb-3 text-[1.3125rem] font-normal leading-[1.4] tracking-tight text-white">Screenbolt is the fastest way to record your screen and share it with anyone, anywhere.</p>
+        <a href="#" class="text-[1.3125rem] font-normal tracking-tight text-white underline">Learn more</a>
+      </div>
+    </section>
+
+    <!-- Metrics -->
+    <section id="metrics" class="overflow-hidden bg-[#f5f5f2] px-5 py-20 md:px-12">
+      <div class="mx-auto max-w-[1280px]">
+        <div class="grid gap-10 sm:grid-cols-3">
+          <div data-scope="metrics" data-reveal data-y="30" data-duration="800" class="border-t border-black/15 pt-6 opacity-0" style="transform:translateY(30px);">
+            <div class="metric-num text-[3.5rem] font-normal leading-none tracking-tight text-[#090b0c] tabular-nums md:text-[5rem]" data-target="14000" data-suffix="+">0</div>
+            <p class="mt-4 text-[0.75rem] font-normal uppercase tracking-[0.125rem] text-[#090b0c]/50">Videos recorded</p>
+          </div>
+          <div data-scope="metrics" data-reveal data-y="30" data-delay="120" data-duration="800" class="border-t border-black/15 pt-6 opacity-0" style="transform:translateY(30px);">
+            <div class="metric-num text-[3.5rem] font-normal leading-none tracking-tight text-[#090b0c] tabular-nums md:text-[5rem]" data-target="1.2" data-decimals="1" data-suffix="M">0</div>
+            <p class="mt-4 text-[0.75rem] font-normal uppercase tracking-[0.125rem] text-[#090b0c]/50">Minutes watched</p>
+          </div>
+          <div data-scope="metrics" data-reveal data-y="30" data-delay="240" data-duration="800" class="border-t border-black/15 pt-6 opacity-0" style="transform:translateY(30px);">
+            <div class="metric-num text-[3.5rem] font-normal leading-none tracking-tight text-[#090b0c] tabular-nums md:text-[5rem]" data-target="3000" data-suffix="+">0</div>
+            <p class="mt-4 text-[0.75rem] font-normal uppercase tracking-[0.125rem] text-[#090b0c]/50">Teams on Screenbolt</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Use cases -->
+    <section id="usecases" class="overflow-hidden bg-[#f5f5f2] px-5 py-20 md:px-12">
+      <div class="mx-auto max-w-[1280px]">
+        <div class="mb-16 flex flex-col gap-8 md:flex-row md:items-end md:justify-between">
+          <div>
+            <div class="mb-6 flex items-center gap-3">
+              <span class="h-px w-5 bg-[#090b0c]/60"></span>
+              <p class="text-xs font-normal uppercase tracking-[0.16rem] text-[#090b0c]/50">CORE FEATURES</p>
+            </div>
+            <h2 data-scope="usecases" data-reveal data-y="30" data-blur="12" data-duration="800" class="m-0 text-[#090b0c] opacity-0" style="transform:translateY(30px);filter:blur(12px);">
+              <span class="block text-[3rem] font-normal leading-[0.94] tracking-tight md:text-[4.5rem]">Record, edit,</span>
+              <span class="block text-[3rem] font-normal italic leading-[0.94] tracking-tight md:text-[4.5rem]" style="font-family:'Instrument Serif',serif;">and share.</span>
+            </h2>
+          </div>
+          <p data-scope="usecases" data-reveal data-y="20" data-blur="8" data-delay="150" data-duration="800" class="max-w-xs text-sm font-normal leading-6 text-[#090b0c]/55 opacity-0 md:text-right" style="transform:translateY(20px);filter:blur(8px);">Everything you need to capture, polish, and share — without a meeting.</p>
+        </div>
+
+        <div class="grid gap-4 lg:min-h-[36rem] lg:grid-cols-[2.3fr_1fr_1fr]">
+          <article data-scope="usecases" data-reveal data-y="30" data-duration="700" class="relative min-h-[28rem] overflow-hidden rounded-3xl p-7 opacity-0 lg:min-h-0" style="transform:translateY(30px);">
+            <img src="assets/grass-artwork.webp" alt="" class="absolute inset-0 z-0 h-full w-full object-cover">
+            <div class="absolute inset-0 z-[1]" style="background:rgba(0,0,0,.30);"></div>
+
+            <img src="assets/artwork-korean-women.webp" alt="" class="absolute left-6 top-[56px] z-[2] h-[145px] w-[130px] rounded-2xl object-cover shadow-2xl lg:left-10 lg:top-[58px] lg:h-[230px] lg:w-[210px]" style="object-position:top center;">
+
+            <div class="absolute right-6 top-[calc(48%+40px)] z-[3] flex items-center gap-2 lg:right-10">
+              <div class="flex items-center gap-2 rounded-full py-2 pl-2.5 pr-4" style="background:rgba(255,255,255,.15);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);">
+                <img src="assets/logo.svg" alt="" class="h-[22px] w-auto lg:h-[24px]">
+              </div>
+              <button class="flex h-9 w-9 items-center justify-center rounded-full text-white lg:h-10 lg:w-10" style="background:rgba(255,255,255,.15);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);">
+                <iconify-icon icon="solar:arrow-right-up-linear" style="font-size:1rem;stroke-width:1.5;"></iconify-icon>
+              </button>
+            </div>
+
+            <div class="absolute left-1/2 top-[48%] z-[3] flex -translate-x-1/2 -translate-y-1/2 items-center gap-1.5 rounded-full py-2 pl-3 pr-2 shadow-2xl lg:gap-2 lg:py-2.5 lg:pl-4 lg:pr-2.5" style="background:rgba(255,255,255,.95);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);">
+              <span class="h-2.5 w-2.5 shrink-0 rounded-full" style="background:#ff3b30;animation:recPulse 1.6s ease-in-out infinite;"></span>
+              <span class="text-[0.8125rem] font-normal leading-none tracking-tight text-black tabular-nums">0:42</span>
+              <span class="mx-1 h-5 w-px" style="background:rgba(0,0,0,.10);"></span>
+              <button class="flex h-8 w-8 items-center justify-center rounded-full text-black/65 transition-colors hover:bg-black/5 lg:h-9 lg:w-9">
+                <iconify-icon icon="solar:videocamera-linear" style="font-size:1.0625rem;stroke-width:1.5;"></iconify-icon>
+              </button>
+              <button class="flex h-8 w-8 items-center justify-center rounded-full text-black/65 transition-colors hover:bg-black/5 lg:h-9 lg:w-9">
+                <iconify-icon icon="solar:microphone-linear" style="font-size:1.0625rem;stroke-width:1.5;"></iconify-icon>
+              </button>
+              <button class="flex h-8 w-8 items-center justify-center rounded-full text-black/65 transition-colors hover:bg-black/5 lg:h-9 lg:w-9">
+                <iconify-icon icon="solar:monitor-linear" style="font-size:1.0625rem;stroke-width:1.5;"></iconify-icon>
+              </button>
+              <button class="hidden h-8 w-8 items-center justify-center rounded-full text-black/65 transition-colors hover:bg-black/5 lg:flex lg:h-9 lg:w-9">
+                <iconify-icon icon="solar:settings-linear" style="font-size:1.0625rem;stroke-width:1.5;"></iconify-icon>
+              </button>
+              <span class="mx-1 h-5 w-px" style="background:rgba(0,0,0,.10);"></span>
+              <button class="flex h-8 w-8 items-center justify-center rounded-full lg:h-9 lg:w-9" style="background:#ff3b30;">
+                <span class="h-2.5 w-2.5 rounded-[3px] bg-white"></span>
+              </button>
+            </div>
+
+            <div class="absolute bottom-7 left-7 right-7 z-[2]">
+              <p class="mb-3 text-xs font-normal uppercase tracking-[0.16rem] text-white/60">Record</p>
+              <h3 class="max-w-xl text-[1.75rem] font-normal leading-tight tracking-tight text-white md:text-4xl">Capture your screen in seconds.</h3>
+              <p class="mt-4 max-w-md text-[0.875rem] font-normal leading-6 text-white/65">Record your screen, camera, and voice in one click — no downloads, no setup.</p>
+            </div>
+          </article>
+
+          <article data-scope="usecases" data-reveal data-y="30" data-delay="100" data-duration="700" class="relative min-h-[20rem] overflow-hidden rounded-3xl p-7 opacity-0 lg:min-h-0" style="transform:translateY(30px);">
+            <img src="assets/artwork-savana-horse.webp" alt="" class="absolute inset-0 z-0 h-full w-full object-cover">
+            <div class="absolute inset-0 z-[1]" style="background:rgba(0,0,0,.30);"></div>
+            <div class="absolute bottom-7 left-7 right-7 z-[2]">
+              <iconify-icon icon="solar:scissors-linear" style="font-size:2rem;stroke-width:1.5;color:rgba(255,255,255,.75);" class="mb-8"></iconify-icon>
+              <p class="mb-3 text-xs font-normal uppercase tracking-[0.16rem] text-white/65">Edit</p>
+              <h3 class="text-2xl font-normal leading-tight tracking-tight text-white">Cut the unwanted</h3>
+            </div>
+          </article>
+
+          <article data-scope="usecases" data-reveal data-y="30" data-delay="200" data-duration="700" class="relative min-h-[20rem] overflow-hidden rounded-3xl p-7 opacity-0 lg:min-h-0" style="transform:translateY(30px);">
+            <img src="assets/artwork-paper-plan.webp" alt="" class="absolute inset-0 z-0 h-full w-full object-cover">
+            <div class="absolute inset-0 z-[1]" style="background:rgba(0,0,0,.30);"></div>
+            <div class="absolute bottom-7 left-7 right-7 z-[2]">
+              <iconify-icon icon="solar:share-linear" style="font-size:2rem;stroke-width:1.5;color:rgba(255,255,255,.75);" class="mb-8"></iconify-icon>
+              <p class="mb-3 text-xs font-normal uppercase tracking-[0.16rem] text-white/65">Share</p>
+              <h3 class="text-2xl font-normal leading-tight tracking-tight text-white">A link is all it takes.</h3>
+            </div>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <!-- Testimonials -->
+    <section id="testimonials" class="relative overflow-hidden bg-[#f5f5f2] px-5 pt-28 pb-20 md:px-12 md:pt-40 md:pb-24">
+      <div class="pointer-events-none absolute inset-0" style="background:radial-gradient(ellipse 74% 64% at 50% 36%,rgba(0,0,0,.09),rgba(0,0,0,.03) 45%,transparent 72%);"></div>
+      <div class="relative mx-auto max-w-[1280px]">
+        <div data-scope="testimonials" data-reveal data-y="30" data-blur="12" data-duration="900" class="relative mx-auto max-w-4xl text-center opacity-0" style="transform:translateY(30px);filter:blur(12px);">
+        <div class="mb-8 text-[0.75rem] font-normal uppercase tracking-[0.125rem] text-[#090b0c]/50">WHAT PEOPLE SAY</div>
+
+        <div class="relative min-h-[24rem] md:min-h-[22rem]">
+          <figure class="testimonial-item absolute inset-0 m-0 flex flex-col items-center justify-center" style="transition:opacity 700ms cubic-bezier(.22,1,.36,1),transform 700ms cubic-bezier(.22,1,.36,1);opacity:1;transform:translateY(0);">
+            <blockquote class="m-0 text-[2.5rem] font-normal leading-[1.1] tracking-tight text-[#090b0c] md:text-[4rem]">“We replaced half our standups with Screenbolt videos. The team is <span style="font-family:'Instrument Serif',serif;font-style:italic;">faster</span> and nobody misses a beat.”</blockquote>
+            <figcaption class="mt-8 text-sm font-normal text-[#090b0c]/50">Maya Chen · Head of Product</figcaption>
+          </figure>
+          <figure class="testimonial-item absolute inset-0 m-0 flex flex-col items-center justify-center" style="transition:opacity 700ms cubic-bezier(.22,1,.36,1),transform 700ms cubic-bezier(.22,1,.36,1);opacity:0;transform:translateY(14px);">
+            <blockquote class="m-0 text-[2.5rem] font-normal leading-[1.1] tracking-tight text-[#090b0c] md:text-[4rem]">“Bug reports finally <span style="font-family:'Instrument Serif',serif;font-style:italic;">make sense</span>. A 20-second recording beats a paragraph of ‘it’s broken’.”</blockquote>
+            <figcaption class="mt-8 text-sm font-normal text-[#090b0c]/50">Dan Silva · Engineering Lead</figcaption>
+          </figure>
+          <figure class="testimonial-item absolute inset-0 m-0 flex flex-col items-center justify-center" style="transition:opacity 700ms cubic-bezier(.22,1,.36,1),transform 700ms cubic-bezier(.22,1,.36,1);opacity:0;transform:translateY(14px);">
+            <blockquote class="m-0 text-[2.5rem] font-normal leading-[1.1] tracking-tight text-[#090b0c] md:text-[4rem]">“I record a quick walkthrough instead of a 30-minute call. Clients love it, and I <span style="font-family:'Instrument Serif',serif;font-style:italic;">get my day back</span>.”</blockquote>
+            <figcaption class="mt-8 text-sm font-normal text-[#090b0c]/50">Amara Reed · Founder</figcaption>
+          </figure>
+        </div>
+
+        <div class="mt-12 flex items-center justify-center gap-2">
+          <button class="testimonial-dot h-2 rounded-full transition-all duration-300" aria-label="Testimonial 1" style="width:2rem;background:rgba(0,0,0,.9);"></button>
+          <button class="testimonial-dot h-2 rounded-full transition-all duration-300" aria-label="Testimonial 2" style="width:0.5rem;background:rgba(0,0,0,.2);"></button>
+          <button class="testimonial-dot h-2 rounded-full transition-all duration-300" aria-label="Testimonial 3" style="width:0.5rem;background:rgba(0,0,0,.2);"></button>
+        </div>
+      </div>
+
+      <div id="smartTrigger" class="mt-16 flex flex-col items-stretch gap-4 lg:flex-row">
+        <article data-scope="smart" data-reveal data-y="40" data-delay="200" data-duration="700" class="relative min-h-[560px] flex-1 overflow-hidden rounded-3xl opacity-0" style="transform:translateY(40px);">
+          <img src="assets/artwork-daisy.webp" alt="" class="absolute inset-0 z-0 h-full w-full object-cover">
+          <div class="absolute inset-0 z-[1]" style="background:rgba(0,0,0,.50);"></div>
+
+          <div class="absolute left-6 right-6 top-8 z-[2] rounded-[20px] border p-5" style="border-color:rgba(255,255,255,.20);background:rgba(255,255,255,.10);backdrop-filter:blur(56px);-webkit-backdrop-filter:blur(56px);">
+            <div class="mb-4 flex items-center gap-2.5">
+              <div class="flex h-10 items-center justify-center rounded-xl bg-white px-3">
+                <img src="assets/logo.svg" alt="" class="h-3 w-auto brightness-0">
+              </div>
+              <span class="text-[1rem] font-normal text-white">Screenbolt</span>
+            </div>
+            <div class="mb-4 border-t border-dashed border-white/20"></div>
+
+            <div id="qaBlock" class="relative h-40">
+              <div class="absolute inset-0">
+                <p id="qaQuestion" class="mb-3 text-[1rem] font-normal leading-[1.4] text-white">Can you summarize my recording?</p>
+                <div class="flex items-start gap-2">
+                  <div class="flex h-5 shrink-0 items-center justify-center rounded-md bg-white/15 px-1.5">
+                    <img src="assets/logo.svg" class="h-2 w-auto opacity-80" alt="">
+                  </div>
+                  <p id="qaAnswer" class="m-0 text-[0.75rem] font-normal leading-[1.6] text-white/55">Sure — in your latest video you walked through the new onboarding flow and shared the launch date of October 12.</p>
+                </div>
+              </div>
+            </div>
+
+            <div class="mt-4 flex items-center justify-between">
+              <button class="flex items-center gap-2 rounded-full bg-white py-1.5 pl-4 pr-1.5 text-[0.8125rem] font-normal text-black">
+                View video
+                <span class="flex h-[22px] w-[22px] items-center justify-center rounded-full bg-black text-white">
+                  <iconify-icon icon="solar:arrow-right-up-linear" style="font-size:.75rem;stroke-width:1.5;"></iconify-icon>
+                </span>
+              </button>
+              <a class="text-[0.8125rem] font-normal text-white/80 underline" href="#">ASK AI</a>
+            </div>
+          </div>
+
+          <div class="absolute bottom-7 left-6 right-6 z-[2]">
+            <h3 class="mb-2 text-[1.625rem] font-normal italic tracking-tight text-white" style="font-family:'Instrument Serif',serif;">Ask your videos anything</h3>
+            <p class="text-[0.8125rem] font-normal leading-[1.6] text-white/65">Type a question and Screenbolt's AI answers from your video's transcript and viewer data.</p>
+          </div>
+        </article>
+
+        <article data-scope="smart" data-reveal data-y="40" data-delay="350" data-duration="700" class="relative min-h-[560px] flex-1 overflow-hidden rounded-3xl opacity-0" style="transform:translateY(40px);">
+          <img src="assets/artwork-yard.webp" alt="" class="absolute inset-0 z-0 h-full w-full object-cover">
+          <div class="absolute inset-0 z-[1]" style="background:rgba(0,0,0,.20);"></div>
+
+          <div class="absolute left-6 right-6 top-8 z-[2]">
+            <div class="rounded-[20px] px-5 pb-5 pt-6 text-center" style="background:rgba(255,255,255,.92);">
+              <div class="mb-1 text-[0.75rem] font-normal leading-[1.5] text-black/50">Watch time<br>up this month</div>
+              <div class="text-[3.25rem] font-normal italic leading-none tracking-tight text-black" style="font-family:'Instrument Serif',serif;">+18%</div>
+              <div class="h-4"></div>
+
+              <div class="relative mx-auto h-[145px] w-[280px] max-w-full overflow-visible">
+                <svg viewBox="60 -25 220 145" width="100%" height="100%" preserveAspectRatio="none" style="overflow:visible;">
+                  <defs>
+                    <linearGradient id="areaFill" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="0%" stop-color="rgba(180,210,80,.85)"></stop>
+                      <stop offset="100%" stop-color="rgba(180,210,80,.10)"></stop>
+                    </linearGradient>
+                    <clipPath id="reveal">
+                      <rect id="chartReveal" x="60" y="-25" width="0" height="145"></rect>
+                    </clipPath>
+                  </defs>
+                  <g clip-path="url(#reveal)">
+                    <path d="M 60 75 L 150 20 L 280 28 L 280 120 L 60 120 Z" fill="url(#areaFill)"></path>
+                    <path d="M 60 75 L 150 20 L 280 28" fill="none" stroke="#8DB800" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"></path>
+                    <line x1="60" y1="75" x2="60" y2="120" stroke="#8DB800" stroke-width="1" stroke-dasharray="3 3" opacity=".6"></line>
+                    <line x1="280" y1="28" x2="280" y2="120" stroke="#8DB800" stroke-width="1" stroke-dasharray="3 3" opacity=".6"></line>
+                  </g>
+                  <line id="greenConnector" x1="150" y1="-15" x2="150" y2="20" stroke="#1DC47D" stroke-width="1.2" stroke-dasharray="36" stroke-dashoffset="36"></line>
+                  <circle id="greenDot" cx="150" cy="-15" r="4.5" fill="#1DC47D" style="transform-box:fill-box;transform-origin:center;transform:scale(0);"></circle>
+                </svg>
+              </div>
+
+              <div class="mt-4 inline-block rounded-full border px-4 py-2 text-center text-[0.6875rem] text-black/60" style="border-color:rgba(0,0,0,.12);background:rgba(255,255,255,.80);backdrop-filter:blur(8px);">Tip: Add chapters so viewers can jump to the part they need.</div>
+            </div>
+          </div>
+
+          <div class="absolute bottom-7 left-6 right-6 z-[2]">
+            <h3 class="mb-2 text-[1.625rem] font-normal italic tracking-tight text-white" style="font-family:'Instrument Serif',serif;">Viewer Insights</h3>
+            <p class="text-[0.8125rem] font-normal leading-[1.6] text-white/65">See where viewers watch, rewatch, and drop off — so you can make tighter videos.</p>
+          </div>
+        </article>
+
+        <article data-scope="smart" data-reveal data-y="40" data-delay="500" data-duration="700" class="relative min-h-[560px] flex-1 overflow-hidden rounded-3xl opacity-0" style="transform:translateY(40px);">
+          <img src="assets/sky-artwork.webp" alt="" class="absolute inset-0 z-0 h-full w-full object-cover">
+          <div class="absolute inset-0 z-[1]" style="background:rgba(0,0,0,.30);"></div>
+
+          <div class="absolute left-4 right-4 top-8 bottom-[110px] z-[2]">
+            <svg class="absolute inset-0 z-[1] h-full w-full overflow-visible" viewBox="0 0 360 380" preserveAspectRatio="none">
+              <defs>
+                <path id="tree-path-0" d="M180 44 C180 73,105 73,105 102"></path>
+                <path id="tree-path-1" d="M180 44 C180 73,255 73,255 102"></path>
+                <path id="tree-path-2" d="M105 140 C105 166,105 166,105 192"></path>
+                <path id="tree-path-3" d="M255 140 C255 166,255 166,255 192"></path>
+                <path id="tree-path-4" d="M180 44 C180 171,180 171,180 298"></path>
+                <path id="tree-path-5" d="M180 334 C180 347,180 347,180 360"></path>
+              </defs>
+              <g class="tree-line" opacity="0">
+                <path d="M180 44 C180 73,105 73,105 102" stroke="rgba(255,255,255,.35)" stroke-width="1" fill="none"></path>
+                <path d="M180 44 C180 73,255 73,255 102" stroke="rgba(255,255,255,.35)" stroke-width="1" fill="none"></path>
+                <path d="M105 140 C105 166,105 166,105 192" stroke="rgba(255,255,255,.35)" stroke-width="1" fill="none"></path>
+                <path d="M255 140 C255 166,255 166,255 192" stroke="rgba(255,255,255,.35)" stroke-width="1" fill="none"></path>
+                <path d="M180 44 C180 171,180 171,180 298" stroke="rgba(255,255,255,.35)" stroke-width="1" fill="none"></path>
+                <path d="M180 334 C180 347,180 347,180 360" stroke="rgba(255,255,255,.35)" stroke-width="1" fill="none"></path>
+                <circle cx="105" cy="102" r="2.5" fill="rgba(255,255,255,.9)"></circle>
+                <circle cx="255" cy="102" r="2.5" fill="rgba(255,255,255,.9)"></circle>
+                <circle cx="105" cy="192" r="2.5" fill="rgba(255,255,255,.9)"></circle>
+                <circle cx="255" cy="192" r="2.5" fill="rgba(255,255,255,.9)"></circle>
+                <circle cx="180" cy="298" r="2.5" fill="rgba(255,255,255,.9)"></circle>
+                <circle cx="180" cy="360" r="2.5" fill="rgba(255,255,255,.9)"></circle>
+                <circle r="3" fill="#fff" style="filter:drop-shadow(0 0 4px rgba(255,255,255,.8));"><animateMotion dur="2.4s" repeatCount="indefinite" begin=".85s"><mpath href="#tree-path-0"></mpath></animateMotion></circle>
+                <circle r="3" fill="#fff" style="filter:drop-shadow(0 0 4px rgba(255,255,255,.8));"><animateMotion dur="2.4s" repeatCount="indefinite" begin="1s"><mpath href="#tree-path-1"></mpath></animateMotion></circle>
+                <circle r="3" fill="#fff" style="filter:drop-shadow(0 0 4px rgba(255,255,255,.8));"><animateMotion dur="2.4s" repeatCount="indefinite" begin="1.2s"><mpath href="#tree-path-2"></mpath></animateMotion></circle>
+                <circle r="3" fill="#fff" style="filter:drop-shadow(0 0 4px rgba(255,255,255,.8));"><animateMotion dur="2.4s" repeatCount="indefinite" begin="1.38s"><mpath href="#tree-path-3"></mpath></animateMotion></circle>
+                <circle r="3" fill="#fff" style="filter:drop-shadow(0 0 4px rgba(255,255,255,.8));"><animateMotion dur="2.4s" repeatCount="indefinite" begin="1.55s"><mpath href="#tree-path-4"></mpath></animateMotion></circle>
+                <circle r="3" fill="#fff" style="filter:drop-shadow(0 0 4px rgba(255,255,255,.8));"><animateMotion dur="2.4s" repeatCount="indefinite" begin="1.75s"><mpath href="#tree-path-5"></mpath></animateMotion></circle>
+              </g>
+            </svg>
+
+            <div class="relative z-[2] flex h-full flex-col items-center gap-[18px]">
+              <div class="tree-node rounded-full border px-5 py-2.5 text-[1rem] italic text-white opacity-0" data-delay="0" style="font-family:'Instrument Serif',serif;border-color:rgba(255,255,255,.25);background:rgba(255,255,255,.10);backdrop-filter:blur(20px);transform:scale(.85);">Auto Chapters</div>
+              <div class="flex gap-4">
+                <div class="tree-node rounded-full border px-5 py-2.5 text-[1rem] italic text-white opacity-0" data-delay="180" style="font-family:'Instrument Serif',serif;border-color:rgba(255,255,255,.25);background:rgba(255,255,255,.10);backdrop-filter:blur(20px);transform:scale(.85);">Intro</div>
+                <div class="tree-node rounded-full border px-5 py-2.5 text-[1rem] italic text-white opacity-0" data-delay="360" style="font-family:'Instrument Serif',serif;border-color:rgba(255,255,255,.25);background:rgba(255,255,255,.10);backdrop-filter:blur(20px);transform:scale(.85);">Demo</div>
+              </div>
+              <div class="flex items-start gap-4">
+                <div class="tree-node max-w-[160px] rounded-xl px-4 py-2.5 text-[0.75rem] font-normal leading-[1.5] text-black/75 opacity-0" data-delay="540" style="background:rgba(255,255,255,.92);transform:scale(.85);">Hook, agenda, quick intro</div>
+                <div class="tree-node max-w-[160px] rounded-xl px-4 py-2.5 text-[0.75rem] font-normal leading-[1.5] text-black/75 opacity-0" data-delay="720" style="background:rgba(255,255,255,.92);transform:scale(.85);">Screen share, walkthrough, highlights</div>
+              </div>
+              <div class="mt-auto tree-node rounded-full border px-5 py-2.5 text-[1rem] italic text-white opacity-0" data-delay="900" style="font-family:'Instrument Serif',serif;border-color:rgba(255,255,255,.25);background:rgba(255,255,255,.10);backdrop-filter:blur(20px);transform:scale(.85);">Next steps</div>
+              <div class="tree-node max-w-[160px] rounded-xl px-4 py-2.5 text-center text-[0.75rem] font-normal leading-[1.5] text-black/75 opacity-0" data-delay="1080" style="background:rgba(255,255,255,.92);transform:scale(.85);">Recap, action items, CTA</div>
+            </div>
+          </div>
+
+          <div class="absolute bottom-7 left-6 right-6 z-[2]">
+            <h3 class="mb-2 text-[1.625rem] font-normal italic tracking-tight text-white" style="font-family:'Instrument Serif',serif;">Smart Chapters</h3>
+            <p class="text-[0.8125rem] font-normal leading-[1.6] text-white/65">Screenbolt detects topics in your recording and turns them into clickable chapters automatically.</p>
+          </div>
+        </article>
+      </div>
+      </div>
+    </section>
+
+    <section id="analytics" class="overflow-hidden bg-[#f5f5f2] px-5 py-20 md:px-12">
+      <div id="analyticsTrigger" class="mb-16 text-center">
+        <div class="mb-4 text-[0.75rem] font-normal uppercase tracking-[0.125rem] text-[#090b0c]/50">ANALYTICS</div>
+        <h2 data-scope="analytics" data-reveal data-y="30" data-blur="12" data-duration="800" class="m-0 text-[#090b0c] opacity-0" style="transform:translateY(30px);filter:blur(12px);">
+          <span class="block text-[3.5rem] font-normal leading-none tracking-tight md:text-[4.5rem]">See how your videos</span>
+          <span class="block text-[3.5rem] font-normal italic leading-none tracking-tight md:text-[4.5rem]" style="font-family:'Instrument Serif',serif;">perform at a glance</span>
+        </h2>
+        <p data-scope="analytics" data-reveal data-y="20" data-blur="8" data-delay="200" data-duration="800" class="mt-4 text-[1rem] font-normal text-[#090b0c]/60 opacity-0" style="transform:translateY(20px);filter:blur(8px);">Track views, watch time, and engagement in real time.</p>
+      </div>
+
+      <div class="mx-auto flex max-w-[1280px] flex-col items-stretch gap-4 lg:flex-row">
+        <article data-scope="analytics" data-reveal data-x="-60" data-delay="300" data-duration="800" class="relative min-h-[480px] flex-[1.4] overflow-hidden rounded-3xl opacity-0" style="transform:translateX(-60px);">
+          <img src="assets/artwork-green-wall.webp" alt="" class="absolute inset-0 z-0 h-full w-full object-cover">
+          <div class="absolute inset-0 z-[1]" style="background:rgba(0,0,0,.42);"></div>
+
+          <div class="absolute left-8 right-8 top-8 z-[2] rounded-[20px] border px-7 py-6" style="border-color:rgba(255,255,255,.20);background:rgba(255,255,255,.10);backdrop-filter:blur(56px);-webkit-backdrop-filter:blur(56px);">
+            <div class="mb-2 flex items-center justify-between">
+              <span class="text-[0.6875rem] font-normal tracking-[0.09375rem] text-white/60">VIEWS THIS MONTH</span>
+              <span class="text-[0.6875rem] font-normal tracking-[0.09375rem] text-white/60 underline">LAST 30 DAYS</span>
+            </div>
+            <div id="countMain" class="mb-6 text-[2.625rem] font-normal tracking-tight text-white tabular-nums">0</div>
+            <div class="mb-5 w-full border-t border-dashed border-white/20"></div>
+
+            <div class="mb-4">
+              <div class="flex items-center justify-between text-[0.8125rem]"><span class="text-white/70">Watch time</span><span class="font-normal text-white">8,200 min</span></div>
+              <div class="relative mt-1.5 h-[5px] w-full overflow-hidden rounded-full">
+                <div class="absolute inset-0 opacity-[.13]" style="background:linear-gradient(90deg,#040504 0%,rgba(4,5,4,.50) 100%);"></div>
+                <div class="absolute left-0 top-0 h-full w-[75%] rounded-full" style="background:linear-gradient(90deg,#1DC47D 60.8%,rgba(29,196,125,0) 100%);"></div>
+              </div>
+            </div>
+
+            <div class="mb-4">
+              <div class="flex items-center justify-between text-[0.8125rem]"><span class="text-white/70">Unique viewers</span><span class="font-normal text-white">4,250</span></div>
+              <div class="relative mt-1.5 h-[5px] w-full overflow-hidden rounded-full">
+                <div class="absolute inset-0 opacity-[.13]" style="background:linear-gradient(90deg,#040504 0%,rgba(4,5,4,.50) 100%);"></div>
+                <div class="absolute left-0 top-0 h-full w-[45%] rounded-full" style="background:linear-gradient(90deg,#B48F17 55.74%,rgba(180,143,23,0) 100%);"></div>
+              </div>
+            </div>
+
+            <div>
+              <div class="flex items-center justify-between text-[0.8125rem]"><span class="text-white/70">Shares</span><span class="font-normal text-white">1,860</span></div>
+              <div class="relative mt-1.5 h-[5px] w-full overflow-hidden rounded-full">
+                <div class="absolute inset-0 opacity-[.13]" style="background:linear-gradient(90deg,#040504 0%,rgba(4,5,4,.50) 100%);"></div>
+                <div class="absolute left-0 top-0 h-full w-[60%] rounded-full" style="background:linear-gradient(90deg,#fff 52.46%,rgba(255,255,255,0) 100%);"></div>
+              </div>
+            </div>
+          </div>
+
+          <div class="absolute bottom-[22px] left-8 right-8 z-[2]">
+            <h3 class="mb-2 text-[1.625rem] font-normal italic tracking-tight text-white" style="font-family:'Instrument Serif',serif;">See the full picture of your video performance.</h3>
+            <p class="m-0 text-[0.8125rem] font-normal leading-[1.6] text-white/65">Screenbolt tracks every view and every minute watched, so you always know what's landing with your audience.</p>
+          </div>
+        </article>
+
+        <article data-scope="analytics" data-reveal data-x="60" data-delay="450" data-duration="800" class="relative min-h-[480px] flex-1 overflow-hidden rounded-3xl opacity-0" style="transform:translateX(60px);">
+          <img src="assets/artwork-blue-glass.webp" alt="" class="absolute inset-0 z-0 h-full w-full object-cover">
+          <div class="absolute inset-0 z-[1]" style="background:rgba(0,0,0,.42);"></div>
+          <div class="absolute right-6 top-6 z-[2] text-[0.6875rem] font-normal tracking-[0.09375rem] text-white/70 underline">TODAY</div>
+
+          <div class="absolute left-8 top-8 z-[2] w-[200px] rounded-2xl bg-white px-[18px] py-4 shadow-2xl">
+            <div class="flex items-start justify-between">
+              <div id="countSmall" class="text-[1.375rem] font-normal tracking-tight text-black tabular-nums">0</div>
+              <iconify-icon icon="solar:info-circle-linear" style="font-size:1rem;color:rgba(0,0,0,.35);stroke-width:1.5;"></iconify-icon>
+            </div>
+            <div class="mb-3.5 text-[0.75rem] text-black/45">Views today</div>
+            <button class="flex w-full items-center justify-between rounded-full bg-black py-2.5 pl-3.5 pr-2 text-[0.8125rem] font-normal text-white">
+              View video
+              <span class="flex h-6 w-6 items-center justify-center rounded-full bg-white/15">
+                <iconify-icon icon="solar:arrow-right-up-linear" style="font-size:.8125rem;stroke-width:1.5;"></iconify-icon>
+              </span>
+            </button>
+          </div>
+
+          <img src="assets/artwork-korean-women.webp" alt="" class="absolute bottom-[140px] left-1/2 z-[2] h-[240px] w-[200px] -translate-x-1/2 rounded-2xl object-cover" style="object-position:top center;">
+          <div class="absolute bottom-[160px] right-6 z-[3] flex items-center gap-2">
+            <div class="flex items-center gap-2 rounded-full py-2 pl-2.5 pr-4" style="background:rgba(255,255,255,.15);backdrop-filter:blur(12px);">
+              <img src="assets/logo.svg" alt="" class="h-[18px] w-auto">
+            </div>
+            <button class="flex h-9 w-9 items-center justify-center rounded-full text-white" style="background:rgba(255,255,255,.15);backdrop-filter:blur(12px);">
+              <iconify-icon icon="solar:arrow-right-up-linear" style="font-size:1rem;stroke-width:1.5;"></iconify-icon>
+            </button>
+          </div>
+
+          <div class="absolute bottom-[22px] left-8 right-8 z-[2]">
+            <h3 class="mb-2 text-[1.5rem] font-normal italic tracking-tight text-white" style="font-family:'Instrument Serif',serif;">Record. Share. Done.</h3>
+            <p class="m-0 text-[0.8125rem] font-normal leading-[1.6] text-white/65">Share your recording as a link in one click and see who's watching in real time.</p>
+          </div>
+        </article>
+      </div>
+    </section>
+
+    <!-- How it works -->
+    <section id="how" class="overflow-hidden bg-[#f5f5f2] px-5 py-20 md:px-12">
+      <div class="mx-auto max-w-[1280px]">
+        <div class="mb-16">
+          <div class="mb-4 text-[0.75rem] font-normal uppercase tracking-[0.125rem] text-[#090b0c]/50">HOW IT WORKS</div>
+          <h2 data-scope="how" data-reveal data-y="30" data-blur="12" data-duration="800" class="m-0 text-[#090b0c] opacity-0" style="transform:translateY(30px);filter:blur(12px);">
+            <span class="block text-[3.5rem] font-normal leading-none tracking-tight md:text-[4.5rem]">From record to</span>
+            <span class="block text-[3.5rem] font-normal italic leading-none tracking-tight md:text-[4.5rem]" style="font-family:'Instrument Serif',serif;">feedback in seconds</span>
+          </h2>
+        </div>
+
+        <div>
+          <article data-scope="how" data-reveal data-y="30" data-duration="700" class="grid gap-5 border-t border-black/15 py-9 md:grid-cols-[0.45fr_1fr_1fr] opacity-0" style="transform:translateY(30px);">
+            <span class="text-4xl italic text-[#090b0c]/40" style="font-family:'Instrument Serif',serif;">01</span>
+            <h3 class="text-[1.75rem] font-normal tracking-tight text-[#090b0c]">Record</h3>
+            <p class="max-w-md text-[0.9375rem] font-normal leading-6 text-[#090b0c]/50">Capture your screen, camera, and voice in one click.</p>
+          </article>
+          <article data-scope="how" data-reveal data-y="30" data-delay="80" data-duration="700" class="grid gap-5 border-t border-black/15 py-9 md:grid-cols-[0.45fr_1fr_1fr] opacity-0" style="transform:translateY(30px);">
+            <span class="text-4xl italic text-[#090b0c]/40" style="font-family:'Instrument Serif',serif;">02</span>
+            <h3 class="text-[1.75rem] font-normal tracking-tight text-[#090b0c]">Edit</h3>
+            <p class="max-w-md text-[0.9375rem] font-normal leading-6 text-[#090b0c]/50">Trim, add chapters, and remove filler words automatically.</p>
+          </article>
+          <article data-scope="how" data-reveal data-y="30" data-delay="160" data-duration="700" class="grid gap-5 border-t border-black/15 py-9 md:grid-cols-[0.45fr_1fr_1fr] opacity-0" style="transform:translateY(30px);">
+            <span class="text-4xl italic text-[#090b0c]/40" style="font-family:'Instrument Serif',serif;">03</span>
+            <h3 class="text-[1.75rem] font-normal tracking-tight text-[#090b0c]">Share</h3>
+            <p class="max-w-md text-[0.9375rem] font-normal leading-6 text-[#090b0c]/50">Copy a link and drop it anywhere — no downloads, no accounts.</p>
+          </article>
+          <article data-scope="how" data-reveal data-y="30" data-delay="240" data-duration="700" class="grid gap-5 border-y border-black/15 py-9 md:grid-cols-[0.45fr_1fr_1fr] opacity-0" style="transform:translateY(30px);">
+            <span class="text-4xl italic text-[#090b0c]/40" style="font-family:'Instrument Serif',serif;">04</span>
+            <h3 class="text-[1.75rem] font-normal tracking-tight text-[#090b0c]">Get feedback</h3>
+            <p class="max-w-md text-[0.9375rem] font-normal leading-6 text-[#090b0c]/50">See who watched, with reactions and comments in real time.</p>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <!-- Pricing -->
+    <section id="pricing" class="overflow-hidden bg-[#f5f5f2] px-5 py-20 md:px-12">
+      <div class="mx-auto max-w-[1280px]">
+        <div class="mb-20 text-center">
+          <div class="mb-4 text-[0.75rem] font-normal uppercase tracking-[0.125rem] text-[#090b0c]/50">PRICING</div>
+          <h2 data-scope="pricing" data-reveal data-y="30" data-blur="12" data-duration="800" class="m-0 text-[#090b0c] opacity-0" style="transform:translateY(30px);filter:blur(12px);">
+            <span class="block text-[3.5rem] font-normal leading-none tracking-tight md:text-[4.5rem]">Start free. Upgrade</span>
+            <span class="block text-[3.5rem] font-normal italic leading-none tracking-tight md:text-[4.5rem]" style="font-family:'Instrument Serif',serif;">when you're ready</span>
+          </h2>
+        </div>
+
+        <div class="grid gap-4 lg:grid-cols-3 lg:items-stretch">
+          <article data-scope="pricing" data-reveal data-y="30" data-duration="700" class="flex min-h-[26rem] flex-col rounded-3xl border p-7 opacity-0" style="border-color:rgba(0,0,0,.12);background:rgba(0,0,0,.04);transform:translateY(30px);">
+            <p class="text-xs font-normal uppercase tracking-[0.14rem] text-[#090b0c]/50">Free</p>
+            <p class="mt-6 text-[3.5rem] font-normal leading-none tracking-tight text-[#090b0c]">$0</p>
+            <p class="mt-3 text-sm font-normal text-[#090b0c]/45">For getting started.</p>
+            <ul class="mt-8 space-y-3 text-sm font-normal text-[#090b0c]/70">
+              <li class="flex gap-3"><iconify-icon icon="solar:check-circle-linear" style="font-size:1.125rem;stroke-width:1.5;" class="shrink-0"></iconify-icon>Up to 25 videos</li>
+              <li class="flex gap-3"><iconify-icon icon="solar:check-circle-linear" style="font-size:1.125rem;stroke-width:1.5;" class="shrink-0"></iconify-icon>5-minute recording limit</li>
+              <li class="flex gap-3"><iconify-icon icon="solar:check-circle-linear" style="font-size:1.125rem;stroke-width:1.5;" class="shrink-0"></iconify-icon>Screen + camera</li>
+              <li class="flex gap-3"><iconify-icon icon="solar:check-circle-linear" style="font-size:1.125rem;stroke-width:1.5;" class="shrink-0"></iconify-icon>Instant link sharing</li>
+            </ul>
+            <a href="#" class="mt-auto flex items-center justify-between rounded-full border border-black/20 px-5 py-3 text-xs font-normal uppercase tracking-wider text-[#090b0c] transition-colors hover:bg-[#090b0c] hover:text-white">Start free <iconify-icon icon="solar:arrow-right-linear" style="font-size:1.125rem;stroke-width:1.5;"></iconify-icon></a>
+          </article>
+
+          <article data-scope="pricing" data-reveal data-y="30" data-delay="100" data-duration="700" class="flex min-h-[26rem] flex-col rounded-3xl bg-[#090b0c] p-7 opacity-0" style="transform:translateY(30px);box-shadow:0 24px 80px rgba(0,0,0,.5);">
+            <p class="flex items-center justify-between text-xs font-normal uppercase tracking-[0.14rem] text-white/50"><span>Pro</span><span class="rounded-full bg-[#f5f5f2] px-3 py-1 text-[0.625rem] font-normal text-[#090b0c]">Most popular</span></p>
+            <p class="mt-6 text-[3.5rem] font-normal leading-none tracking-tight text-white">$10<span class="text-base text-white/40">/mo</span></p>
+            <p class="mt-3 text-sm font-normal text-white/45">For individuals who record often.</p>
+            <ul class="mt-8 space-y-3 text-sm font-normal text-white/70">
+              <li class="flex gap-3"><iconify-icon icon="solar:check-circle-linear" style="font-size:1.125rem;stroke-width:1.5;" class="shrink-0"></iconify-icon>Unlimited videos & length</li>
+              <li class="flex gap-3"><iconify-icon icon="solar:check-circle-linear" style="font-size:1.125rem;stroke-width:1.5;" class="shrink-0"></iconify-icon>AI titles & transcripts</li>
+              <li class="flex gap-3"><iconify-icon icon="solar:check-circle-linear" style="font-size:1.125rem;stroke-width:1.5;" class="shrink-0"></iconify-icon>Remove filler words</li>
+              <li class="flex gap-3"><iconify-icon icon="solar:check-circle-linear" style="font-size:1.125rem;stroke-width:1.5;" class="shrink-0"></iconify-icon>View analytics</li>
+            </ul>
+            <a href="#" class="mt-auto flex items-center justify-between rounded-full bg-[#f5f5f2] px-5 py-3 text-xs font-normal uppercase tracking-wider text-[#090b0c] transition-opacity hover:opacity-80">Go Pro <iconify-icon icon="solar:arrow-right-linear" style="font-size:1.125rem;stroke-width:1.5;"></iconify-icon></a>
+          </article>
+
+          <article data-scope="pricing" data-reveal data-y="30" data-delay="200" data-duration="700" class="flex min-h-[26rem] flex-col rounded-3xl border p-7 opacity-0" style="border-color:rgba(0,0,0,.12);background:rgba(0,0,0,.04);transform:translateY(30px);">
+            <p class="text-xs font-normal uppercase tracking-[0.14rem] text-[#090b0c]/50">Business</p>
+            <p class="mt-6 text-[3.5rem] font-normal leading-none tracking-tight text-[#090b0c]">$25<span class="text-base text-[#090b0c]/40">/user/mo</span></p>
+            <p class="mt-3 text-sm font-normal text-[#090b0c]/45">For teams who need more.</p>
+            <ul class="mt-8 space-y-3 text-sm font-normal text-[#090b0c]/70">
+              <li class="flex gap-3"><iconify-icon icon="solar:check-circle-linear" style="font-size:1.125rem;stroke-width:1.5;" class="shrink-0"></iconify-icon>Everything in Pro</li>
+              <li class="flex gap-3"><iconify-icon icon="solar:check-circle-linear" style="font-size:1.125rem;stroke-width:1.5;" class="shrink-0"></iconify-icon>Shared workspace</li>
+              <li class="flex gap-3"><iconify-icon icon="solar:check-circle-linear" style="font-size:1.125rem;stroke-width:1.5;" class="shrink-0"></iconify-icon>Team analytics</li>
+              <li class="flex gap-3"><iconify-icon icon="solar:check-circle-linear" style="font-size:1.125rem;stroke-width:1.5;" class="shrink-0"></iconify-icon>SSO & admin controls</li>
+            </ul>
+            <a href="#" class="mt-auto flex items-center justify-between rounded-full border border-black/20 px-5 py-3 text-xs font-normal uppercase tracking-wider text-[#090b0c] transition-colors hover:bg-[#090b0c] hover:text-white">Contact sales <iconify-icon icon="solar:arrow-right-linear" style="font-size:1.125rem;stroke-width:1.5;"></iconify-icon></a>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <!-- FAQ -->
+    <section id="faq" class="overflow-hidden bg-[#f5f5f2] px-5 py-20 md:px-12">
+      <div class="mx-auto grid max-w-[1280px] gap-16 lg:grid-cols-[0.8fr_1.2fr]">
+        <div data-scope="faq" data-reveal data-y="30" data-duration="800" class="opacity-0" style="transform:translateY(30px);">
+          <div class="mb-4 text-[0.75rem] font-normal uppercase tracking-[0.125rem] text-[#090b0c]/50">QUESTIONS</div>
+          <h2 class="text-[3.5rem] font-normal leading-none tracking-tight text-[#090b0c] md:text-[4.5rem]">Good to know.</h2>
+        </div>
+
+        <div data-scope="faq" data-reveal data-y="30" data-delay="120" data-duration="800" class="opacity-0" style="transform:translateY(30px);">
+          <article class="faq-item border-t border-black/15">
+            <button class="flex w-full items-center justify-between gap-4 py-7 text-left" aria-expanded="false">
+              <span class="text-[1.125rem] font-normal tracking-tight text-[#090b0c]">Do viewers need an account to watch?</span>
+              <iconify-icon icon="solar:add-circle-linear" style="font-size:1.5rem;stroke-width:1.5;color:rgba(0,0,0,.7);" class="faq-icon shrink-0 transition-transform duration-300"></iconify-icon>
+            </button>
+            <div class="faq-answer overflow-hidden transition-all duration-500" style="max-height:0;">
+              <p class="max-w-xl pb-7 text-sm font-normal leading-6 text-[#090b0c]/50">No. Anyone with the link can watch instantly — no sign-up or download required.</p>
+            </div>
+          </article>
+          <article class="faq-item border-t border-black/15">
+            <button class="flex w-full items-center justify-between gap-4 py-7 text-left" aria-expanded="false">
+              <span class="text-[1.125rem] font-normal tracking-tight text-[#090b0c]">Can I edit after recording?</span>
+              <iconify-icon icon="solar:add-circle-linear" style="font-size:1.5rem;stroke-width:1.5;color:rgba(0,0,0,.7);" class="faq-icon shrink-0 transition-transform duration-300"></iconify-icon>
+            </button>
+            <div class="faq-answer overflow-hidden transition-all duration-500" style="max-height:0;">
+              <p class="max-w-xl pb-7 text-sm font-normal leading-6 text-[#090b0c]/50">Yes. Trim the start and end, add chapters, and remove filler words with AI — no editor needed.</p>
+            </div>
+          </article>
+          <article class="faq-item border-t border-black/15">
+            <button class="flex w-full items-center justify-between gap-4 py-7 text-left" aria-expanded="false">
+              <span class="text-[1.125rem] font-normal tracking-tight text-[#090b0c]">Is my data secure?</span>
+              <iconify-icon icon="solar:add-circle-linear" style="font-size:1.5rem;stroke-width:1.5;color:rgba(0,0,0,.7);" class="faq-icon shrink-0 transition-transform duration-300"></iconify-icon>
+            </button>
+            <div class="faq-answer overflow-hidden transition-all duration-500" style="max-height:0;">
+              <p class="max-w-xl pb-7 text-sm font-normal leading-6 text-[#090b0c]/50">Your recordings are private by default, encrypted in transit and at rest, and you control who can view them.</p>
+            </div>
+          </article>
+          <article class="faq-item border-y border-black/15">
+            <button class="flex w-full items-center justify-between gap-4 py-7 text-left" aria-expanded="false">
+              <span class="text-[1.125rem] font-normal tracking-tight text-[#090b0c]">What's included in the free plan?</span>
+              <iconify-icon icon="solar:add-circle-linear" style="font-size:1.5rem;stroke-width:1.5;color:rgba(0,0,0,.7);" class="faq-icon shrink-0 transition-transform duration-300"></iconify-icon>
+            </button>
+            <div class="faq-answer overflow-hidden transition-all duration-500" style="max-height:0;">
+              <p class="max-w-xl pb-7 text-sm font-normal leading-6 text-[#090b0c]/50">Up to 25 videos with screen and camera recording, instant sharing, and basic analytics — free forever.</p>
+            </div>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <!-- Closing CTA -->
+    <section id="cta" class="relative mx-auto mb-10 w-full max-w-[1280px] overflow-hidden rounded-[28px] px-5 py-24 text-center md:px-12 md:py-32" style="border:1px solid rgba(255,255,255,.12);">
+      <img src="assets/artwork-landscape.webp" alt="" class="absolute inset-0 z-0 h-full w-full object-cover">
+      <div class="absolute inset-0 z-[1]" style="background:rgba(0,0,0,.42);"></div>
+      <div data-scope="cta" data-reveal data-y="30" data-blur="12" data-duration="800" class="relative z-[2] mx-auto flex max-w-3xl flex-col items-center opacity-0" style="transform:translateY(30px);filter:blur(12px);">
+        <p class="mb-5 text-xs font-normal uppercase tracking-[0.16rem] text-white/50">START TODAY</p>
+        <h2 class="text-[3rem] font-normal leading-[0.9] tracking-tight text-white md:text-[5.5rem]">
+          Stop typing.<br>
+          <span style="font-family:'Instrument Serif',serif;font-style:italic;">Start recording.</span>
+        </h2>
+        <a href="#" class="mt-9 flex items-center gap-2 rounded-full bg-white py-2 pl-6 pr-2 text-[0.9375rem] font-normal text-[#090b0c] transition-opacity hover:opacity-85">
+          Start recording free
+          <span class="flex h-9 w-9 items-center justify-center rounded-full bg-[#090b0c] text-white">
+            <iconify-icon icon="solar:arrow-right-up-linear" style="font-size:1rem;stroke-width:1.5;"></iconify-icon>
+          </span>
+        </a>
+        <p class="mt-4 text-sm font-normal text-white/45">No credit card required.</p>
+      </div>
+    </section>
+  </main>
+
+  <!-- Footer -->
+  <footer class="overflow-hidden bg-[#f5f5f2] px-6 pb-6 pt-20 text-[#090b0c]">
+    <div class="mx-auto max-w-[1280px]">
+      <div class="grid gap-14 border-b border-black/15 pb-16 md:grid-cols-2 lg:grid-cols-4">
+        <div class="md:col-span-2">
+          <a href="#" class="flex items-center">
+            <img src="assets/logo.svg" alt="Screenbolt" class="h-[22px] w-auto brightness-0">
+          </a>
+          <p class="mt-6 max-w-sm text-[1.375rem] font-normal leading-snug tracking-tight text-[#090b0c]">The fastest way to record your screen and share it with anyone.</p>
+        </div>
+        <div>
+          <p class="mb-5 text-xs font-normal uppercase tracking-[0.15rem] text-[#090b0c]/35">Explore</p>
+          <div class="space-y-3 text-sm font-normal text-[#090b0c]/70">
+            <a href="#how" class="block hover:text-[#090b0c]">How it works</a>
+            <a href="#analytics" class="block hover:text-[#090b0c]">Features</a>
+            <a href="#pricing" class="block hover:text-[#090b0c]">Pricing</a>
+          </div>
+        </div>
+        <div>
+          <p class="mb-5 text-xs font-normal uppercase tracking-[0.15rem] text-[#090b0c]/35">Company</p>
+          <div class="space-y-3 text-sm font-normal text-[#090b0c]/70">
+            <a href="#" class="block hover:text-[#090b0c]">About</a>
+            <a href="#" class="block hover:text-[#090b0c]">Blog</a>
+            <a href="#" class="block hover:text-[#090b0c]">Careers</a>
+            <a href="#" class="block hover:text-[#090b0c]">Contact</a>
+          </div>
+        </div>
+      </div>
+
+      <div class="flex flex-col gap-4 py-6 text-xs font-normal uppercase tracking-wider text-[#090b0c]/35 sm:flex-row sm:items-center sm:justify-between">
+        <p>© 2026 Screenbolt</p>
+        <div class="flex gap-6">
+          <a href="#" class="hover:text-[#090b0c]">Privacy</a>
+          <a href="#" class="hover:text-[#090b0c]">Terms</a>
+        </div>
+      </div>
+    </div>
+
+    <p class="mt-4 select-none whitespace-nowrap bg-gradient-to-b from-[#090b0c] to-[#090b0c]/0 bg-clip-text text-center text-[16vw] font-medium leading-none tracking-[-0.04em] text-transparent">SCREENBOLT</p>
+  </footer>
+
+  <script>
+    const video = document.getElementById('heroVideo');
+    video.muted = true;
+    video.defaultMuted = true;
+    video.autoplay = true;
+    video.loop = true;
+    video.playsInline = true;
+    video.setAttribute('webkit-playsinline', '');
+    video.play().catch(() => console.warn('Video play blocked'));
+
+    document.querySelectorAll('.nav-pill').forEach((el) => {
+      el.addEventListener('mouseenter', () => el.style.background = 'rgba(255,255,255,.10)');
+      el.addEventListener('mouseleave', () => el.style.background = 'transparent');
+    });
+
+    const ease = 'cubic-bezier(.22,1,.36,1)';
+    function revealElement(el) {
+      const delay = Number(el.dataset.delay || 0);
+      const duration = Number(el.dataset.duration || 800);
+      const x = Number(el.dataset.x || 0);
+      const y = Number(el.dataset.y || 0);
+      el.style.transition = `opacity ${duration}ms ${ease} ${delay}ms, transform ${duration}ms ${ease} ${delay}ms, filter ${duration}ms ease-out ${delay}ms`;
+      el.style.opacity = '1';
+      el.style.transform = 'translate(0,0)';
+      el.style.filter = 'blur(0)';
+    }
+
+    document.querySelectorAll('[data-reveal]:not([data-scope])').forEach(revealElement);
+
+    function scopedReveal(scope) {
+      document.querySelectorAll(`[data-scope="${scope}"][data-reveal]`).forEach(revealElement);
+    }
+
+    const analyticsObs = new IntersectionObserver((entries) => {
+      if (entries[0].isIntersecting) {
+        scopedReveal('analytics');
+        countUp(document.getElementById('countMain'), 0, 12480, 1200);
+        countUp(document.getElementById('countSmall'), 0, 925, 1200);
+        analyticsObs.disconnect();
+      }
+    }, { rootMargin: '-100px' });
+    analyticsObs.observe(document.getElementById('analyticsTrigger'));
+
+    const aiObs = new IntersectionObserver((entries) => {
+      if (entries[0].isIntersecting) {
+        scopedReveal('smart');
+        animateChart();
+        animateTree();
+        aiObs.disconnect();
+      }
+    }, { rootMargin: '-100px' });
+    aiObs.observe(document.getElementById('smartTrigger'));
+
+    function countUp(el, from, to, duration) {
+      const start = performance.now();
+      function tick(now) {
+        const t = Math.min(1, (now - start) / duration);
+        const eased = 1 - Math.pow(1 - t, 3);
+        const value = from + (to - from) * eased;
+        el.textContent = value.toLocaleString('en-US', { maximumFractionDigits: 0 });
+        if (t < 1) requestAnimationFrame(tick);
+      }
+      requestAnimationFrame(tick);
+    }
+
+    const marquee = document.getElementById('marquee');
+    marquee.animate([{ transform: 'translateX(0)' }, { transform: 'translateX(-50%)' }], { duration: 14000, iterations: Infinity, easing: 'linear' });
+
+    const questions = [
+      {
+        q: 'Can you summarize my recording?',
+        a: 'Sure — in your latest video you walked through the new onboarding flow and shared the launch date of October 12.'
+      },
+      {
+        q: 'Who has watched my video?',
+        a: '14 people have watched so far. Dana watched the full 2:34, while 3 others dropped off after the intro.'
+      },
+      {
+        q: 'What should I title this?',
+        a: 'I’d suggest "New onboarding walkthrough — 2 min" based on the topics covered and average watch time.'
+      }
+    ];
+    let qi = 0;
+    const qaBlock = document.getElementById('qaBlock');
+    setInterval(() => {
+      qi = (qi + 1) % questions.length;
+      qaBlock.style.transition = `opacity 600ms ${ease}, transform 600ms ${ease}, filter 600ms ${ease}`;
+      qaBlock.style.opacity = '0';
+      qaBlock.style.transform = 'translateY(-6px)';
+      qaBlock.style.filter = 'blur(8px)';
+      setTimeout(() => {
+        document.getElementById('qaQuestion').textContent = questions[qi].q;
+        document.getElementById('qaAnswer').textContent = questions[qi].a;
+        qaBlock.style.opacity = '1';
+        qaBlock.style.transform = 'translateY(0)';
+        qaBlock.style.filter = 'blur(0)';
+      }, 650);
+    }, 4000);
+
+    function animateChart() {
+      const rect = document.getElementById('chartReveal');
+      const start = performance.now() + 300;
+      function frame(now) {
+        const t = Math.max(0, Math.min(1, (now - start) / 1400));
+        const eased = 1 - Math.pow(1 - t, 3);
+        rect.setAttribute('width', 220 * eased);
+        if (t < 1) requestAnimationFrame(frame);
+      }
+      requestAnimationFrame(frame);
+      setTimeout(() => {
+        const line = document.getElementById('greenConnector');
+        line.style.transition = 'stroke-dashoffset 500ms ease-out';
+        line.style.strokeDashoffset = '0';
+      }, 1400);
+      setTimeout(() => {
+        const dot = document.getElementById('greenDot');
+        dot.style.transition = 'transform 300ms ease-out';
+        dot.style.transform = 'scale(1)';
+      }, 1700);
+    }
+
+    function animateTree() {
+      document.querySelectorAll('.tree-node').forEach((node) => {
+        const delay = Number(node.dataset.delay || 0) + 450;
+        node.style.transition = `opacity 450ms ease-out ${delay}ms, transform 450ms ease-out ${delay}ms`;
+        node.style.opacity = '1';
+        node.style.transform = 'scale(1)';
+      });
+      document.querySelectorAll('.tree-line').forEach((line) => {
+        line.style.transition = 'opacity 700ms ease-out 700ms';
+        line.style.opacity = '1';
+      });
+    }
+
+    function registerScope(scope, onReveal) {
+      const trigger = document.getElementById(scope);
+      if (!trigger) return;
+      const obs = new IntersectionObserver((entries) => {
+        if (entries[0].isIntersecting) {
+          scopedReveal(scope);
+          if (onReveal) onReveal();
+          obs.disconnect();
+        }
+      }, { rootMargin: '-100px' });
+      obs.observe(trigger);
+    }
+
+    function countMetric(el) {
+      const target = Number(el.dataset.target);
+      const suffix = el.dataset.suffix || '';
+      const decimals = Number(el.dataset.decimals || 0);
+      const duration = 1400;
+      const start = performance.now();
+      function tick(now) {
+        const t = Math.min(1, (now - start) / duration);
+        const eased = 1 - Math.pow(1 - t, 4);
+        el.textContent = (target * eased).toLocaleString('en-US', { minimumFractionDigits: decimals, maximumFractionDigits: decimals }) + suffix;
+        if (t < 1) requestAnimationFrame(tick);
+      }
+      requestAnimationFrame(tick);
+    }
+
+    registerScope('metrics', () => document.querySelectorAll('.metric-num').forEach(countMetric));
+    registerScope('how');
+    registerScope('usecases');
+    registerScope('testimonials');
+    registerScope('pricing');
+    registerScope('faq');
+    registerScope('cta');
+
+    document.querySelectorAll('.faq-item button').forEach((button) => {
+      button.addEventListener('click', () => {
+        const item = button.closest('.faq-item');
+        const isOpen = button.getAttribute('aria-expanded') === 'true';
+        document.querySelectorAll('.faq-item').forEach((i) => {
+          i.querySelector('button').setAttribute('aria-expanded', 'false');
+          i.querySelector('.faq-answer').style.maxHeight = '0px';
+          i.querySelector('.faq-icon').style.transform = 'rotate(0deg)';
+        });
+        if (!isOpen) {
+          button.setAttribute('aria-expanded', 'true');
+          const answer = item.querySelector('.faq-answer');
+          answer.style.maxHeight = answer.scrollHeight + 'px';
+          item.querySelector('.faq-icon').style.transform = 'rotate(45deg)';
+        }
+      });
+    });
+
+    const testimonialItems = document.querySelectorAll('.testimonial-item');
+    const testimonialDots = document.querySelectorAll('.testimonial-dot');
+    let testimonialIndex = 0;
+    let testimonialTimer = null;
+
+    function showTestimonial(n) {
+      testimonialIndex = n;
+      testimonialItems.forEach((item, idx) => {
+        const active = idx === testimonialIndex;
+        item.style.opacity = active ? '1' : '0';
+        item.style.transform = active ? 'translateY(0)' : 'translateY(14px)';
+        item.style.pointerEvents = active ? 'auto' : 'none';
+      });
+      testimonialDots.forEach((dot, idx) => {
+        const active = idx === testimonialIndex;
+        dot.style.background = active ? 'rgba(0,0,0,.9)' : 'rgba(0,0,0,.2)';
+        dot.style.width = active ? '2rem' : '0.5rem';
+      });
+    }
+
+    function startTestimonialTimer() {
+      if (testimonialTimer) clearInterval(testimonialTimer);
+      testimonialTimer = setInterval(() => {
+        showTestimonial((testimonialIndex + 1) % testimonialItems.length);
+      }, 5000);
+    }
+
+    testimonialDots.forEach((dot, idx) => {
+      dot.addEventListener('click', () => {
+        showTestimonial(idx);
+        startTestimonialTimer();
+      });
+    });
+
+    showTestimonial(0);
+    startTestimonialTimer();
+  </script>
+</body>
+</html>

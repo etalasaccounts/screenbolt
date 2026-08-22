@@ -1,0 +1,51 @@
+@font-face {
+  font-family: Satoshi-Light;
+  src: url(chrome-extension://__MSG_@@extension_id__/assets/fonts/Satoshi-Light.ttf) format('truetype');
+  font-weight: normal;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: Satoshi-Medium;
+  src: url(chrome-extension://__MSG_@@extension_id__/assets/fonts/Satoshi-Medium.ttf) format('truetype');
+  font-weight: normal;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: Satoshi-Bold;
+  src: url(chrome-extension://__MSG_@@extension_id__/assets/fonts/Satoshi-Bold.ttf) format('truetype');
+  font-weight: normal;
+  font-style: normal;
+}
+
+@font-face {
+	font-family: Gloria-Hallelujah;
+	src: url(chrome-extension://__MSG_@@extension_id__/assets/fonts/GloriaHallelujah-Regular.ttf) format('truetype');
+}
+
+/* Screenbolt brand fonts (self-hosted, no CDN — injected into 3rd-party pages
+   where a Google Fonts request can be blocked by CSP/adblock).
+   Inter Tight is a single variable woff2 (latin, wght 300-700);
+   Instrument Serif ships regular + italic. */
+@font-face {
+  font-family: Inter-Tight;
+  src: url(chrome-extension://__MSG_@@extension_id__/assets/fonts/InterTight-Variable.woff2) format('woff2');
+  font-weight: 300 700;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: Instrument-Serif;
+  src: url(chrome-extension://__MSG_@@extension_id__/assets/fonts/InstrumentSerif-Regular.woff2) format('woff2');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: Instrument-Serif;
+  src: url(chrome-extension://__MSG_@@extension_id__/assets/fonts/InstrumentSerif-Italic.woff2) format('woff2');
+  font-weight: 400;
+  font-style: italic;
+  font-display: swap;
+}

@@ -1,0 +1,890 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Screenbolt · Control UI — Design Pass</title>
+<!--
+  ============================================================================
+  Screenbolt Extension "Control UI" — static design mockup
+  ============================================================================
+  Design source for the floating overlay widgets shown WHILE recording
+  (the extension's control UI), restyled into the Screenbolt landing-page
+  visual language. This is a throwaway design artifact — CDN Tailwind,
+  Google Fonts and Iconify are used exactly like the original
+  apps/web/docs/design.html, NOT production code (the real app self-hosts).
+
+  KEY DESIGN DECISIONS
+  --------------------
+  1. One glass surface: dark frosted glass everywhere. These widgets float
+     on TOP of arbitrary websites, so they can't assume the landing page's
+     #f5f5f2 paper backdrop. A translucent near-black surface —
+     rgba(13,15,16,.60) + blur(22px) + saturate(150%) — reads clearly on
+     both light pages AND bright photo/video content, which frosted WHITE
+     cannot guarantee (a white pill on a white page melts into it, kept
+     apart only by shadow). The primary control bar therefore uses the same
+     dark glass as the secondary panels, diverging from the landing page's
+     frosted-white Record-card pill for legibility over arbitrary content —
+     the same dark treatment the landing page itself already uses for its
+     floating nav and analytics glass. Active/selected states use solid
+     white pills; the red rec dot stays the one always-on color anchor.
+  2. One accent color. Screenity's blue (#3080f8) is dropped; recording
+     semantics use the landing page's red #ff3b30 (rec dot, stop, danger),
+     with amber #ffb020 marking the PAUSED state. Active tool states use
+     solid white on dark glass — no other hues in the chrome itself.
+  3. Pill geometry everywhere. 999px radii, matching landing buttons and
+     the existing 30px container radius. Panels that need more room use
+     20-24px rounded rectangles, still softer than the old 15px corners.
+  4. Typography split by job. Instrument Serif italic is used ONLY for
+     accent words and labels (brand voice, mirrors the landing). All
+     functional chrome (timers, tooltips, menu items, toasts) stays Inter
+     Tight for small-size legibility. Timer is tabular-nums.
+  5. Icon set = Solar linear, stroke-width 1.5, matching the landing.
+  6. Every component is staged over a real photographic backdrop (reused
+     apps/web/public/*.webp) or a fake "webpage" so the frosted blur is
+     actually visible/testable — never floated on flat white.
+
+  COMPONENT MAP (one section each)
+   01 Recording Control Bar   (recording + paused states)
+   02 Tool Switcher / Radial Menu
+   03 Drawing Toolbar         (color wheel, stroke, pen/arrow/text)
+   04 Shape Toolbar           (shape picker, fill/stroke)
+   05 Blur Toolbar            (brush size / options)
+   06 Camera Bubble           (floating webcam + mini controls)
+   07 Region Selector         (drag box, dimensions, confirm/cancel)
+   08 Settings / Popup Panel
+   09 Toast notifications
+   10 Post-recording action card
+  ============================================================================
+-->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Inter+Tight:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="https://code.iconify.design/iconify-icon/2.1.0/iconify-icon.min.js"></script>
+<style>
+  :root { --ink:#090b0c; --paper:#f5f5f2; --red:#ff3b30; --amber:#ffb020; --green:#4ade80; }
+
+  * { -webkit-font-smoothing: antialiased; text-rendering: optimizeLegibility; }
+  html { scroll-behavior: smooth; }
+  body {
+    background: #0a0c0d;
+    color: #f5f5f2;
+    font-family: 'Inter Tight', system-ui, sans-serif;
+  }
+  .wrap { max-width: 1240px; margin: 0 auto; padding: 0 32px 140px; }
+
+  .section { margin-top: 108px; }
+  .sec-head { margin-bottom: 30px; }
+  .sec-num {
+    font-family: 'Instrument Serif', serif; font-style: italic;
+    font-size: 2.7rem; line-height: 1; color: rgba(255,255,255,.26);
+  }
+  .sec-title {
+    font-size: 2.5rem; font-weight: 500; letter-spacing: -0.02em; line-height: 1.04;
+    color: #f5f5f2; margin: 12px 0 0;
+  }
+  .sec-title .serif { font-family: 'Instrument Serif', serif; font-style: italic; font-weight: 400; }
+  .sec-desc { color: rgba(255,255,255,.55); font-size: .95rem; line-height: 1.55; max-width: 640px; margin-top: 12px; }
+  .eyebrow { font-size: .7rem; letter-spacing: .18em; text-transform: uppercase; color: rgba(255,255,255,.4); font-weight: 500; }
+
+  /* ---------------- stages (fake backdrop for each floating widget) ---------------- */
+  .stage {
+    position: relative; border-radius: 24px; overflow: hidden;
+    border: 1px solid rgba(255,255,255,.1);
+    box-shadow: 0 30px 90px rgba(0,0,0,.55);
+  }
+  .stage > .bg { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+  .stage > .scrim { position: absolute; inset: 0; }
+  .stage-body { position: relative; z-index: 2; }
+
+  /* ---------------- frosted glass surfaces ---------------- */
+  .glass-dark {
+    background: rgba(13,15,16,.60);
+    -webkit-backdrop-filter: blur(22px) saturate(150%);
+    backdrop-filter: blur(22px) saturate(150%);
+    border: 1px solid rgba(255,255,255,.12);
+    box-shadow: 0 18px 50px rgba(0,0,0,.35);
+  }
+  .glass-bar {
+    background: rgba(13,15,16,.62);
+    -webkit-backdrop-filter: blur(22px) saturate(150%);
+    backdrop-filter: blur(22px) saturate(150%);
+    border: 1px solid rgba(255,255,255,.14);
+    box-shadow: 0 18px 50px rgba(0,0,0,.40);
+  }
+
+  /* ---------------- icon buttons ---------------- */
+  .icon-btn {
+    display: inline-flex; align-items: center; justify-content: center;
+    width: 36px; height: 36px; border-radius: 999px;
+    color: rgba(255,255,255,.72);
+    transition: background .18s ease, color .18s ease;
+    cursor: default; flex: none;
+  }
+  .icon-btn:hover { background: rgba(255,255,255,.10); color: #fff; }
+  .icon-btn.active { background: #fff; color: var(--ink); }
+  .icon-btn:disabled { opacity: .32; }
+
+  .icon-btn.dark { color: rgba(9,11,12,.62); }
+  .icon-btn.dark:hover { background: rgba(9,11,12,.06); color: var(--ink); }
+  .icon-btn.dark.active { background: var(--ink); color: #fff; }
+  .icon-btn.dark.active:hover { background: var(--ink); color: #fff; }
+
+  .divider-v { width: 1px; align-self: stretch; background: rgba(255,255,255,.13); }
+  .divider-v.dark { background: rgba(0,0,0,.10); }
+
+  @keyframes recPulse { 0%,100% { transform: scale(1); opacity: 1 } 50% { transform: scale(1.75); opacity: .25 } }
+  .rec-dot { width: 10px; height: 10px; border-radius: 999px; background: var(--red); }
+  .rec-dot.pulse { animation: recPulse 1.6s ease-in-out infinite; }
+
+  .state-label {
+    display: inline-flex; align-items: center; gap: 8px;
+    font-size: .7rem; letter-spacing: .14em; text-transform: uppercase; font-weight: 500;
+    color: rgba(255,255,255,.55); margin-bottom: 14px;
+  }
+  .state-label .dot { width: 7px; height: 7px; border-radius: 999px; }
+
+  /* ---------------- switches ---------------- */
+  .switch { width: 40px; height: 23px; border-radius: 999px; position: relative; transition: background .2s; flex: none; }
+  .switch .knob { position: absolute; top: 3px; left: 3px; width: 17px; height: 17px; border-radius: 999px; background: #fff; transition: transform .2s; box-shadow: 0 1px 3px rgba(0,0,0,.3); }
+  .switch.on { background: var(--green); }
+  .switch.on .knob { transform: translateX(17px); }
+  .switch.off { background: rgba(255,255,255,.16); }
+
+  /* ---------------- fake webpage backdrop ---------------- */
+  .browser-bar { height: 42px; display: flex; align-items: center; gap: 12px; padding: 0 14px; }
+  .traffic { display: flex; gap: 6px; }
+  .traffic span { width: 11px; height: 11px; border-radius: 999px; }
+  .url-pill { flex: 1; height: 26px; border-radius: 8px; display: flex; align-items: center; gap: 7px; padding: 0 12px; font-size: .72rem; }
+  .skeleton { border-radius: 6px; background: rgba(9,11,12,.08); }
+  .skeleton.dark { background: rgba(255,255,255,.15); }
+
+  /* ---------------- misc ---------------- */
+  .chip {
+    display: inline-flex; align-items: center; gap: 7px;
+    font-size: .78rem; font-weight: 500; color: #f5f5f2; padding: 7px 13px; border-radius: 999px;
+  }
+  .kbd {
+    font-size: .68rem; font-weight: 500; color: rgba(255,255,255,.5);
+    background: rgba(255,255,255,.08); border: 1px solid rgba(255,255,255,.12);
+    border-radius: 5px; padding: 1px 5px; line-height: 1;
+  }
+  .serif { font-family: 'Instrument Serif', serif; font-style: italic; font-weight: 400; }
+</style>
+</head>
+
+<body class="antialiased">
+<div class="wrap">
+
+  <!-- ============================ DOC HEADER ============================ -->
+  <header class="pt-20 pb-8" style="border-bottom:1px solid rgba(255,255,255,.1);">
+    <div class="eyebrow">Extension · Design pass</div>
+    <h1 class="mt-5 text-[3.4rem] font-medium leading-[0.98] tracking-tight text-white md:text-[4.2rem]">
+      Control UI,<br>
+      <span class="serif text-white/90">re-recorded.</span>
+    </h1>
+    <p class="mt-6 max-w-2xl text-[1.02rem] leading-6 text-white/55">
+      The floating overlay widgets shown while Screenbolt is actively recording —
+      restyled from Screenity's blue chrome into the landing page's frosted-glass,
+      red-accent, pill-shaped visual language. Every widget is staged over a real
+      backdrop so the glass treatment is testable.
+    </p>
+    <div class="mt-8 flex flex-wrap gap-3">
+      <span class="chip glass-dark" style="background:rgba(255,255,255,.07);">Instrument Serif <span class="serif normal-case">italic</span></span>
+      <span class="chip glass-dark" style="background:rgba(255,255,255,.07);">Inter Tight</span>
+      <span class="chip glass-dark" style="background:rgba(255,255,255,.07);">Solar linear · 1.5</span>
+      <span class="chip glass-dark" style="background:rgba(255,255,255,.07);"><span class="rec-dot"></span> #ff3b30</span>
+      <span class="chip glass-dark" style="background:rgba(255,255,255,.07);"><span class="rec-dot" style="background:var(--amber)"></span> #ffb020 paused</span>
+    </div>
+  </header>
+
+  <!-- ============================ 01 · RECORDING CONTROL BAR ============================ -->
+  <section class="section" id="s1">
+    <div class="sec-head">
+      <div class="flex items-baseline gap-4">
+        <span class="sec-num">01</span>
+        <span class="eyebrow">Recording Control Bar</span>
+      </div>
+      <h2 class="sec-title">The control bar, <span class="serif">front and center.</span></h2>
+      <p class="sec-desc">
+        Anchored to the landing page's Record-card pill layout, but restyled onto dark frosted
+        glass so it reads on both light and dark pages. Pulsing red rec dot, tabular timer, source
+        toggles and the red stop. The paused state swaps the accent to amber and promotes resume.
+      </p>
+    </div>
+
+    <!-- State A · Recording -->
+    <div class="stage">
+      <img class="bg" src="../../web/public/grass-artwork.webp" alt="">
+      <div class="scrim" style="background:linear-gradient(180deg,rgba(0,0,0,.15),rgba(0,0,0,.35));"></div>
+      <div class="stage-body flex min-h-[480px] flex-col items-center justify-center px-6 py-16">
+        <div class="state-label"><span class="dot" style="background:var(--red)"></span> State A — Recording</div>
+
+        <div class="glass-bar flex items-center gap-1.5 rounded-full py-2.5 pl-4 pr-2.5 md:gap-2">
+          <span class="rec-dot pulse"></span>
+          <span class="text-[0.82rem] font-medium leading-none tracking-tight text-white tabular-nums">0:42</span>
+          <span class="divider-v mx-1.5 h-5"></span>
+          <!-- pause -->
+          <button class="icon-btn" title="Pause (space)">
+            <iconify-icon icon="solar:pause-linear" style="font-size:1.05rem"></iconify-icon>
+          </button>
+          <!-- mic (on) -->
+          <button class="icon-btn" title="Microphone on">
+            <iconify-icon icon="solar:microphone-linear" style="font-size:1.05rem"></iconify-icon>
+          </button>
+          <!-- camera (on) -->
+          <button class="icon-btn" title="Camera on">
+            <iconify-icon icon="solar:videocamera-linear" style="font-size:1.05rem"></iconify-icon>
+          </button>
+          <!-- screen (on, source toggle) -->
+          <button class="icon-btn" title="Screen source">
+            <iconify-icon icon="solar:monitor-linear" style="font-size:1.05rem"></iconify-icon>
+          </button>
+          <!-- settings -->
+          <button class="icon-btn" title="Settings">
+            <iconify-icon icon="solar:settings-linear" style="font-size:1.05rem"></iconify-icon>
+          </button>
+          <span class="divider-v mx-1.5 h-5"></span>
+          <!-- stop -->
+          <button class="flex h-9 w-9 items-center justify-center rounded-full" style="background:var(--red);" title="Stop recording">
+            <span class="h-2.5 w-2.5 rounded-[3px] bg-white"></span>
+          </button>
+        </div>
+
+        <p class="mt-6 max-w-sm text-center text-[0.8rem] leading-5 text-white/60">
+          Mic, camera and screen read as "on" via filled white icons; tapping any toggles it off
+          (icon hollows + red slash). Pause sits closest to the timer for thumb reach.
+        </p>
+      </div>
+    </div>
+
+    <!-- State B · Paused -->
+    <div class="stage mt-5">
+      <img class="bg" src="../../web/public/sky-artwork.webp" alt="">
+      <div class="scrim" style="background:linear-gradient(180deg,rgba(0,0,0,.12),rgba(0,0,0,.42));"></div>
+      <div class="stage-body flex min-h-[480px] flex-col items-center justify-center px-6 py-16">
+        <div class="state-label"><span class="dot" style="background:var(--amber)"></span> State B — Paused</div>
+
+        <div class="glass-bar flex items-center gap-1.5 rounded-full py-2.5 pl-4 pr-2.5 md:gap-2">
+          <span class="rec-dot" style="background:var(--amber);animation:recPulse 2.2s ease-in-out infinite;"></span>
+          <span class="text-[0.82rem] font-medium leading-none tracking-tight tabular-nums" style="color:var(--red);">0:42</span>
+          <span class="divider-v mx-1.5 h-5"></span>
+          <!-- resume (primary) -->
+          <button class="flex h-9 items-center gap-1.5 rounded-full px-3.5 text-[0.8rem] font-medium" style="background:#fff;color:var(--ink);" title="Resume (space)">
+            <iconify-icon icon="solar:play-linear" style="font-size:0.95rem"></iconify-icon>
+            Resume
+          </button>
+          <span class="divider-v mx-1.5 h-5"></span>
+          <!-- restart -->
+          <button class="icon-btn" title="Restart recording">
+            <iconify-icon icon="solar:restart-linear" style="font-size:1.05rem"></iconify-icon>
+          </button>
+          <!-- discard -->
+          <button class="icon-btn" title="Discard recording">
+            <iconify-icon icon="solar:trash-bin-minimalistic-linear" style="font-size:1.05rem"></iconify-icon>
+          </button>
+          <!-- stop -->
+          <button class="flex h-9 w-9 items-center justify-center rounded-full" style="background:var(--red);" title="Stop recording">
+            <span class="h-2.5 w-2.5 rounded-[3px] bg-white"></span>
+          </button>
+        </div>
+
+        <p class="mt-6 max-w-sm text-center text-[0.8rem] leading-5 text-white/60">
+          Paused: amber dot, timer ticks red, and <em>Resume</em> becomes the single primary action.
+          Restart + discard surface as secondary ghost controls only while paused.
+        </p>
+      </div>
+    </div>
+  </section>
+  <!-- ============================ 02 · TOOL SWITCHER / RADIAL MENU ============================ -->
+  <section class="section" id="s2">
+    <div class="sec-head">
+      <div class="flex items-baseline gap-4">
+        <span class="sec-num">02</span>
+        <span class="eyebrow">Tool Switcher · Radial Menu</span>
+      </div>
+      <h2 class="sec-title">Pick a mode <span class="serif">from the ring.</span></h2>
+      <p class="sec-desc">
+        Screenity scatters cursor / draw / blur across the main bar and a cramped nested
+        popover. Here they collapse into one "tool" button on the control bar; pressing it fans
+        out a dark-glass radial ring of four modes plus a collapsed collapse affordance.
+      </p>
+    </div>
+
+    <div class="stage">
+      <img class="bg" src="../../web/public/artwork-daisy.webp" alt="">
+      <div class="scrim" style="background:linear-gradient(180deg,rgba(0,0,0,.10),rgba(0,0,0,.45));"></div>
+      <div class="stage-body flex min-h-[560px] items-center justify-center px-6 py-20">
+        <div class="relative flex items-center justify-center">
+          <!-- control bar trigger (context) -->
+          <div class="glass-bar absolute left-1/2 top-0 z-10 flex -translate-x-1/2 items-center gap-1.5 rounded-full py-2.5 pl-4 pr-2.5">
+            <span class="rec-dot pulse"></span>
+            <span class="text-[0.82rem] font-medium leading-none tracking-tight text-white tabular-nums">0:42</span>
+            <span class="divider-v mx-1.5 h-5"></span>
+            <button class="icon-btn active" title="Tools">
+              <iconify-icon icon="solar:menu-dots-linear" style="font-size:1.05rem"></iconify-icon>
+            </button>
+            <span class="divider-v mx-1.5 h-5"></span>
+            <button class="flex h-9 w-9 items-center justify-center rounded-full" style="background:var(--red);">
+              <span class="h-2.5 w-2.5 rounded-[3px] bg-white"></span>
+            </button>
+          </div>
+
+          <!-- radial menu -->
+          <div class="relative mt-24" style="width:340px;height:340px;">
+            <!-- ring backdrop -->
+            <div class="glass-dark absolute inset-0 rounded-full"></div>
+            <div class="absolute inset-[14px] rounded-full" style="border:1px dashed rgba(255,255,255,.18);"></div>
+
+            <!-- center label -->
+            <div class="absolute left-1/2 top-1/2 flex -translate-x-1/2 -translate-y-1/2 flex-col items-center gap-1 text-center">
+              <iconify-icon icon="solar:magic-wand-linear" style="font-size:1.5rem;color:rgba(255,255,255,.85)"></iconify-icon>
+              <span class="serif text-[1.15rem] text-white">Tools</span>
+              <span class="text-[0.66rem] uppercase tracking-[0.16em] text-white/40">esc to close</span>
+            </div>
+
+            <!-- items at 0/90/180/270 -->
+            <div class="absolute left-1/2 top-[6px] -translate-x-1/2 flex flex-col items-center gap-2">
+              <button class="flex h-[62px] w-[62px] items-center justify-center rounded-full text-white" style="background:#fff;">
+                <iconify-icon icon="solar:cursor-linear" style="font-size:1.5rem;color:var(--ink)"></iconify-icon>
+              </button>
+              <span class="text-[0.68rem] font-medium text-white/85">Cursor</span>
+              <span class="kbd">1</span>
+            </div>
+            <div class="absolute top-1/2 right-[6px] -translate-y-1/2 flex flex-col items-center gap-2">
+              <button class="flex h-[62px] w-[62px] items-center justify-center rounded-full text-white" style="background:rgba(255,255,255,.12);">
+                <iconify-icon icon="solar:pen-linear" style="font-size:1.5rem"></iconify-icon>
+              </button>
+              <span class="text-[0.68rem] font-medium text-white/85">Draw</span>
+              <span class="kbd">2</span>
+            </div>
+            <div class="absolute bottom-[6px] left-1/2 -translate-x-1/2 flex flex-col items-center gap-2">
+              <button class="flex h-[62px] w-[62px] items-center justify-center rounded-full text-white" style="background:rgba(255,255,255,.12);">
+                <iconify-icon icon="solar:scaling-linear" style="font-size:1.5rem"></iconify-icon>
+              </button>
+              <span class="text-[0.68rem] font-medium text-white/85">Shape</span>
+              <span class="kbd">3</span>
+            </div>
+            <div class="absolute top-1/2 left-[6px] -translate-y-1/2 flex flex-col items-center gap-2">
+              <button class="flex h-[62px] w-[62px] items-center justify-center rounded-full text-white" style="background:rgba(255,255,255,.12);">
+                <iconify-icon icon="solar:radial-blur-linear" style="font-size:1.5rem"></iconify-icon>
+              </button>
+              <span class="text-[0.68rem] font-medium text-white/85">Blur</span>
+              <span class="kbd">4</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================ 03 · DRAWING TOOLBAR ============================ -->
+  <section class="section" id="s3">
+    <div class="sec-head">
+      <div class="flex items-baseline gap-4">
+        <span class="sec-num">03</span>
+        <span class="eyebrow">Drawing Toolbar</span>
+      </div>
+      <h2 class="sec-title">Draw with <span class="serif">intent.</span></h2>
+      <p class="sec-desc">
+        The radial color-and-stroke popover is flattened into a single dark-glass drawer:
+        tools on the left, a live color wheel + eyedropper in the middle, stroke weight on the
+        right. One surface, no hidden second ring to re-open.
+      </p>
+    </div>
+
+    <div class="stage">
+      <img class="bg" src="../../web/public/artwork-green-wall.webp" alt="">
+      <div class="scrim" style="background:linear-gradient(180deg,rgba(0,0,0,.10),rgba(0,0,0,.40));"></div>
+      <div class="stage-body flex min-h-[560px] flex-col items-center justify-center px-6 py-20">
+        <div class="state-label"><span class="dot" style="background:var(--red)"></span> Drawing active</div>
+
+        <!-- toolbar drawer -->
+        <div class="glass-dark flex items-center gap-3 rounded-[22px] px-4 py-3">
+          <!-- tools -->
+          <div class="flex items-center gap-0.5">
+            <button class="icon-btn" title="Select"><iconify-icon icon="solar:text-selection-linear" style="font-size:1.15rem"></iconify-icon></button>
+            <button class="icon-btn active" title="Pen"><iconify-icon icon="solar:pen-linear" style="font-size:1.15rem"></iconify-icon></button>
+            <button class="icon-btn" title="Highlighter"><iconify-icon icon="solar:radial-blur-linear" style="font-size:1.15rem"></iconify-icon></button>
+            <button class="icon-btn" title="Eraser"><iconify-icon icon="solar:eraser-linear" style="font-size:1.15rem"></iconify-icon></button>
+          </div>
+          <span class="divider-v"></span>
+          <button class="icon-btn" title="Text"><iconify-icon icon="solar:text-format-linear" style="font-size:1.15rem"></iconify-icon></button>
+          <button class="icon-btn" title="Arrow"><iconify-icon icon="solar:arrow-up-linear" style="font-size:1.15rem"></iconify-icon></button>
+          <button class="icon-btn" title="Image"><iconify-icon icon="solar:gallery-add-linear" style="font-size:1.15rem"></iconify-icon></button>
+          <span class="divider-v"></span>
+
+          <!-- color wheel + swatches -->
+          <div class="flex items-center gap-3">
+            <div class="relative h-[64px] w-[64px] shrink-0">
+              <svg viewBox="0 0 64 64" width="64" height="64">
+                <defs>
+                  <linearGradient id="hueWheel" x1="0" y1="0" x2="1" y2="1">
+                    <stop offset="0%" stop-color="#ff3b30"/>
+                    <stop offset="25%" stop-color="#ffb020"/>
+                    <stop offset="50%" stop-color="#4ade80"/>
+                    <stop offset="75%" stop-color="#38bdf8"/>
+                    <stop offset="100%" stop-color="#c084fc"/>
+                  </linearGradient>
+                </defs>
+                <circle cx="32" cy="32" r="28" fill="none" stroke="url(#hueWheel)" stroke-width="12"/>
+                <circle cx="32" cy="32" r="20" fill="rgba(13,15,16,.85)"/>
+              </svg>
+              <span class="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 flex h-5 w-5 items-center justify-center rounded-full border-2 border-white" style="background:#ff3b30;box-shadow:0 0 0 2px rgba(0,0,0,.35)"></span>
+              <span class="kbd absolute -right-1 -top-1">⌘</span>
+            </div>
+            <div class="flex flex-col gap-1.5">
+              <div class="flex gap-1.5">
+                <span class="h-5 w-5 rounded-full border border-white/25" style="background:#FED252"></span>
+                <span class="h-5 w-5 rounded-full border border-white/25" style="background:#4597F7"></span>
+                <span class="h-5 w-5 rounded-full border border-white/25" style="background:#F24822"></span>
+              </div>
+              <div class="flex gap-1.5">
+                <span class="h-5 w-5 rounded-full border border-white/25" style="background:#ffffff"></span>
+                <span class="h-5 w-5 rounded-full border border-white/25" style="background:#201F1D"></span>
+                <span class="flex h-5 w-5 items-center justify-center rounded-full border border-white/25 text-white/60"><iconify-icon icon="solar:magic-wand-linear" style="font-size:0.7rem"></iconify-icon></span>
+              </div>
+            </div>
+          </div>
+          <span class="divider-v"></span>
+
+          <!-- stroke weight -->
+          <div class="flex items-center gap-1.5">
+            <button class="flex h-9 w-9 items-center justify-center rounded-full text-white/60 hover:bg-white/10"><span class="h-[3px] w-4 rounded-full bg-white/70"></span></button>
+            <button class="flex h-9 w-9 items-center justify-center rounded-full text-white/60 hover:bg-white/10"><span class="h-[5px] w-4 rounded-full bg-white/80"></span></button>
+            <button class="flex h-9 w-9 items-center justify-center rounded-full bg-white text-ink" style="color:var(--ink)"><span class="h-[7px] w-4 rounded-full" style="background:var(--ink)"></span></button>
+          </div>
+          <span class="divider-v"></span>
+
+          <!-- undo / redo / clear -->
+          <div class="flex items-center gap-0.5">
+            <button class="icon-btn" title="Undo"><iconify-icon icon="solar:undo-left-linear" style="font-size:1.15rem"></iconify-icon></button>
+            <button class="icon-btn" title="Redo"><iconify-icon icon="solar:undo-right-linear" style="font-size:1.15rem"></iconify-icon></button>
+            <button class="icon-btn" title="Clear"><iconify-icon icon="solar:trash-bin-minimalistic-linear" style="font-size:1.15rem"></iconify-icon></button>
+          </div>
+        </div>
+
+        <p class="mt-6 max-w-sm text-center text-[0.8rem] leading-5 text-white/60">
+          Active tool is a solid-white pill; hover states are 10% white. The color wheel is
+          draggable and the eyedropper swatch opens the OS picker.
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================ 04 · SHAPE TOOLBAR ============================ -->
+  <section class="section" id="s4">
+    <div class="sec-head">
+      <div class="flex items-baseline gap-4">
+        <span class="sec-num">04</span>
+        <span class="eyebrow">Shape Toolbar</span>
+      </div>
+      <h2 class="sec-title">Shapes, <span class="serif">outlined or filled.</span></h2>
+      <p class="sec-desc">
+        Rectangle, circle, triangle — each rendered as an actual shape glyph (not a tool
+        icon), plus a fill/stroke toggle. Selected shape gets a white pill; filled variants
+        fill the glyph.
+      </p>
+    </div>
+
+    <div class="stage">
+      <img class="bg" src="../../web/public/artwork-yard.webp" alt="">
+      <div class="scrim" style="background:linear-gradient(180deg,rgba(0,0,0,.10),rgba(0,0,0,.45));"></div>
+      <div class="stage-body flex min-h-[480px] flex-col items-center justify-center px-6 py-16">
+        <div class="state-label"><span class="dot" style="background:var(--red)"></span> Shape active</div>
+
+        <div class="glass-dark flex items-center gap-1 rounded-full px-2.5 py-2.5">
+          <button class="icon-btn active" title="Rectangle">
+            <svg width="18" height="18" viewBox="0 0 18 18" fill="none"><rect x="2.5" y="4" width="13" height="10" rx="1.5" stroke="currentColor" stroke-width="1.6"/></svg>
+          </button>
+          <button class="icon-btn" title="Circle">
+            <svg width="18" height="18" viewBox="0 0 18 18" fill="none"><circle cx="9" cy="9" r="6.2" stroke="currentColor" stroke-width="1.6"/></svg>
+          </button>
+          <button class="icon-btn" title="Triangle">
+            <svg width="18" height="18" viewBox="0 0 18 18" fill="none"><path d="M9 3.5L16 15H2L9 3.5Z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg>
+          </button>
+          <span class="divider-v mx-1.5"></span>
+          <!-- fill toggle (shows current shape, filled vs outlined) -->
+          <button class="flex h-9 items-center gap-1.5 rounded-full px-3.5 text-[0.78rem] font-medium text-white/75 hover:bg-white/10" title="Toggle fill">
+            <svg width="16" height="16" viewBox="0 0 18 18"><rect x="2.5" y="4" width="13" height="10" rx="1.5" fill="currentColor"/></svg>
+            Fill
+          </button>
+          <button class="flex h-9 items-center gap-1.5 rounded-full px-3.5 text-[0.78rem] font-medium text-white/75 hover:bg-white/10" title="Stroke color">
+            <svg width="16" height="16" viewBox="0 0 18 18" fill="none"><circle cx="9" cy="9" r="6.2" stroke="currentColor" stroke-width="1.6"/></svg>
+            Stroke
+          </button>
+        </div>
+
+        <p class="mt-6 max-w-sm text-center text-[0.8rem] leading-5 text-white/60">
+          A small filled/stroke legend below the picker shows the current fill color when a
+          shape is filled.
+        </p>
+      </div>
+    </div>
+  </section>
+  <!-- ============================ 05 · BLUR TOOLBAR ============================ -->
+  <section class="section" id="s5">
+    <div class="sec-head">
+      <div class="flex items-baseline gap-4">
+        <span class="sec-num">05</span>
+        <span class="eyebrow">Blur Toolbar</span>
+      </div>
+      <h2 class="sec-title">Brush away <span class="serif">the sensitive.</span></h2>
+      <p class="sec-desc">
+        Screenity's blur mode has almost no controls (a select toggle + clear). Here it gets a
+        real brush: size slider, intensity, and clear — with the currently-blurred region
+        shown live through the glass.
+      </p>
+    </div>
+
+    <div class="stage">
+      <img class="bg" src="../../web/public/artwork-korean-women.webp" alt="">
+      <div class="scrim" style="background:rgba(0,0,0,.28);"></div>
+      <!-- a blurred patch to demonstrate -->
+      <div class="absolute right-[16%] top-[22%] z-[1] h-28 w-40 rounded-xl" style="-webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px);border:1.5px dashed rgba(255,255,255,.55);"></div>
+      <div class="stage-body flex min-h-[500px] flex-col items-center justify-end px-6 pb-16">
+        <div class="glass-dark flex items-center gap-3 rounded-[22px] px-4 py-3">
+          <span class="flex h-9 w-9 items-center justify-center rounded-full bg-white text-ink" style="color:var(--ink)">
+            <iconify-icon icon="solar:radial-blur-linear" style="font-size:1.15rem"></iconify-icon>
+          </span>
+          <div class="flex items-center gap-2.5">
+            <span class="text-[0.7rem] uppercase tracking-[0.14em] text-white/45">Brush</span>
+            <div class="relative h-[6px] w-28 rounded-full bg-white/15">
+              <div class="absolute left-0 top-0 h-full w-2/3 rounded-full bg-white"></div>
+              <span class="absolute -top-[5px] left-2/3 h-4 w-4 -translate-x-1/2 rounded-full bg-white shadow"></span>
+            </div>
+            <span class="text-[0.75rem] font-medium text-white/80 tabular-nums">48px</span>
+          </div>
+          <span class="divider-v"></span>
+          <div class="flex items-center gap-2.5">
+            <span class="text-[0.7rem] uppercase tracking-[0.14em] text-white/45">Intensity</span>
+            <div class="relative h-[6px] w-24 rounded-full bg-white/15">
+              <div class="absolute left-0 top-0 h-full w-full rounded-full bg-white"></div>
+              <span class="absolute -top-[5px] right-0 h-4 w-4 translate-x-1/2 rounded-full bg-white shadow"></span>
+            </div>
+            <span class="text-[0.75rem] font-medium text-white/80">Full</span>
+          </div>
+          <span class="divider-v"></span>
+          <button class="flex h-9 items-center gap-1.5 rounded-full px-3.5 text-[0.78rem] font-medium text-white/75 hover:bg-white/10" title="Clear all blurred areas">
+            <iconify-icon icon="solar:trash-bin-minimalistic-linear" style="font-size:1rem"></iconify-icon>
+            Clear
+          </button>
+        </div>
+
+        <p class="mt-5 max-w-sm text-center text-[0.8rem] leading-5 text-white/60">
+          The dashed outline shows a region being blurred; the toolbar floats at the bottom
+          where it won't cover the area you're working on.
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================ 06 · CAMERA BUBBLE ============================ -->
+  <section class="section" id="s6">
+    <div class="sec-head">
+      <div class="flex items-baseline gap-4">
+        <span class="sec-num">06</span>
+        <span class="eyebrow">Camera Bubble</span>
+      </div>
+      <h2 class="sec-title">A little <span class="serif">you, floating.</span></h2>
+      <p class="sec-desc">
+        The floating webcam circle keeps its circular crop, but the mini controls move from
+        Screenity's tiny corner chip to a dark-glass handle that docks to the ring's lower-right
+        — flip, picture-in-picture, and close.
+      </p>
+    </div>
+
+    <div class="stage">
+      <img class="bg" src="../../web/public/artwork-savana-horse.webp" alt="">
+      <div class="scrim" style="background:linear-gradient(180deg,rgba(0,0,0,.10),rgba(0,0,0,.38));"></div>
+      <div class="stage-body flex min-h-[560px] items-center justify-center px-6 py-20">
+        <div class="relative">
+          <!-- camera circle -->
+          <div class="relative h-[220px] w-[220px] rounded-full p-[6px]" style="background:linear-gradient(135deg,rgba(255,255,255,.35),rgba(255,255,255,.08));box-shadow:0 24px 60px rgba(0,0,0,.4);">
+            <div class="relative h-full w-full overflow-hidden rounded-full" style="background:radial-gradient(circle at 30% 20%, #4a5568, #1a202c);">
+              <!-- faux face -->
+              <div class="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2">
+                <div class="h-[86px] w-[70px] rounded-[50%]" style="background:linear-gradient(160deg,#c78d63,#8c5a3c)"></div>
+                <div class="absolute left-1/2 top-[24px] h-[54px] w-[54px] -translate-x-1/2 rounded-[50%]" style="background:linear-gradient(160deg,#3d2f28,#241a14)"></div>
+                <div class="absolute left-1/2 top-[44px] h-[26px] w-[36px] -translate-x-1/2 rounded-[50%]" style="background:linear-gradient(160deg,#c78d63,#8c5a3c)"></div>
+                <div class="absolute left-1/2 top-[-18px] h-5 w-[74px] -translate-x-1/2 rounded-[50%]" style="background:#2d231c;box-shadow:0 2px 0 rgba(0,0,0,.2)"></div>
+              </div>
+              <!-- live label -->
+              <div class="absolute left-3 top-3 flex items-center gap-1.5 rounded-full px-2.5 py-1" style="background:rgba(0,0,0,.45);-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px);">
+                <span class="rec-dot" style="width:7px;height:7px;background:#ff3b30"></span>
+                <span class="text-[0.62rem] font-medium uppercase tracking-[0.14em] text-white">Live</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- docked mini-controls -->
+          <div class="glass-dark absolute -bottom-2 -right-4 flex items-center gap-0.5 rounded-full px-1.5 py-1.5">
+            <button class="icon-btn !h-8 !w-8" title="Flip camera" style="width:32px;height:32px">
+              <iconify-icon icon="solar:flip-horizontal-linear" style="font-size:1rem"></iconify-icon>
+            </button>
+            <button class="icon-btn !h-8 !w-8" title="Picture in picture" style="width:32px;height:32px">
+              <iconify-icon icon="solar:pip-linear" style="font-size:1rem"></iconify-icon>
+            </button>
+            <button class="icon-btn !h-8 !w-8" title="Close camera" style="width:32px;height:32px;color:rgba(255,255,255,.6)">
+              <iconify-icon icon="solar:close-circle-linear" style="font-size:1rem"></iconify-icon>
+            </button>
+          </div>
+
+          <!-- resize handle hint -->
+          <div class="absolute -bottom-4 -right-1 flex h-5 w-5 items-center justify-center rounded-full border border-white/40 bg-black/40" style="-webkit-backdrop-filter:blur(4px);backdrop-filter:blur(4px);">
+            <iconify-icon icon="solar:scaling-linear" style="font-size:0.65rem;color:rgba(255,255,255,.7)"></iconify-icon>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================ 07 · REGION SELECTOR ============================ -->
+  <section class="section" id="s7">
+    <div class="sec-head">
+      <div class="flex items-baseline gap-4">
+        <span class="sec-num">07</span>
+        <span class="eyebrow">Region Selector</span>
+      </div>
+      <h2 class="sec-title">Crop <span class="serif">to the pixel.</span></h2>
+      <p class="sec-desc">
+        The drag-to-select region keeps its dimmed-outside + dashed-outline mechanic, but the
+        live dimension label becomes a dark-glass chip docked to the box, with confirm/cancel
+        pill actions in place of the current ghost edges.
+      </p>
+    </div>
+
+    <div class="stage">
+      <img class="bg" src="../../web/public/artwork-landscape.webp" alt="">
+      <div class="scrim" style="background:rgba(0,0,0,.10);"></div>
+      <div class="stage-body relative min-h-[560px] px-6 py-20">
+        <!-- dimmed outside + selected region -->
+        <div class="absolute inset-0" style="box-shadow:0 0 0 9999px rgba(0,0,0,.55);"></div>
+        <div class="absolute left-[22%] top-[24%] h-[280px] w-[420px] max-w-[56%] rounded-md" style="outline:2px dashed rgba(255,255,255,.9);outline-offset:-2px;">
+          <!-- dimension chip docked top-left inside -->
+          <div class="glass-dark absolute -top-4 left-3 flex items-center gap-2 rounded-full px-3.5 py-1.5">
+            <iconify-icon icon="solar:crop-linear" style="font-size:0.95rem;color:rgba(255,255,255,.75)"></iconify-icon>
+            <span class="text-[0.8rem] font-medium text-white tabular-nums">1280 × 720</span>
+          </div>
+          <!-- corner handles -->
+          <span class="absolute -left-1.5 -top-1.5 h-3 w-3 rounded-full border-2 border-white bg-[#0d0f10]"></span>
+          <span class="absolute -right-1.5 -top-1.5 h-3 w-3 rounded-full border-2 border-white bg-[#0d0f10]"></span>
+          <span class="absolute -bottom-1.5 -left-1.5 h-3 w-3 rounded-full border-2 border-white bg-[#0d0f10]"></span>
+          <span class="absolute -bottom-1.5 -right-1.5 h-3 w-3 rounded-full border-2 border-white bg-[#0d0f10]"></span>
+
+          <!-- confirm / cancel docked bottom-right of box -->
+          <div class="glass-dark absolute -bottom-14 right-0 flex items-center gap-1.5 rounded-full px-2 py-2">
+            <button class="flex h-8 items-center gap-1.5 rounded-full bg-white px-3.5 text-[0.78rem] font-medium text-ink" style="color:var(--ink)">
+              <iconify-icon icon="solar:check-circle-linear" style="font-size:1rem"></iconify-icon>
+              Record
+            </button>
+            <button class="icon-btn !h-8 !w-8" title="Cancel" style="width:32px;height:32px">
+              <iconify-icon icon="solar:close-circle-linear" style="font-size:1rem"></iconify-icon>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+  <!-- ============================ 08 · SETTINGS / POPUP PANEL ============================ -->
+  <section class="section" id="s8">
+    <div class="sec-head">
+      <div class="flex items-baseline gap-4">
+        <span class="sec-num">08</span>
+        <span class="eyebrow">Settings / Popup Panel</span>
+      </div>
+      <h2 class="sec-title">Quick settings, <span class="serif">on the fly.</span></h2>
+      <p class="sec-desc">
+        The settings menu (max resolution, fps, system audio, webcodecs, restore) moves onto
+        dark glass with the landing page's pill toggles and segmented choices — no more white
+        dropdowns that fight the page behind them.
+      </p>
+    </div>
+
+    <div class="stage">
+      <img class="bg" src="../../web/public/artwork-blue-glass.webp" alt="">
+      <div class="scrim" style="background:linear-gradient(180deg,rgba(0,0,0,.10),rgba(0,0,0,.45));"></div>
+      <div class="stage-body flex min-h-[600px] items-start justify-end px-8 py-10">
+        <!-- panel -->
+        <div class="glass-dark w-[300px] rounded-[22px] p-4">
+          <div class="mb-3 flex items-center justify-between">
+            <span class="text-[0.95rem] font-medium text-white">Recording settings</span>
+            <button class="icon-btn !h-7 !w-7" style="width:28px;height:28px"><iconify-icon icon="solar:close-circle-linear" style="font-size:0.95rem"></iconify-icon></button>
+          </div>
+
+          <!-- resolution segmented -->
+          <div class="mb-4">
+            <div class="mb-2 flex items-center justify-between"><span class="text-[0.72rem] uppercase tracking-[0.12em] text-white/45">Max resolution</span><span class="text-[0.72rem] font-medium text-white/80">1080p</span></div>
+            <div class="flex gap-1 rounded-full bg-black/25 p-1">
+              <button class="flex-1 rounded-full py-1.5 text-[0.72rem] font-medium text-white/55">4K</button>
+              <button class="flex-1 rounded-full bg-white py-1.5 text-[0.72rem] font-medium text-ink" style="color:var(--ink)">1080</button>
+              <button class="flex-1 rounded-full py-1.5 text-[0.72rem] font-medium text-white/55">720</button>
+              <button class="flex-1 rounded-full py-1.5 text-[0.72rem] font-medium text-white/55">480</button>
+            </div>
+          </div>
+
+          <!-- fps segmented -->
+          <div class="mb-4">
+            <div class="mb-2 flex items-center justify-between"><span class="text-[0.72rem] uppercase tracking-[0.12em] text-white/45">Frame rate</span><span class="text-[0.72rem] font-medium text-white/80">30 fps</span></div>
+            <div class="flex gap-1 rounded-full bg-black/25 p-1">
+              <button class="flex-1 rounded-full py-1.5 text-[0.72rem] font-medium text-white/55">60</button>
+              <button class="flex-1 rounded-full bg-white py-1.5 text-[0.72rem] font-medium text-ink" style="color:var(--ink)">30</button>
+              <button class="flex-1 rounded-full py-1.5 text-[0.72rem] font-medium text-white/55">24</button>
+              <button class="flex-1 rounded-full py-1.5 text-[0.72rem] font-medium text-white/55">15</button>
+            </div>
+          </div>
+
+          <!-- toggles -->
+          <div class="space-y-2.5">
+            <div class="flex items-center justify-between rounded-xl bg-black/20 px-3 py-2.5">
+              <span class="text-[0.82rem] text-white/80">System audio</span>
+              <span class="switch on"><span class="knob"></span></span>
+            </div>
+            <div class="flex items-center justify-between rounded-xl bg-black/20 px-3 py-2.5">
+              <span class="text-[0.82rem] text-white/80">Countdown</span>
+              <span class="switch on"><span class="knob"></span></span>
+            </div>
+            <div class="flex items-center justify-between rounded-xl bg-black/20 px-3 py-2.5">
+              <span class="text-[0.82rem] text-white/80">Highlight cursor</span>
+              <span class="switch off"><span class="knob"></span></span>
+            </div>
+            <div class="flex items-center justify-between rounded-xl bg-black/20 px-3 py-2.5">
+              <div>
+                <div class="text-[0.82rem] text-white/80">WebCodecs (fast)</div>
+                <div class="text-[0.68rem] text-white/40">Faster, smaller recordings</div>
+              </div>
+              <span class="switch on"><span class="knob"></span></span>
+            </div>
+          </div>
+
+          <div class="my-3 border-t border-white/10"></div>
+
+          <button class="flex w-full items-center justify-between rounded-xl px-3 py-2.5 text-[0.82rem] text-white/80 hover:bg-white/5">
+            Restore last recording
+            <iconify-icon icon="solar:restart-linear" style="font-size:0.95rem;color:rgba(255,255,255,.5)"></iconify-icon>
+          </button>
+          <button class="flex w-full items-center justify-between rounded-xl px-3 py-2.5 text-[0.82rem] text-white/80 hover:bg-white/5">
+            Download for troubleshooting
+            <iconify-icon icon="solar:download-minimalistic-linear" style="font-size:0.95rem;color:rgba(255,255,255,.5)"></iconify-icon>
+          </button>
+
+          <div class="my-3 border-t border-white/10"></div>
+          <button class="flex w-full items-center justify-center gap-2 rounded-full bg-white py-2.5 text-[0.82rem] font-medium text-ink" style="color:var(--ink)">
+            <iconify-icon icon="solar:link-circle-linear" style="font-size:0.95rem"></iconify-icon>
+            Connect to Screenbolt
+          </button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================ 09 · TOAST NOTIFICATIONS ============================ -->
+  <section class="section" id="s9">
+    <div class="sec-head">
+      <div class="flex items-baseline gap-4">
+        <span class="sec-num">09</span>
+        <span class="eyebrow">Toast Notifications</span>
+      </div>
+      <h2 class="sec-title">Quiet <span class="serif">confirmations.</span></h2>
+      <p class="sec-desc">
+        Toasts become dark-glass pills with a left accent, matching the landing page's
+        floating badges. An optional Esc affordance keeps the current keyboard-escape pattern.
+      </p>
+    </div>
+
+    <div class="stage">
+      <img class="bg" src="../../web/public/artwork-paper-plan.webp" alt="">
+      <div class="scrim" style="background:linear-gradient(180deg,rgba(0,0,0,.10),rgba(0,0,0,.40));"></div>
+      <div class="stage-body flex min-h-[480px] flex-col items-center justify-center gap-4 px-6 py-20">
+        <!-- toast: recording started -->
+        <div class="glass-dark flex items-center gap-3 rounded-full py-2.5 pl-4 pr-3">
+          <span class="rec-dot" style="width:8px;height:8px;background:#4ade80"></span>
+          <span class="text-[0.85rem] font-medium text-white">Recording started</span>
+          <span class="ml-2 flex h-6 items-center rounded-md px-1.5 text-[0.68rem] font-medium text-white/50" style="background:rgba(255,255,255,.10)">Esc</span>
+        </div>
+
+        <!-- toast: copied to clipboard -->
+        <div class="glass-dark flex items-center gap-3 rounded-full py-2.5 pl-4 pr-3">
+          <span class="flex h-5 w-5 items-center justify-center rounded-full bg-white text-ink" style="color:var(--ink)">
+            <iconify-icon icon="solar:check-circle-linear" style="font-size:0.95rem"></iconify-icon>
+          </span>
+          <span class="text-[0.85rem] font-medium text-white">Link copied to clipboard</span>
+        </div>
+
+        <!-- toast: mic off (warning accent) -->
+        <div class="glass-dark flex items-center gap-3 rounded-full py-2.5 pl-4 pr-3">
+          <span class="rec-dot" style="width:8px;height:8px;background:var(--amber)"></span>
+          <span class="text-[0.85rem] font-medium text-white">Microphone off</span>
+          <span class="ml-2 flex h-6 items-center rounded-md px-1.5 text-[0.68rem] font-medium text-white/50" style="background:rgba(255,255,255,.10)">Esc</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================ 10 · POST-RECORDING ACTION CARD ============================ -->
+  <section class="section" id="s10">
+    <div class="sec-head">
+      <div class="flex items-baseline gap-4">
+        <span class="sec-num">10</span>
+        <span class="eyebrow">Post-Recording Action Card</span>
+      </div>
+      <h2 class="sec-title">Stop, then <span class="serif">ship it.</span></h2>
+      <p class="sec-desc">
+        After stop, a single dark-glass card offers the three next actions — save, edit, share —
+        with the thumbnail of the just-finished recording as the anchor. One tap, no hunt.
+      </p>
+    </div>
+
+    <div class="stage">
+      <img class="bg" src="../../web/public/artwork-savana-horse.webp" alt="">
+      <div class="scrim" style="background:linear-gradient(180deg,rgba(0,0,0,.15),rgba(0,0,0,.55));"></div>
+      <div class="stage-body flex min-h-[560px] flex-col items-center justify-center px-6 py-20">
+        <div class="glass-dark w-[340px] overflow-hidden rounded-[24px]">
+          <!-- thumbnail -->
+          <div class="relative h-[160px]">
+            <img class="absolute inset-0 h-full w-full object-cover" src="../../web/public/artwork-yard.webp" alt="">
+            <div class="absolute inset-0" style="background:linear-gradient(180deg,rgba(0,0,0,.05),rgba(0,0,0,.45))"></div>
+            <div class="absolute bottom-3 left-3 flex items-center gap-2 rounded-full px-3 py-1.5" style="background:rgba(0,0,0,.5);-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);">
+              <iconify-icon icon="solar:play-linear" style="font-size:0.85rem;color:#fff"></iconify-icon>
+              <span class="text-[0.75rem] font-medium text-white tabular-nums">0:42</span>
+            </div>
+          </div>
+
+          <div class="p-4">
+            <div class="mb-3 flex items-center justify-between">
+              <span class="serif text-[1.15rem] text-white">Recording complete</span>
+              <span class="text-[0.7rem] uppercase tracking-[0.12em] text-white/40">1080p · 24fps</span>
+            </div>
+
+            <!-- primary: save -->
+            <button class="mb-2 flex w-full items-center justify-center gap-2 rounded-full bg-white py-3 text-[0.85rem] font-medium text-ink" style="color:var(--ink)">
+              <iconify-icon icon="solar:download-minimalistic-linear" style="font-size:1rem"></iconify-icon>
+              Save recording
+            </button>
+
+            <!-- secondary row -->
+            <div class="flex gap-2">
+              <button class="flex flex-1 items-center justify-center gap-2 rounded-full py-2.5 text-[0.8rem] font-medium text-white/85 hover:bg-white/8" style="background:rgba(255,255,255,.08)">
+                <iconify-icon icon="solar:scissors-linear" style="font-size:0.95rem"></iconify-icon>
+                Edit
+              </button>
+              <button class="flex flex-1 items-center justify-center gap-2 rounded-full py-2.5 text-[0.8rem] font-medium text-white/85 hover:bg-white/8" style="background:rgba(255,255,255,.08)">
+                <iconify-icon icon="solar:share-linear" style="font-size:0.95rem"></iconify-icon>
+                Share
+              </button>
+            </div>
+
+            <!-- tertiary -->
+            <button class="mt-2 flex w-full items-center justify-center gap-2 rounded-full py-2 text-[0.78rem] font-medium text-white/45 hover:bg-white/5">
+              <iconify-icon icon="solar:trash-bin-minimalistic-linear" style="font-size:0.9rem"></iconify-icon>
+              Discard
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+</div>
+</body>
+</html>

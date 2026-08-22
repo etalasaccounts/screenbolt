@@ -1,0 +1,35 @@
+@use '../../../styles/_variables' as *;
+
+.shapeToolbar {
+	position: absolute;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	gap: 8px;
+	left: 165px;
+	padding: 8px;
+	opacity: 0;
+	bottom: 45px;
+	transform: translateY(calc(-50% + 16px));
+	transform-origin: 0 100%;
+	border-radius: 999px;
+	z-index: 99999999;
+	transition: transform 0.25s cubic-bezier(.61,.11,.08,.96), opacity 0.25s cubic-bezier(.61,.11,.08,.96);
+	transform: scale(0.5) translatY(calc(-50% + 16px), 10px);
+	pointer-events: none;
+	background: $sb-glass-bg;
+	-webkit-backdrop-filter: $sb-glass-blur;
+	backdrop-filter: $sb-glass-blur;
+	border: 1px solid $sb-glass-border;
+	box-shadow: $sb-glass-shadow;
+
+	&::after {
+		content: '';
+		display: none;
+	}
+}
+.shapeToolbar.show-toolbar {
+	opacity: 1!important;
+	pointer-events: all!important;
+	transform: scale(1) translateY(calc(-50% + 16px), 0px)!important;
+}

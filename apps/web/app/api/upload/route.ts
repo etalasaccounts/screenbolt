@@ -1,0 +1,80 @@
+import { NextRequest, NextResponse } from "next/server";
+
+import { getCurrentUser, getCurrentUserOrToken } from "@/lib/auth/server-auth";
+import { UploadService } from "@/lib/services/upload.service";
+
+const MAX_SIZE = 500 * 1024 * 1024; // 500MB single-request ceiling; larger files use the chunked API
+
+/**
+ * Simple upload endpoint: accepts a single multipart `video` file (plus
+ * optional `title`, `duration`, `workspaceId` fields and an optional
+ * `thumbnail` image), stores it to Bunny CDN, and creates a video record
+ * in the active workspace.
+ *
+ * For large files, use the chunked flow instead:
+ *   POST /api/upload/init → PUT /api/upload/part (xN) → POST /api/upload/complete
+ */
+export async function POST(request: NextRequest) {
+  try {
+    let user = await getCurrentUser();
+    if (!user) user = await getCurrentUserOrToken(request);
+    if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    if (!user.activeWorkspaceId) return NextResponse.json({ error: "No active workspace" }, { status: 400 });
+
+    if (!UploadService.checkStorageConfiguration()) {
+      return NextResponse.json(
+        { error: "Storage is not configured (BUNNY_STORAGE_ZONE/BUNNY_STORAGE_ACCESS_KEY/BUNNY_PULL_ZONE_HOST missing)" },
+        { status: 503 },
+      );
+    }
+
+    const formData = await request.formData();
+
+    const video = formData.get("video");
+    if (!(video instanceof File)) {
+      return NextResponse.json({ error: "No video file provided" }, { status: 400 });
+    }
+    if (video.size > MAX_SIZE) {
+      return NextResponse.json(
+        { error: `File too large (${(video.size / 1024 / 1024).toFixed(1)}MB). Use the chunked upload API.` },
+        { status: 413 },
+      );
+    }
+
+    const title = (formData.get("title") as string) || undefined;
+    const duration = formData.get("duration") ? Number(formData.get("duration")) : null;
+    const workspaceId = (formData.get("workspaceId") as string) || user.activeWorkspaceId;
+
+    // Optional thumbnail
+    let thumbnail: File | null = null;
+    const thumbnailField = formData.get("thumbnail");
+    if (thumbnailField instanceof File && thumbnailField.type.startsWith("image/")) {
+      thumbnail = thumbnailField;
+    }
+
+    const result = await UploadService.uploadSimple(
+      video,
+      user.id,
+      workspaceId,
+      title,
+      duration && !isNaN(duration) ? duration : null,
+      thumbnail,
+    );
+
+    return NextResponse.json(
+      {
+        success: true,
+        url: result.url,
+        video: result.video,
+        service: "bunny",
+      },
+      { status: 201 },
+    );
+  } catch (error) {
+    console.error("POST /api/upload error:", error);
+    return NextResponse.json(
+      { error: "Upload failed", details: error instanceof Error ? error.message : String(error) },
+      { status: 500 },
+    );
+  }
+}

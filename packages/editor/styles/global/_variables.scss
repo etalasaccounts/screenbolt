@@ -1,0 +1,85 @@
+@mixin font($font-family, $font-file) {
+  @font-face {
+    font-family: $font-family;
+         src: url($font-file+'.ttf') format('truetype');
+    font-weight: normal;
+    font-style: normal;
+  }
+}
+
+// Root-relative -- resolves against chrome-extension://<id>/... in the
+// extension (Chrome's __MSG_@@extension_id__ CSS placeholder was never
+// actually needed for a same-origin path) and the site origin on web.
+@include font('Satoshi-Light', '/assets/fonts/Satoshi-Light');
+@include font('Satoshi-Medium', '/assets/fonts/Satoshi-Medium');
+@include font('Satoshi-Bold', '/assets/fonts/Satoshi-Bold');
+
+/* Colors -- matched to apps/web's landing page palette (#f5f5f2 page bg,
+   #090b0c text, hairline black borders) so the editor reads as the same
+   product instead of stock upstream chrome. $color-primary was already
+   this blue in the original extension's palette -- kept as-is, just given a
+   glow treatment (see $glow-primary below) matching the red Record button
+   on /home. */
+$color-background: #FFF;
+$color-light-grey: #F5F5F2;
+$color-primary: #3080F8;
+$color-border: rgba(9, 11, 12, 0.08);
+$color-text-contrast: #FFF;
+$color-text-primary: #090B0C;
+$color-text-secondary: rgba(9, 11, 12, 0.5);
+$color-red: #D2234D;
+$color-red-light: #FAF0F4;
+$color-primary-transparent: rgba(48, 128, 248, 0.1);
+$color-icon: rgba(9, 11, 12, 0.4);
+
+/* Font */
+//$font-size-normal: 0.875rem;
+//$font-size-small: 0.75rem;
+$font-size-normal: 14px;
+$font-size-small: 12px;
+$font-weight-bold: 700;
+$font-weight-normal: 500;
+$font-weight-light: 400;
+// apps/web's root layout loads Inter Tight via next/font and exposes it as
+// --font-inter-tight on <html> -- available here too since /record/editor-frame
+// goes through that same root layout (it's a real page navigation inside an
+// iframe, not just a nested component). Falls back to the original
+// Satoshi files where that variable doesn't exist, i.e. apps/extension.
+$font-light: var(--font-inter-tight, 'Satoshi-Light'), sans-serif;
+$font-medium: var(--font-inter-tight, 'Satoshi-Medium'), sans-serif;
+$font-bold: var(--font-inter-tight, 'Satoshi-Bold'), sans-serif;
+
+/* Spacing */
+/*
+$spacing-01: 0.125rem;
+$spacing-02: 0.25rem;
+$spacing-03: 0.5rem;
+$spacing-04: 0.75rem;
+$spacing-05: 1rem;
+*/
+$spacing-01: 2px;
+$spacing-02: 4px; 
+$spacing-03: 8px;
+$spacing-04: 12px; 
+$spacing-05: 16px;
+
+/* Container */
+$container-border-radius: 30px;
+$container-border: 1px solid $color-border;
+$container-shadow: drop-shadow(0px 4px 100px rgba(0, 0, 0, 0.35));
+$container-shadow-focus: 2px 2px 10px rgba(0, 0, 0, 0.1);
+
+/* Gradients */
+$gradient-primary: radial-gradient(117.41% 117.78% at 35.44% 0%, #2BAEF8 23.13%, #3582F6 46.35%, #486DEF 74.48%, #7B9AEA 100%);
+$gradient-shadow-primary: drop-shadow(0px 4px 20px rgba(86, 123, 218, 0.5));
+
+/* Events */
+$focus-border: 0px 0px 0px 2px rgba(48, 128, 248, 0.5);
+$focus-inner-border: inset 0px 0px 0px 2px rgba(48, 128, 248, 0.5);
+
+/* Glow -- same recipe as the red Record button on apps/web's /home (a
+   drop shadow tinted the button's own color), applied to primary CTAs. */
+$glow-primary: 0px 10px 24px rgba(48, 128, 248, 0.28);
+
+/* Z-index */
+$z-index-max: 99999999999;
