@@ -1,3 +1,5 @@
+import { unstable_rethrow } from "next/navigation";
+
 import { auth } from "@/lib/auth";
 import { getUserById } from "@/lib/db/users";
 import { ensureActiveWorkspace } from "@/lib/db/workspaces";
@@ -47,6 +49,10 @@ export async function getCurrentUser(): Promise<ServerUser | null> {
     if (!session?.user?.id) return null;
     return loadUserById(session.user.id);
   } catch (error) {
+    // Never swallow Next's control-flow errors (e.g. the dynamic-server
+    // bailout auth() throws when a static render reads cookies/headers) --
+    // catching them turns a prerender bailout into a silent "logged out".
+    unstable_rethrow(error);
     console.error("getCurrentUser error:", error);
     return null;
   }

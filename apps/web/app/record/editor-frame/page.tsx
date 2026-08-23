@@ -9,6 +9,11 @@ import { EditorFrameClient } from "./editor-frame-client";
 // chrome), so packages/editor's global stylesheet can own its whole
 // document the way editor.html does in apps/extension without leaking onto
 // the rest of the site. See components/record/editor/shared-editor.tsx.
+//
+// Session-gated, so it can never be prerendered -- unlike the pages under
+// app/(home), this route has no layout above it to opt out on its behalf.
+export const dynamic = "force-dynamic";
+
 export default async function EditorFramePage() {
   const user = await getCurrentUser();
   if (!user) redirect("/login");
