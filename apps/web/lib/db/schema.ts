@@ -6,6 +6,7 @@ import {
   timestamp,
   primaryKey,
   doublePrecision,
+  boolean,
   type AnyPgColumn,
 } from "drizzle-orm/pg-core";
 import { relations } from "drizzle-orm";
@@ -157,6 +158,7 @@ export const videos = pgTable("videos", {
   thumbnailUrl: text("thumbnail_url"),
   duration: doublePrecision("duration"), // duration in seconds
   source: sourceEnum("source").default("bunny").notNull(),
+  isPublic: boolean("is_public").default(false).notNull(),
   userId: text("user_id")
     .notNull()
     .references(() => users.id, { onDelete: "cascade" }),

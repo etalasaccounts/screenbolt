@@ -10,6 +10,7 @@ import {
   getVideo,
   getVideoWithComments,
   getCommentsForVideo,
+  getPublicVideos,
   createVideo as dbCreateVideo,
   updateVideo as dbUpdateVideo,
   updateVideoTitle as dbUpdateVideoTitle,
@@ -59,6 +60,13 @@ export class VideoService {
    */
   static async getCommentsForVideo(videoId: string) {
     return getCommentsForVideo(videoId);
+  }
+
+  /**
+   * List videos the owner has flagged as public, for sitemap generation.
+   */
+  static async listPublicVideos() {
+    return getPublicVideos();
   }
 
   /**

@@ -111,6 +111,7 @@ export async function updateVideo(
     duration?: number | null;
     source?: VideoSource;
     title?: string;
+    isPublic?: boolean;
   },
 ) {
   const [video] = await db
@@ -119,6 +120,14 @@ export async function updateVideo(
     .where(eq(videos.id, id))
     .returning();
   return video;
+}
+
+export async function getPublicVideos() {
+  return db.query.videos.findMany({
+    where: eq(videos.isPublic, true),
+    orderBy: desc(videos.updatedAt),
+    columns: { id: true, title: true, updatedAt: true },
+  });
 }
 
 export async function deleteVideo(id: string) {

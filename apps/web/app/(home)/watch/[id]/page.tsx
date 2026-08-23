@@ -1,3 +1,4 @@
+import { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { VideoService } from "@/lib/services/video.service";
 import { getCurrentUser } from "@/lib/auth/server-auth";
@@ -7,6 +8,50 @@ import { ViewTracker } from "@/components/shell/view-tracker";
 import { CommentSection, type SerializedComment } from "@/components/shell/comment-section";
 import { CopyLinkButton } from "@/components/shell/copy-link-button";
 import { VideoTitle } from "@/components/shell/video-title";
+import { PublicToggle } from "@/components/shell/public-toggle";
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ id: string }>;
+}): Promise<Metadata> {
+  const { id } = await params;
+  const video = await VideoService.getVideo(id);
+
+  if (!video) {
+    return {
+      title: "Recording Not Found - Screenbolt",
+    };
+  }
+
+  if (video.isPublic) {
+    return {
+      title: `${video.title} - Screenbolt`,
+      description: "Watch this screen recording on Screenbolt.",
+      alternates: {
+        canonical: `https://screenbolt.app/watch/${video.id}`,
+      },
+      openGraph: {
+        title: video.title,
+        description: "Watch this screen recording on Screenbolt.",
+        type: "video.other",
+        images: video.thumbnailUrl ? [video.thumbnailUrl] : undefined,
+      },
+      robots: {
+        index: true,
+        follow: true,
+      },
+    };
+  }
+
+  return {
+    title: "Shared Recording - Screenbolt",
+    robots: {
+      index: false,
+      follow: false,
+    },
+  };
+}
 
 type CommentUser = {
   id: string;
@@ -83,7 +128,12 @@ export default async function WatchPage({
               </span>
             </div>
           </div>
-          <CopyLinkButton videoId={video.id} />
+          <div className="flex items-center gap-2">
+            <CopyLinkButton videoId={video.id} />
+            {user?.id === video.user.id && (
+              <PublicToggle videoId={video.id} initialIsPublic={video.isPublic} />
+            )}
+          </div>
         </div>
       </div>
 

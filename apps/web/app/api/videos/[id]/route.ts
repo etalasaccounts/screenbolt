@@ -13,6 +13,7 @@ const updateSchema = z.object({
   thumbnailUrl: z.string().url("Invalid thumbnail URL").optional().nullable(),
   duration: z.number().nonnegative().optional().nullable(),
   source: z.enum(["local", "bunny", "drive", "dropbox"]).optional(),
+  isPublic: z.boolean().optional(),
 });
 
 function serialize(video: Record<string, unknown> & { videoViews?: Array<{ id: string }> }) {
@@ -23,6 +24,7 @@ function serialize(video: Record<string, unknown> & { videoViews?: Array<{ id: s
     thumbnailUrl: video.thumbnailUrl,
     duration: video.duration,
     source: video.source,
+    isPublic: video.isPublic,
     createdAt: video.createdAt,
     updatedAt: video.updatedAt,
     views: video.videoViews?.length ?? 0,
@@ -64,7 +66,7 @@ export async function PUT(request: NextRequest, context: RouteContext) {
 
     const video = await VideoService.updateVideo(id, parsed.data);
 
-    return ok(video);
+    return ok(serialize(video));
   } catch (error) {
     return handleApiError(error, "PUT /api/videos/[id]");
   }
