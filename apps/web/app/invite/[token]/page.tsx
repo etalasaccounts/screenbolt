@@ -1,9 +1,20 @@
+import { Metadata } from "next";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 
 import { getCurrentUser } from "@/lib/auth/server-auth";
 import { WorkspaceService } from "@/lib/services/workspace.service";
 import { ApiError } from "@/lib/shared/errors";
+
+export async function generateMetadata(): Promise<Metadata> {
+  return {
+    title: "Invite - Screenbolt",
+    robots: {
+      index: false,
+      follow: false,
+    },
+  };
+}
 
 export default async function InvitePage({
   params,

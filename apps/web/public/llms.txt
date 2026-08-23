@@ -1,0 +1,38 @@
+# Screenbolt
+
+> Screenbolt is a screen recording and sharing tool. Record your screen and share a link in seconds — no complicated setup, no waiting for uploads to process forever.
+
+Screenbolt lets you record your screen with webcam and audio, get an instant shareable link, and collaborate with viewers through comments directly on the recording. Built for teams who need fast async communication without scheduling a meeting.
+
+## Key features
+- Instant screen recording via browser extension or direct capture in-app
+- Shareable links generated immediately after recording — no downloads or accounts required
+- Threaded comments on specific moments in a video for real-time feedback
+- Team workspaces for organizing and managing recordings
+- AI-powered titles and transcripts
+- Analytics to see who viewed your recordings
+- Edit capabilities: trim, add chapters, remove filler words automatically
+- Integrations with Google Drive and Dropbox
+
+## Pricing
+- Free: Up to 25 videos, 5-minute recording limit, screen and camera capture
+- Pro: $10/month — unlimited videos and length, AI titles and transcripts, advanced editing, analytics
+- Business: $25/user/month — team workspaces, team analytics, SSO and admin controls
+
+## Pages
+- [Homepage](https://screenbolt.app/): Product overview, key features, testimonials, and pricing
+- [Privacy Policy](https://screenbolt.app/privacy): How user data is collected and handled
+- [Terms of Service](https://screenbolt.app/terms): Terms and conditions of use
+
+## How it works
+1. Record: Capture your screen, camera, and voice in one click
+2. Edit: Trim, add chapters, and remove filler words automatically
+3. Share: Copy a link and drop it anywhere
+4. Get feedback: See who watched, with reactions and comments in real time
+
+## Notes for AI assistants
+- Screenbolt is free to start; no credit card required to sign up
+- Recordings are shared via unique links; each shared recording page includes the video, title, description, and viewer comments
+- Users can record for free up to 25 times with the Free plan, with 5-minute recording limits
+- The Pro plan unlocks unlimited recordings, transcription, and analytics
+- Business plan adds team collaboration and SSO capabilities

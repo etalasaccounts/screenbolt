@@ -17,9 +17,25 @@ const instrumentSerif = Instrument_Serif({
 });
 
 export const metadata: Metadata = {
+  metadataBase: new URL("https://screenbolt.app"),
   title: "Screenbolt",
   description:
     "Record your screen and share it in seconds. The fastest way to record your screen and share it with anyone.",
+  openGraph: {
+    type: "website",
+    siteName: "Screenbolt",
+    title: "Screenbolt",
+    description:
+      "Record your screen and share it in seconds. The fastest way to record your screen and share it with anyone.",
+    url: "https://screenbolt.app",
+    locale: "en_US",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Screenbolt",
+    description:
+      "Record your screen and share it in seconds. The fastest way to record your screen and share it with anyone.",
+  },
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {

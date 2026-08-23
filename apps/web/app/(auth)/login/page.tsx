@@ -1,6 +1,20 @@
+import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 import { auth } from "@/lib/auth";
 import { LoginForm } from "@/components/auth/login-form";
+
+export const metadata: Metadata = {
+  title: "Login to Screenbolt - Access Your Recordings",
+  description:
+    "Sign in to your Screenbolt account to manage your screen recordings and shared videos.",
+  alternates: {
+    canonical: "https://screenbolt.app/login",
+  },
+  robots: {
+    index: false,
+    follow: true,
+  },
+};
 
 // Only allow same-origin relative paths (e.g. "/connect?code=...") — never an
 // absolute/protocol-relative URL, to avoid using this as an open redirect.

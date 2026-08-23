@@ -1,6 +1,20 @@
+import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 import { auth } from "@/lib/auth";
 import { SignupForm } from "@/components/auth/signup-form";
+
+export const metadata: Metadata = {
+  title: "Start Recording Free with Screenbolt - Sign Up Today",
+  description:
+    "Create your free Screenbolt account now. Record, edit, and share your screen in seconds. No credit card required.",
+  alternates: {
+    canonical: "https://screenbolt.app/signup",
+  },
+  robots: {
+    index: false,
+    follow: true,
+  },
+};
 
 function safeCallbackUrl(url: string | undefined): string {
   if (!url || !url.startsWith("/") || url.startsWith("//")) return "/home";
