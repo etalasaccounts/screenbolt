@@ -30,6 +30,7 @@ export const authConfig = {
       const isPublic =
         ["/", "/login", "/signup", "/terms", "/privacy"].includes(pathname) ||
         pathname.startsWith("/watch/") ||
+        pathname.startsWith("/embed/") ||
         pathname.startsWith("/invite/");
 
       if (isPublic) return true;

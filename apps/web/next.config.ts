@@ -166,6 +166,40 @@ const nextConfig: NextConfig = {
       },
     },
   },
+  // Add headers to control framing and CSP.
+  // Previously, the app set no frame headers at all, creating clickjacking
+  // exposure on all routes. This config opens up /embed for third-party
+  // embedding while closing that exposure everywhere else.
+  // Note: app/(home) already iframes /record/editor-frame internally;
+  // frame-ancestors 'self' permits that, so it stays working.
+  //
+  // IMPORTANT: In Next.js, every matching header source is applied, and when
+  // the same header key appears multiple times, the later one overwrites.
+  // The catch-all "/:path*" also matches "/embed/abc", so it would override
+  // the embed rule unless we explicitly exclude it. Use a negative lookahead
+  // to prevent "/embed/" from matching the catch-all.
+  async headers() {
+    return [
+      {
+        source: "/embed/:path*",
+        headers: [
+          {
+            key: "Content-Security-Policy",
+            value: "frame-ancestors *",
+          },
+        ],
+      },
+      {
+        source: "/((?!embed/).*)",
+        headers: [
+          {
+            key: "Content-Security-Policy",
+            value: "frame-ancestors 'self'",
+          },
+        ],
+      },
+    ];
+  },
 };
 
 export default nextConfig;
