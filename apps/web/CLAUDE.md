@@ -77,7 +77,7 @@ Before any commit in `apps/web`:
 npm test                  # Run tests (tests test services, mock DB)
 npm run lint              # Layer boundaries (eslint)
 npm run check:pattern     # Route shape (pattern checker)
-npx tsc --noEmit          # Type safety
+npm run typecheck         # Type safety (next typegen + tsc --noEmit)
 ```
 
 **Note:** The pre-commit hook runs only `npm run lint` and `npm run check:pattern` on staged files. Tests and type-checking do not run on the hook; they are verified in CI. This keeps the local hook fast while still catching layer violations immediately.

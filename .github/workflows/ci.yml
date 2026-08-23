@@ -51,6 +51,9 @@ jobs:
         if: ${{ !cancelled() && steps.install.outcome == 'success' }}
         run: npm test
 
+      # `next typegen` first: tsc needs the route/layout types Next generates
+      # into .next/types (LayoutProps, PageProps), which only exist after a
+      # build or an explicit typegen -- CI never builds.
       - name: Type check
         if: ${{ !cancelled() && steps.install.outcome == 'success' }}
-        run: npx tsc --noEmit
+        run: npm run typecheck

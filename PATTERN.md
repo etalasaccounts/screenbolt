@@ -221,7 +221,7 @@ Run from `apps/web` after every task:
 npm test                       # vitest; all tests pass
 npm run lint                   # 0 no-restricted-imports violations
 npm run check:pattern          # all routes compliant
-npx tsc --noEmit              # no type errors
+npm run typecheck            # no type errors
 ```
 
 These are sequential checks; any failure blocks the next one. The pre-commit hook runs only lint and check:pattern on staged files (tests and type-checking happen in CI).
@@ -252,6 +252,6 @@ The hook runs **only** these two checks. Tests and type-checking are **not** run
 1. **Lint** — `npm run lint` (no `if:` condition; uses default)
 2. **Check pattern** — `npm run check:pattern`
 3. **Run tests** — `npm test`
-4. **Type check** — `npx tsc --noEmit`
+4. **Type check** — `npm run typecheck` (`next typegen` first: `tsc` needs the route types Next generates into `.next/types`)
 
 The workflow declares top-level `permissions: contents: read` to limit token scope, and a `concurrency` block that cancels superseded runs on every ref except `main` to avoid redundant work on rapidly-pushed branches. After `npm ci` succeeds, Lint runs first with the default condition (`success()`), while the remaining three checks (Check pattern, Run tests, Type check) run with `if: ${{ !cancelled() && steps.install.outcome == 'success' }}` to ensure each reports its findings even if an earlier check fails, so a single CI run captures every problem. If `npm ci` fails, all checks are skipped (they cannot run without dependencies). CI makes all violations visible on every push and PR; blocking merges additionally requires enabling branch protection on `main` in GitHub settings.

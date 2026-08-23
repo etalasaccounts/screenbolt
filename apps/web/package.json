@@ -8,6 +8,7 @@
     "start": "next start",
     "lint": "eslint",
     "check:pattern": "node scripts/check-pattern.mjs",
+    "typecheck": "next typegen && tsc --noEmit",
     "test": "vitest run",
     "prepare": "cd ../.. && git config core.hooksPath .githooks",
     "db:generate": "drizzle-kit generate",
