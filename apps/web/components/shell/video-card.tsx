@@ -7,6 +7,7 @@ import { Icon } from "@iconify/react";
 import { toast } from "sonner";
 
 import { formatDuration, formatDate } from "@/lib/client/format";
+import { ApiClientError, apiPut, apiPost, apiFetch } from "@/lib/client/api-fetch";
 
 interface VideoCardData {
   id: string;
@@ -51,16 +52,11 @@ export function VideoCard({ video }: { video: VideoCardData }) {
     }
     setBusy(true);
     try {
-      const res = await fetch(`/api/videos/${video.id}`, {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ title: trimmed }),
-      });
-      if (!res.ok) throw new Error();
+      await apiPut(`/api/videos/${video.id}`, { title: trimmed });
       toast.success("Title updated");
       queryClient.invalidateQueries({ queryKey: ["videos"] });
-    } catch {
-      toast.error("Could not rename video");
+    } catch (err) {
+      toast.error(err instanceof ApiClientError ? err.message : "Could not rename video");
       setTitle(video.title);
     } finally {
       setBusy(false);
@@ -71,12 +67,11 @@ export function VideoCard({ video }: { video: VideoCardData }) {
   async function deleteVideo() {
     setBusy(true);
     try {
-      const res = await fetch(`/api/videos/${video.id}`, { method: "DELETE" });
-      if (!res.ok) throw new Error();
+      await apiFetch(`/api/videos/${video.id}`, { method: "DELETE" });
       toast.success("Video deleted");
       queryClient.invalidateQueries({ queryKey: ["videos"] });
-    } catch {
-      toast.error("Could not delete video");
+    } catch (err) {
+      toast.error(err instanceof ApiClientError ? err.message : "Could not delete video");
       setBusy(false);
     }
   }
@@ -85,16 +80,10 @@ export function VideoCard({ video }: { video: VideoCardData }) {
     setMenuOpen(false);
     setBusy(true);
     try {
-      const res = await fetch(`/api/videos/${video.id}/export`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ provider }),
-      });
-      const data = await res.json().catch(() => ({}));
-      if (!res.ok) throw new Error(data.error?.message || "Export failed");
+      await apiPost(`/api/videos/${video.id}/export`, { provider });
       toast.success(provider === "drive" ? "Saved to Google Drive" : "Saved to Dropbox");
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : "Export failed");
+      toast.error(error instanceof ApiClientError ? error.message : "Export failed");
     } finally {
       setBusy(false);
     }

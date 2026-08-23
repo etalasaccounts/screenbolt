@@ -4,6 +4,8 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Icon } from "@iconify/react";
 
+import { ApiClientError, apiPost } from "@/lib/client/api-fetch";
+
 export function ConnectClient({ code }: { code: string }) {
   const router = useRouter();
   const [state, setState] = useState<"idle" | "approving" | "approved" | "error">("idle");
@@ -13,20 +15,10 @@ export function ConnectClient({ code }: { code: string }) {
     setState("approving");
     setError(null);
     try {
-      const res = await fetch("/api/extension/pair/approve", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ code, label: "Chrome extension" }),
-      });
-      const data = await res.json().catch(() => ({}));
-      if (!res.ok) {
-        setError(data.error?.message || "Could not approve this device");
-        setState("error");
-        return;
-      }
+      await apiPost("/api/extension/pair/approve", { code, label: "Chrome extension" });
       setState("approved");
-    } catch {
-      setError("Something went wrong. Please try again.");
+    } catch (err) {
+      setError(err instanceof ApiClientError ? err.message : "Something went wrong. Please try again.");
       setState("error");
     }
   }

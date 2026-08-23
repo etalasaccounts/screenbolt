@@ -6,6 +6,7 @@ import { toast } from "sonner";
 import { Icon } from "@iconify/react";
 
 import { captureThumbnail } from "@/lib/client/capture-thumbnail";
+import { apiFetchRaw } from "@/lib/client/api-fetch";
 
 export function UploadButton() {
   // See the matching comment in video-card.tsx -- router.refresh() is a
@@ -32,11 +33,7 @@ export function UploadButton() {
         formData.append("thumbnail", new File([thumbnailBlob], "thumbnail.jpg", { type: "image/jpeg" }));
       }
 
-      const res = await fetch("/api/upload", { method: "POST", body: formData });
-      if (!res.ok) {
-        const data = await res.json().catch(() => ({}));
-        throw new Error(data.error || "Upload failed");
-      }
+      await apiFetchRaw('/api/upload', { method: 'POST', body: formData });
       toast.success("Video uploaded");
       queryClient.invalidateQueries({ queryKey: ["videos"] });
     } catch (error) {

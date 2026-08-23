@@ -5,6 +5,8 @@ import { useRouter } from "next/navigation";
 import { Icon } from "@iconify/react";
 import { toast } from "sonner";
 
+import { ApiClientError, apiPost } from "@/lib/client/api-fetch";
+
 export function CloudConnections({
   drive,
   dropbox,
@@ -18,14 +20,11 @@ export function CloudConnections({
   async function disconnect(provider: "drive" | "dropbox") {
     setBusy(provider);
     try {
-      const res = await fetch(`/api/auth/${provider === "drive" ? "google" : "dropbox"}/disconnect`, {
-        method: "POST",
-      });
-      if (!res.ok) throw new Error();
+      await apiPost(`/api/auth/${provider === "drive" ? "google" : "dropbox"}/disconnect`, {});
       toast.success("Disconnected");
       router.refresh();
-    } catch {
-      toast.error("Could not disconnect");
+    } catch (err) {
+      toast.error(err instanceof ApiClientError ? err.message : "Could not disconnect");
     } finally {
       setBusy(null);
     }

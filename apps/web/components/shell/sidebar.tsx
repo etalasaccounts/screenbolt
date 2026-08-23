@@ -10,6 +10,7 @@ import { toast } from "sonner";
 
 import { getUserInitials } from "@/lib/client/format";
 import { useRecording } from "@/components/record/recording-provider";
+import { ApiClientError, apiPost } from "@/lib/client/api-fetch";
 
 interface ShellUser {
   id: string;
@@ -50,11 +51,7 @@ export function Sidebar({
     if (id === activeWorkspaceId) return setWsOpen(false);
     setBusy(true);
     try {
-      await fetch("/api/workspace/switch", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ workspaceId: id }),
-      });
+      await apiPost("/api/workspace/switch", { workspaceId: id });
     } finally {
       setBusy(false);
       setWsOpen(false);
@@ -68,19 +65,8 @@ export function Sidebar({
     if (!name || busy) return;
     setBusy(true);
     try {
-      const res = await fetch("/api/workspace", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name }),
-      });
-      if (res.ok) {
-        const body = await res.json();
-        await fetch("/api/workspace/switch", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ workspaceId: body.data.workspace.id }),
-        });
-      }
+      const workspace = await apiPost<{ workspace: { id: string } }>("/api/workspace", { name });
+      await apiPost("/api/workspace/switch", { workspaceId: workspace.workspace.id });
     } finally {
       setBusy(false);
       setNewWsName("");
@@ -94,16 +80,12 @@ export function Sidebar({
     if (inviteBusy) return;
     setInviteBusy(true);
     try {
-      const res = await fetch("/api/workspace/invite", { method: "POST" });
-      const body = await res.json();
-      if (!res.ok || !body.success) {
-        throw new Error(body?.error?.message ?? "Could not create invite link");
-      }
-      const url = `${window.location.origin}/invite/${body.data.token}`;
+      const invite = await apiPost<{ token: string }>("/api/workspace/invite", {});
+      const url = `${window.location.origin}/invite/${invite.token}`;
       await navigator.clipboard.writeText(url);
       toast.success("Invite link copied to clipboard");
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : "Could not create invite link");
+      toast.error(error instanceof ApiClientError ? error.message : "Could not create invite link");
     } finally {
       setInviteBusy(false);
     }

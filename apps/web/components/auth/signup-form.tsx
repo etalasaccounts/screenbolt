@@ -5,6 +5,8 @@ import { signIn } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { Icon } from "@iconify/react";
 
+import { ApiClientError, apiPost } from "@/lib/client/api-fetch";
+
 export function SignupForm({
   googleEnabled,
   callbackUrl = "/home",
@@ -30,18 +32,7 @@ export function SignupForm({
 
     setPending(true);
     try {
-      const signupRes = await fetch("/api/auth/signup", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name, email, password }),
-      });
-
-      if (!signupRes.ok) {
-        const data = await signupRes.json().catch(() => ({}));
-        setError(data.error?.message || "Signup failed");
-        setPending(false);
-        return;
-      }
+      await apiPost("/api/auth/signup", { name, email, password });
 
       const loginRes = await signIn("credentials", { email, password, redirect: false });
       if (loginRes?.error) {
@@ -52,8 +43,8 @@ export function SignupForm({
       }
       router.push(callbackUrl);
       router.refresh();
-    } catch {
-      setError("Something went wrong. Please try again.");
+    } catch (err) {
+      setError(err instanceof ApiClientError ? err.message : "Something went wrong. Please try again.");
       setPending(false);
     }
   }

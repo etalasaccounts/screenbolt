@@ -4,6 +4,8 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 
+import { ApiClientError, apiPut } from "@/lib/client/api-fetch";
+
 // Click-to-rename title on /watch/[id] -- same PUT /api/videos/[id]
 // endpoint components/shell/video-card.tsx's rename menu item uses. Only
 // rendered as editable for the video's owner (see page.tsx); router.refresh()
@@ -33,16 +35,11 @@ export function VideoTitle({
     }
     setBusy(true);
     try {
-      const res = await fetch(`/api/videos/${videoId}`, {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ title: trimmed }),
-      });
-      if (!res.ok) throw new Error();
+      await apiPut(`/api/videos/${videoId}`, { title: trimmed });
       toast.success("Title updated");
       router.refresh();
-    } catch {
-      toast.error("Could not rename video");
+    } catch (err) {
+      toast.error(err instanceof ApiClientError ? err.message : "Could not rename video");
       setTitle(initialTitle);
     } finally {
       setBusy(false);

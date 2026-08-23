@@ -5,6 +5,8 @@ import { useRouter } from "next/navigation";
 import { Icon } from "@iconify/react";
 import { toast } from "sonner";
 
+import { ApiClientError, apiPost } from "@/lib/client/api-fetch";
+
 export interface DeviceRow {
   id: string;
   label: string | null;
@@ -33,17 +35,11 @@ export function DeviceList({ devices }: { devices: DeviceRow[] }) {
   async function revoke(id: string) {
     setBusyId(id);
     try {
-      const res = await fetch("/api/extension/device/revoke", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ deviceId: id }),
-      });
-      const data = await res.json().catch(() => ({}));
-      if (!res.ok) throw new Error(data.error?.message || "Revoke failed");
+      await apiPost("/api/extension/device/revoke", { deviceId: id });
       toast.success("Device disconnected");
       router.refresh();
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : "Could not revoke device");
+      toast.error(error instanceof ApiClientError ? error.message : "Could not revoke device");
     } finally {
       setBusyId(null);
     }

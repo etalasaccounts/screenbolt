@@ -2,6 +2,8 @@
 
 import { useEffect, useRef } from "react";
 
+import { apiPost } from "@/lib/client/api-fetch";
+
 function getSessionId(): string {
   const KEY = "sb_session_id";
   try {
@@ -23,11 +25,7 @@ export function ViewTracker({ videoId }: { videoId: string }) {
     if (fired.current) return;
     fired.current = true;
 
-    fetch("/api/video-views", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ videoId, sessionId: getSessionId() }),
-    }).catch(() => {
+    apiPost("/api/video-views", { videoId, sessionId: getSessionId() }).catch(() => {
       /* view tracking is best-effort */
     });
   }, [videoId]);

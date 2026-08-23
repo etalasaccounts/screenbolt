@@ -6,6 +6,7 @@ import { toast } from "sonner";
 import { Icon } from "@iconify/react";
 
 import { getUserInitials, formatDate } from "@/lib/client/format";
+import { ApiClientError, apiPost } from "@/lib/client/api-fetch";
 
 export interface SerializedComment {
   id: string;
@@ -36,19 +37,14 @@ export function CommentSection({
 
     setBusy(true);
     try {
-      const res = await fetch(`/api/videos/${videoId}/comments`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(parentId ? { content: text, parentId } : { content: text }),
-      });
-      if (!res.ok) throw new Error();
+      await apiPost(`/api/videos/${videoId}/comments`, parentId ? { content: text, parentId } : { content: text });
       toast.success(parentId ? "Reply added" : "Comment added");
       setContent("");
       setReplyContent("");
       setReplyTo(null);
       router.refresh();
-    } catch {
-      toast.error("Could not post comment");
+    } catch (err) {
+      toast.error(err instanceof ApiClientError ? err.message : "Could not post comment");
     } finally {
       setBusy(false);
     }

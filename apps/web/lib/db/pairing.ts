@@ -2,7 +2,6 @@ import { and, eq, lt } from "drizzle-orm";
 import { db } from "@/lib/db";
 import { pairingRequests } from "@/lib/db/schema";
 import { PAIRING_TTL_MS } from "@/lib/db/devices";
-import type { pairingStatusEnum } from "@/lib/db/schema";
 
 export type PairingStatus = "pending" | "approved" | "expired";
 export type PairingRow = typeof pairingRequests.$inferSelect;

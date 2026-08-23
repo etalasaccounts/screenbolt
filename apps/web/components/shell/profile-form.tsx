@@ -4,6 +4,8 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 
+import { ApiClientError, apiPatch } from "@/lib/client/api-fetch";
+
 export function ProfileForm({
   initialName,
   email,
@@ -21,16 +23,11 @@ export function ProfileForm({
     if (!trimmed || trimmed === initialName) return;
     setSaving(true);
     try {
-      const res = await fetch("/api/user/profile", {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name: trimmed }),
-      });
-      if (!res.ok) throw new Error();
+      await apiPatch("/api/user/profile", { name: trimmed });
       toast.success("Profile updated");
       router.refresh();
-    } catch {
-      toast.error("Could not update profile");
+    } catch (err) {
+      toast.error(err instanceof ApiClientError ? err.message : "Could not update profile");
     } finally {
       setSaving(false);
     }
