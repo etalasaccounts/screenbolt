@@ -16,14 +16,14 @@ Component → Hook → API Route → Service → Database
 
 | Layer | Where | Calls | Called by | Key rule |
 |---|---|---|---|---|
-| **Route** | `app/api/**/route.ts` | One service + auth | Hooks/client | Auth + validation only |
+| **Route** | `app/api/**/route.ts` | One service + auth | Client code via fetch | Auth + validation only |
 | **Service** | `lib/services/*.service.ts` | DB + integrations, not other services | Routes, server components | Business logic only |
 | **Database** | `lib/db/*.ts` | Drizzle queries only | Services | Queries only, no logic |
 | **Integration** | `lib/integrations/*.ts` | Vendor SDKs (Bunny, Google, Dropbox) | Services | Pure functions, no DB |
 | **Auth adapter** | `lib/auth/*.ts` | DB layer | Routes | NextAuth config + session load |
 | **Shared** | `lib/shared/*.ts` | (nothing internal) | Any layer | Errors, envelopes, helpers |
-| **Client util** | `lib/client/*.ts` | React, DOM | Components | Browser-only code |
-| **Hook** | `lib/hooks/*.ts` | API routes via fetch | Components | React Query wrapper |
+| **Client util** | `lib/client/*.ts` | React, DOM, api-fetch | Components | Browser-only code; API access via api-fetch |
+| **Hook** | `lib/hooks/*.ts` | API routes via fetch (TanStack Query) | Components | React Query wrapper for caching only |
 
 **Response envelope** (all non-frozen routes):
 ```typescript
@@ -50,9 +50,24 @@ Return via `ok(data)` / `fail(message, code, status)` / `handleApiError(error, c
 - Pure client: `async function sendMessage(token, channel, text)`
 - Services call it, pass the token
 
-**New frontend component:** → `components/...tsx`
-- Call a hook, never a service
-- Hook calls `/api/...` via fetch
+**New frontend component or page:** Choose the appropriate data path:
+
+1. **Server component (layout.tsx, page.tsx)** — Call services directly
+   - Pages, layouts, and Next.js special files (e.g., `sitemap.ts`) can import `@/lib/services/*` and call them synchronously
+   - Used by 5 files today (app/(home)/layout.tsx, app/(home)/watch/[id]/page.tsx, app/(home)/connect/page.tsx, app/invite/[token]/page.tsx, app/sitemap.ts)
+   - Best for static or slowly-changing server-only data
+
+2. **Client mutations (form submit, delete, rename)** — Use `lib/client/api-fetch.ts` + refresh server state
+   - Client components call `apiPost`, `apiPut`, `apiPatch`, or `apiFetch` from `@/lib/client/api-fetch`
+   - After success, call `router.refresh()` to re-render server components with fresh data (most common pattern, about 11 components do this today)
+   - Exception: Use `queryClient.invalidateQueries` only in components that already fetch data via React Query hooks (currently: components/shell/video-card.tsx, components/shell/upload-button.tsx)
+   - Best for user-initiated changes that need to update the UI immediately
+
+3. **React Query hooks** — Only where client-side caching or optimistic updates genuinely reduce requests
+   - Wrap API calls in `useQuery` or `useMutation` from TanStack Query
+   - Two hooks exist today (useVideos, useCurrentUser) — a deliberate choice, not under-adoption
+   - Adding React Query everywhere would create a second cache competing with RSC caching
+   - Best for frequently-accessed data with complex refetch strategies
 
 ## Verification Checklist
 
@@ -65,7 +80,7 @@ npm run check:pattern     # Route shape (pattern checker)
 npx tsc --noEmit          # Type safety
 ```
 
-The pre-commit hook runs all four automatically.
+**Note:** The pre-commit hook runs only `npm run lint` and `npm run check:pattern` on staged files. Tests and type-checking do not run on the hook; they are verified in CI. This keeps the local hook fast while still catching layer violations immediately.
 
 ## Common Patterns
 
@@ -166,6 +181,26 @@ Three routes are frozen (never enveloped, extension reads top-level keys):
 - `POST /api/upload`
 
 See `docs/api-contract.md` for their exact shapes.
+
+## Client-Side API Access — `lib/client/api-fetch.ts`
+
+All client code uses `@/lib/client/api-fetch` for API calls. Raw `fetch()` calls are not used in components.
+
+**Error type:**
+- `ApiClientError` — thrown by all api-fetch functions on HTTP error or network failure; carries `message`, `code`, and `status` properties
+
+**Main enveloped helper:**
+- `apiFetch<T>(path, options?)` — Calls any API route with the standard envelope. Unwraps `{ success: true, data }` responses and throws `ApiClientError` on failure with the server's error code and message preserved.
+
+**JSON mutation helpers (sets Content-Type: application/json):**
+- `apiPost<T>(path, body, options?)`
+- `apiPut<T>(path, body, options?)`
+- `apiPatch<T>(path, body, options?)`
+
+**Frozen contract helper:**
+- `apiFetchRaw<T>(path, options?)` — Call ONLY for the three frozen routes (extension pairing and upload). Returns the raw top-level JSON with NO envelope unwrapping. Do not use this for any other route.
+
+All functions throw `ApiClientError` on failure, with identical error handling across enveloped and frozen routes: the server's error message and code are preserved, or an HTTP status fallback is used if the envelope is missing.
 
 ## Tech Stack
 

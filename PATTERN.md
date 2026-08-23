@@ -4,13 +4,15 @@
 
 ## Enforcement
 
-Two hard-failing checks, both run by the pre-commit hook on staged files:
+Two hard-failing checks run by the pre-commit hook on staged files:
 
 ```bash
 cd apps/web
 npm run lint             # layer boundaries (eslint no-restricted-imports)
 npm run check:pattern    # route shape (scripts/check-pattern.mjs)
 ```
+
+**Note:** The pre-commit hook runs **only** these two checks on staged files. Tests and type-checking do not run on the hook and can pass without running locally. CI (see CI section below) is the authoritative enforcement and runs all four checks.
 
 The pre-commit hook is wired via `core.hooksPath` and installs automatically on `npm install` in `apps/web`. To install manually:
 
@@ -22,19 +24,22 @@ It checks **staged files only**, so pre-existing violations elsewhere don't bloc
 
 ## Layer Boundary Enforcement — `npm run lint`
 
-Nine eslint `no-restricted-imports` zones in `apps/web/eslint.config.mjs`:
+Twelve eslint `no-restricted-imports` zones in `apps/web/eslint.config.mjs`:
 
 | Zone | Deny list |
 |---|---|
-| `app/api/**/route.ts` | `@/lib/db`, `@/lib/db/**`, `drizzle-orm*`, `postgres`, `@/lib/integrations/**` |
+| `app/**/*.ts` | `@/lib/db`, `@/lib/db/**`, `drizzle-orm*`, `postgres`, `@/lib/integrations/**` (server .ts files like sitemap.ts, robots.ts, manifest.ts can call services but not db/integrations) |
+| `app/api/**/route.ts` | `@/lib/db`, `@/lib/db/**`, `drizzle-orm*`, `postgres`, `@/lib/integrations/**` (API routes delegate to services) |
 | `lib/services/**` | `@/lib/services/**`, other services, `next/server`, `@/lib/hooks/**`, `drizzle-orm`, `drizzle-orm/**`, `postgres` |
 | `lib/db/**` | `@/lib/services/**`, `@/lib/integrations/**`, `next/server` |
 | `lib/integrations/**` | `@/lib/services/**`, `next/server`, `@/lib/db`, `@/lib/db/**` |
 | `lib/auth/**` | `@/lib/services/**`, `@/lib/integrations/**` |
 | `lib/hooks/**` | `@/lib/services/**`, `@/lib/db**` |
 | `lib/client/**` | `@/lib/db`, `@/lib/db/**`, `@/lib/services/**`, `@/lib/integrations/**` |
-| `components/**`, `app/**/*.tsx` | `@/lib/services/**`, `@/lib/db`, `@/lib/db/**` |
-| `app/**/page.tsx`, `app/**/layout.tsx` | `@/lib/db`, `@/lib/db/**` (server components can call services) |
+| `lib/recording/**` | `@/lib/db`, `@/lib/db/**`, `@/lib/services/**`, `@/lib/integrations/**` (browser-only utilities for getUserMedia, getDisplayMedia, etc.) |
+| `lib/editor/**` | `@/lib/db`, `@/lib/db/**`, `@/lib/services/**`, `@/lib/integrations/**` (browser-only editor adapters) |
+| `components/**`, `app/**/*.tsx` | `@/lib/services/**`, `@/lib/db`, `@/lib/db/**`, `@/lib/integrations/**` |
+| `app/**/page.tsx`, `app/**/layout.tsx` | `@/lib/db`, `@/lib/db/**`, `@/lib/integrations/**` (server components can call services; declared last so rules win) |
 
 ## Route Shape Enforcement — `npm run check:pattern`
 
@@ -42,12 +47,13 @@ Per route, enforced via regex patterns in `apps/web/scripts/check-pattern.mjs`:
 
 ### File-level rules (one check per file):
 
-- **`service`** — imports exactly one `@/lib/services/*` service AND actually calls it (not a dead import)
-- **`auth`** — calls `getCurrentUser()` and the guard block contains a `return` statement (not an empty if)
+- **`service`** — imports exactly one `@/lib/services/*` service (the "service is actually called" check is per-handler)
 - **`contract-frozen` (frozen routes only)** — does not import envelope functions (`ok()`, `fail()`, `handleApiError()`) and response shape matches the recorded fixture
 
 ### Handler-level rules (per HTTP method):
 
+- **`auth`** — calls `getCurrentUser()` and the guard block contains a `return` statement (not an empty if)
+- **`service`** — actually calls the imported service in this handler (not a dead import; prevents a handler from delegating nothing)
 - **`try-catch`** — every handler wrapped in try/catch
 - **`error-handling`** — catch block calls `console.error()` OR `handleApiError()`
 - **`zod`** — POST/PATCH/PUT that read a body validate it with `.safeParse()`
@@ -60,7 +66,14 @@ Redirects (detected by content: `NextResponse.redirect()`) skip the `response-sh
 
 ## Exemptions
 
-Exemptions are declared explicitly in `EXEMPT` at the top of `apps/web/scripts/check-pattern.mjs`, each with a reason. The list as of this document:
+Exemptions are declared explicitly in `EXEMPT` at the top of `apps/web/scripts/check-pattern.mjs`, each with a reason. Rules may be exempted in two forms:
+
+- **Plain rule name** (e.g., `"auth"`) — exempts the rule for **all** handlers in the file. Use sparingly; a plain `"auth"` exemption silences the rule for DELETE and PUT handlers too.
+- **Per-handler rule** (e.g., `"auth:GET"`, `"envelope:POST"`, `"service:DELETE"`) — exempts the rule only for the named HTTP method. This syntax works for every rule, not just `auth`. Strongly preferred when only one handler is public (e.g., a GET that reads shared data but POST that creates).
+
+The checker warns to stderr if a rule name or handler name is misspelled (e.g., `"envelop:GET"` or `"auth:GTE"`) — the typo'd entry silently matches nothing and provides no exemption.
+
+The list as of this document (8 entries):
 
 ```
 "app/api/auth/[...nextauth]/route.ts": rules: "*"
@@ -71,6 +84,12 @@ Exemptions are declared explicitly in `EXEMPT` at the top of `apps/web/scripts/c
 
 "app/api/video-views/route.ts": rules: ["auth"]
   → Public endpoint: records views on shared videos (anonymous viewers)
+
+"app/api/videos/[id]/route.ts": rules: ["auth:GET"]
+  → GET is public: fetches video detail for shared video links; PUT and DELETE require authentication
+
+"app/api/videos/[id]/comments/route.ts": rules: ["auth:GET"]
+  → GET is public: fetches comments on shared videos; POST requires authentication
 
 "app/api/extension/pair/init/route.ts": rules: ["auth", "envelope", "no-manual-status"]
   → Public endpoint (unpaired extension) + frozen external contract
@@ -137,16 +156,17 @@ export async function POST(request: NextRequest) {
 
 From `apps/web`, after running all verifications:
 
-- **Routes:** 30 total — 29 compliant, 0 violating, 1 exempt
-- **ESLint:** 4 errors (3 × `no-html-link-for-pages`, 1 × `no-explicit-any` in `user.service.ts`), 5 warnings — all pre-existing and unrelated to the layer pattern
+- **Routes:** 31 total — 30 compliant, 0 violating, 1 exempt
+- **ESLint:** 0 errors, 0 warnings
 - **TypeScript:** clean (no type errors)
-- **Test files:** 14, 202 tests passing
+- **Test files:** 17, 286 tests passing
 
 ### Rules That Resist Being Gamed
 
-Three checks were tightened after patterns satisfied them without satisfying intent. If tempted by these, the checker will reject:
+Several checks were tightened after patterns satisfied them without satisfying intent. If tempted by these, the checker will reject:
 
-- **Dead service import:** A service import that is never called. The service must actually be **used** (e.g., `UserService.getUser()`, not just `import { UserService }` with no call).
+- **Per-handler auth:** The `auth` rule runs on every HTTP method in the file, not just once for the file. A DELETE or PUT with no auth guard used to pass if a GET in the same file had `getCurrentUser()`. Now each handler must authenticate independently. This prevents subtle security gaps where one handler leaks data while others protect it.
+- **Dead service import:** A service import that is never called in a handler. The service must actually be **used** (e.g., `UserService.getUser()`, not just `import { UserService }` with no call).
 - **Empty guard block:** `if (!user) {}` with no return. The guard must actually **return** (e.g., `if (!user) return ...`); an empty block authenticates nothing.
 - **Fake body reads:** `request.json()` added to a bodyless route just to satisfy zod. Calling `request.json()` on an empty body throws, turning a working 200 into a 500. Zod is required only where a body is genuinely read.
 
@@ -154,7 +174,7 @@ A route that genuinely cannot satisfy a rule belongs in `EXEMPT` with a written 
 
 ## Error Handling — Typed Errors and Envelopes
 
-All 22 enveloped routes (non-frozen, non-exempt) return through `ok()` or `handleApiError()`:
+All 27 enveloped routes (non-frozen, non-exempt) return through `ok()` or `handleApiError()`:
 
 - **Success:** `{ success: true, data: <payload> }` via `ok(data, status?)`
 - **Failure:** `{ success: false, error: { message, code } }` via `fail(message, code, status)` or `handleApiError(error, context)`
@@ -204,7 +224,7 @@ npm run check:pattern          # all routes compliant
 npx tsc --noEmit              # no type errors
 ```
 
-These are sequential checks; any failure blocks the next one. The pre-commit hook runs all four on staged files.
+These are sequential checks; any failure blocks the next one. The pre-commit hook runs only lint and check:pattern on staged files (tests and type-checking happen in CI).
 
 ## Pre-commit Hook
 
@@ -214,7 +234,7 @@ The hook is installed by `npm install` (postinstall script in `apps/web/package.
 - Every commit leaves the codebase incrementally cleaner
 - Bypass is documented (`git commit -n`) for emergencies, never the default
 
-The hook wires both checks together:
+The hook wires eslint and check-pattern together:
 
 ```bash
 #!/bin/bash
@@ -222,3 +242,16 @@ The hook wires both checks together:
 cd "$(git rev-parse --show-toplevel)/apps/web"
 npm run lint && npm run check:pattern
 ```
+
+The hook runs **only** these two checks. Tests and type-checking are **not** run on the hook — they happen in CI. This keeps the local hook fast (roughly a second on a single staged file, dominated by eslint startup) while still catching layer violations immediately. Commits can pass the hook with failing tests or type errors; CI is the authoritative enforcement that requires branch protection to block merging.
+
+## CI — The Authoritative Check
+
+`.github/workflows/ci.yml` runs on every push and pull request to all branches. It runs all four verifications as separate steps on Node 22:
+
+1. **Lint** — `npm run lint` (no `if:` condition; uses default)
+2. **Check pattern** — `npm run check:pattern`
+3. **Run tests** — `npm test`
+4. **Type check** — `npx tsc --noEmit`
+
+The workflow declares top-level `permissions: contents: read` to limit token scope, and a `concurrency` block that cancels superseded runs on every ref except `main` to avoid redundant work on rapidly-pushed branches. After `npm ci` succeeds, Lint runs first with the default condition (`success()`), while the remaining three checks (Check pattern, Run tests, Type check) run with `if: ${{ !cancelled() && steps.install.outcome == 'success' }}` to ensure each reports its findings even if an earlier check fails, so a single CI run captures every problem. If `npm ci` fails, all checks are skipped (they cannot run without dependencies). CI makes all violations visible on every push and PR; blocking merges additionally requires enabling branch protection on `main` in GitHub settings.

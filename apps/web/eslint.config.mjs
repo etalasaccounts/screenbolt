@@ -33,6 +33,40 @@ const eslintConfig = defineConfig([
       ],
     },
   },
+  // Layer boundary enforcement: Server .ts files under app/ (like sitemap.ts, robots.ts, manifest.ts)
+  // may call services but must not touch the database or vendor clients directly.
+  {
+    files: ["app/**/*.ts"],
+    rules: {
+      "no-restricted-imports": [
+        "error",
+        {
+          patterns: [
+            {
+              group: ["@/lib/db", "@/lib/db/**"],
+              message:
+                "Server .ts files must not query the database directly. Call a service in @/lib/services instead — see apps/web/CLAUDE.md.",
+            },
+            {
+              group: ["drizzle-orm", "drizzle-orm/**"],
+              message:
+                "Server .ts files must not query the database directly. Call a service in @/lib/services instead — see apps/web/CLAUDE.md.",
+            },
+            {
+              group: ["postgres"],
+              message:
+                "Server .ts files must not query the database directly. Call a service in @/lib/services instead — see apps/web/CLAUDE.md.",
+            },
+            {
+              group: ["@/lib/integrations/**"],
+              message:
+                "Server .ts files must not import vendor clients directly. Call a service in @/lib/services instead — see apps/web/CLAUDE.md.",
+            },
+          ],
+        },
+      ],
+    },
+  },
   // Layer boundary enforcement: API routes must not touch the database.
   {
     files: ["app/api/**/route.ts"],
@@ -264,6 +298,69 @@ const eslintConfig = defineConfig([
               message:
                 "Components must go through a hook. Never import a service or the database directly.",
             },
+            {
+              group: ["@/lib/integrations/**"],
+              message:
+                "Components must not import vendor clients. Call the API route through a hook instead — see apps/web/CLAUDE.md.",
+            },
+          ],
+        },
+      ],
+    },
+  },
+  // Layer boundary enforcement: Recording utilities (getUserMedia, getDisplayMedia, etc.)
+  // run in the browser and must not access the database or call services directly.
+  {
+    files: ["lib/recording/**"],
+    rules: {
+      "no-restricted-imports": [
+        "error",
+        {
+          patterns: [
+            {
+              group: ["@/lib/db", "@/lib/db/**"],
+              message:
+                "Recording utilities run in the browser and must not access the database. Call the API route via a hook instead — see apps/web/CLAUDE.md.",
+            },
+            {
+              group: ["@/lib/services/**"],
+              message:
+                "Recording utilities run in the browser and must not call services. Call the API route via a hook instead — see apps/web/CLAUDE.md.",
+            },
+            {
+              group: ["@/lib/integrations/**"],
+              message:
+                "Recording utilities run in the browser and must not import vendor clients. These run on the server only — see apps/web/CLAUDE.md.",
+            },
+          ],
+        },
+      ],
+    },
+  },
+  // Layer boundary enforcement: Editor adapters run in the browser and must not
+  // access the database or call services directly.
+  {
+    files: ["lib/editor/**"],
+    rules: {
+      "no-restricted-imports": [
+        "error",
+        {
+          patterns: [
+            {
+              group: ["@/lib/db", "@/lib/db/**"],
+              message:
+                "Editor adapters run in the browser and must not access the database. Call the API route via a hook instead — see apps/web/CLAUDE.md.",
+            },
+            {
+              group: ["@/lib/services/**"],
+              message:
+                "Editor adapters run in the browser and must not call services. Call the API route via a hook instead — see apps/web/CLAUDE.md.",
+            },
+            {
+              group: ["@/lib/integrations/**"],
+              message:
+                "Editor adapters run in the browser and must not import vendor clients. These run on the server only — see apps/web/CLAUDE.md.",
+            },
           ],
         },
       ],
@@ -285,6 +382,11 @@ const eslintConfig = defineConfig([
               group: ["@/lib/db", "@/lib/db/**"],
               message:
                 "Server components must not query the database directly. Call a service in @/lib/services instead.",
+            },
+            {
+              group: ["@/lib/integrations/**"],
+              message:
+                "Server components must not import vendor clients directly. Call a service in @/lib/services instead — see apps/web/CLAUDE.md.",
             },
           ],
         },

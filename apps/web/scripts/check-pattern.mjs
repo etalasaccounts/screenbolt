@@ -21,6 +21,20 @@ const WEB_DIR = path.resolve(import.meta.dirname, "..");
 const API_DIR = path.join(WEB_DIR, "app", "api");
 const SCRIPT_DIR = path.dirname(fileURLToPath(import.meta.url));
 
+/** Known rule names for validation of EXEMPT entries. */
+const KNOWN_RULES = [
+  "service",
+  "auth",
+  "contract-frozen",
+  "handler",
+  "try-catch",
+  "error-handling",
+  "zod",
+  "response-shape",
+  "envelope",
+  "no-manual-status",
+];
+
 let frozenContracts = {};
 try {
   const contractPath = path.join(SCRIPT_DIR, "frozen-contracts.json");
@@ -32,6 +46,13 @@ try {
 /**
  * Routes excused from rules, each with a reason. Keep this narrow and explicit —
  * it is the only escape hatch, and it is deliberately not a wildcard.
+ *
+ * Rules may be specified in two forms:
+ *   - Plain rule name ("auth") — exempts the rule for all handlers in the file
+ *   - Per-handler rule ("auth:GET") — exempts the rule only for the named handler
+ *
+ * Both forms work together: a plain rule exempts all handlers, while per-handler
+ * rules carve out specific exemptions without blanket-exempting the file.
  */
 const EXEMPT = {
   "app/api/auth/[...nextauth]/route.ts": {
@@ -48,6 +69,16 @@ const EXEMPT = {
     rules: ["auth"],
     reason:
       "Public endpoint: records views on shared videos, which anonymous viewers must be able to hit. Attribution falls back to a session id when there is no user.",
+  },
+  "app/api/videos/[id]/route.ts": {
+    rules: ["auth:GET"],
+    reason:
+      "GET is public: fetches video detail for shared video links, which anonymous viewers must be able to access. PUT and DELETE require authentication and are not exempted.",
+  },
+  "app/api/videos/[id]/comments/route.ts": {
+    rules: ["auth:GET"],
+    reason:
+      "GET is public: fetches comments on shared videos, which anonymous viewers must be able to read. POST requires authentication and is not exempted.",
   },
   "app/api/extension/pair/init/route.ts": {
     rules: ["auth", "envelope", "no-manual-status"],
@@ -132,15 +163,30 @@ function checkRoute(absPath) {
   if (exempt && exempt.rules === "*") return { rel, violations, exempt };
   const skip = new Set(Array.isArray(exempt?.rules) ? exempt.rules : []);
 
-  const add = (idx, rule, message) => {
-    if (skip.has(rule)) return;
+  // Validate EXEMPT entries: rule names and handler names must be known
+  for (const entry of skip) {
+    const [ruleName, handlerName] = entry.split(":");
+    if (!KNOWN_RULES.includes(ruleName)) {
+      console.error(
+        `Warning: ${rel}: unknown rule in EXEMPT entry "${entry}" (rule: "${ruleName}")`
+      );
+    }
+    if (handlerName && !HANDLERS.includes(handlerName)) {
+      console.error(
+        `Warning: ${rel}: unknown handler in EXEMPT entry "${entry}" (handler: "${handlerName}")`
+      );
+    }
+  }
+
+  const add = (idx, rule, message, handlerName) => {
+    // Check both plain rule (applies to all handlers) and per-handler rule
+    if (skip.has(rule) || (handlerName && skip.has(`${rule}:${handlerName}`))) return;
     violations.push({ line: lineOf(src, idx), rule, message });
   };
 
   // --- file-level: service layer ---
-  // The service must actually be USED, not merely imported. Checking the import
-  // alone lets a route satisfy this rule with a dead `import { X }` line, which
-  // is guardrail theater -- it reads as compliant while delegating nothing.
+  // Check service IMPORT count only at file level (exactly one import is required).
+  // The "service is actually called" check is per-handler (see below in handler loop).
   const serviceImports = [
     ...src.matchAll(/import\s*\{([^}]*)\}\s*from\s*["']@\/lib\/services\/[^"']+["']/g),
   ];
@@ -159,30 +205,11 @@ function checkRoute(absPath) {
       "service",
       `Imports ${serviceImports.length} services. A route must depend on exactly one — keep dependencies flat.`
     );
-  } else {
-    const used = imported.filter((n) => new RegExp(`\\b${n}\\s*\\.`).test(src));
-    if (used.length === 0) {
-      add(
-        serviceImports[0].index,
-        "service",
-        `Imports ${imported.join(", ") || "a service"} but never calls it. Remove the dead import — a route that needs no service should be exempted with a reason, not given a fake dependency.`
-      );
-    }
   }
 
   // --- file-level: auth ---
-  // The guard must actually return. An empty `if (!user) {}` satisfies a naive
-  // presence check while authenticating nothing -- it reads as compliant and
-  // enforces nothing. A genuinely public route belongs in EXEMPT with a reason.
-  if (!/getCurrentUser\s*\(/.test(src)) {
-    add(0, "auth", "Missing getCurrentUser() — every route must authenticate.");
-  } else if (!/if\s*\(\s*!\s*\w+\s*\)\s*(?:return\b|\{[^}]*\breturn\b)/.test(src)) {
-    add(
-      0,
-      "auth",
-      "Calls getCurrentUser() but the `if (!user)` guard does not return. An empty guard authenticates nothing — if the route is genuinely public, exempt it in EXEMPT with a reason instead."
-    );
-  }
+  // Auth checks are now per-handler (see handler loop below).
+  // A genuinely public route belongs in EXEMPT with a reason.
 
   // --- file-level: contract-frozen ---
   // Only the three frozen routes are checked. If one of them imports the envelope
@@ -261,10 +288,41 @@ function checkRoute(absPath) {
   for (const h of handlers) {
     const { name, body, index } = h;
 
+    // --- per-handler: auth ---
+    // The guard must actually return. An empty `if (!user) {}` satisfies a naive
+    // presence check while authenticating nothing -- it reads as compliant and
+    // enforces nothing. A genuinely public route belongs in EXEMPT with a reason.
+    if (!/getCurrentUser\s*\(/.test(body)) {
+      add(index, "auth", `${name} handler does not call getCurrentUser() — every route must authenticate.`, name);
+    } else if (!/if\s*\(\s*!\s*\w+\s*\)\s*(?:return\b|\{[^}]*\breturn\b)/.test(body)) {
+      add(
+        index,
+        "auth",
+        `${name} handler calls getCurrentUser() but the \`if (!user)\` guard does not return. An empty guard authenticates nothing — if the route is genuinely public, exempt it in EXEMPT with a reason instead.`,
+        name
+      );
+    }
+
+    // --- per-handler: service is actually called ---
+    // The service must actually be USED in this handler, not merely imported at the file level.
+    // Checking the import alone lets a route satisfy this rule with a dead import, which is
+    // guardrail theater -- it reads as compliant while delegating nothing.
+    if (serviceImports.length > 0) {
+      const used = imported.filter((n) => new RegExp(`\\b${n}\\s*\\.`).test(body));
+      if (used.length === 0) {
+        add(
+          index,
+          "service",
+          `${name} handler does not call the imported service. Remove the dead import — a handler that needs no service should return early or use a different pattern.`,
+          name
+        );
+      }
+    }
+
     if (!/\btry\s*\{/.test(body) || !/\bcatch\s*\(/.test(body)) {
-      add(index, "try-catch", `${name} handler is not wrapped in try/catch.`);
+      add(index, "try-catch", `${name} handler is not wrapped in try/catch.`, name);
     } else if (!/console\.error\s*\(|handleApiError\s*\(/.test(body)) {
-      add(index, "error-handling", `${name} catch block does not call console.error() or handleApiError().`);
+      add(index, "error-handling", `${name} catch block does not call console.error() or handleApiError().`, name);
     }
 
     // Only require zod where a body is actually read. Demanding .safeParse from
@@ -276,7 +334,7 @@ function checkRoute(absPath) {
     // vacuous `z.unknown()` schemas that validate nothing.
     const readsBody = /\b(?:request|req)\s*\.\s*json\s*\(/.test(body);
     if (BODY_HANDLERS.has(name) && readsBody && !/\.safeParse\s*\(/.test(body)) {
-      add(index, "zod", `${name} reads a request body but does not validate it with a zod schema (.safeParse).`);
+      add(index, "zod", `${name} reads a request body but does not validate it with a zod schema (.safeParse).`, name);
     }
 
     // Only the failure envelope is enforced. The `{ success: true, data }` success
@@ -285,13 +343,13 @@ function checkRoute(absPath) {
     // not enforced -- only 4 of 30 routes import them. Both are tracked follow-ups
     // in PATTERN.md rather than hard rules, so this check stays meaningful.
     if (!redirectRoute && !/\{\s*error\s*[:,}]|fail\s*\(|handleApiError\s*\(/.test(body)) {
-      add(index, "response-shape", `${name} does not return { error: ... }, fail(), or handleApiError() on failure.`);
+      add(index, "response-shape", `${name} does not return { error: ... }, fail(), or handleApiError() on failure.`, name);
     }
 
     // envelope: Every non-frozen route must return through ok() or handleApiError()
     // for success responses. This prevents hand-built { foo: 1 } shapes.
     if (!redirectRoute && !/\bok\s*\(/.test(body) && !/handleApiError\s*\(/.test(body)) {
-      add(index, "envelope", `${name} must return through ok() or handleApiError() for the envelope.`);
+      add(index, "envelope", `${name} must return through ok() or handleApiError() for the envelope.`, name);
     }
 
     // no-manual-status: No hand-built NextResponse.json({ error }, { status })
@@ -299,7 +357,7 @@ function checkRoute(absPath) {
     if (/NextResponse\.json\s*\(\s*\{\s*error\s*[:,]/.test(body)) {
       const hasManualStatus = /NextResponse\.json\s*\(\s*\{[^}]*error[^}]*\}\s*,\s*\{\s*status\s*:/.test(body);
       if (hasManualStatus) {
-        add(index, "no-manual-status", `${name} hand-builds NextResponse.json({ error }, { status }). Use fail() or handleApiError() instead.`);
+        add(index, "no-manual-status", `${name} hand-builds NextResponse.json({ error }, { status }). Use fail() or handleApiError() instead.`, name);
       }
     }
   }
