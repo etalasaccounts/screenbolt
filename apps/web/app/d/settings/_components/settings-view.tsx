@@ -1,4 +1,3 @@
-import { Icon } from "@iconify/react";
 import { ProfileForm } from "@/components/shell/profile-form";
 import { CloudConnections } from "@/components/shell/cloud-connections";
 import { DeviceList } from "@/components/shell/device-list";

@@ -4,6 +4,9 @@ interface User {
   id: string;
   name: string | null;
   email: string | null;
+  image: string | null;
+  avatarUrl: string | null;
+  activeWorkspaceId: string | null;
   createdAt: Date;
 }
 
@@ -11,6 +14,7 @@ interface Workspace {
   id: string;
   name: string;
   videos: { id: string }[];
+  memberCount?: number;
 }
 
 interface DeviceToken {
