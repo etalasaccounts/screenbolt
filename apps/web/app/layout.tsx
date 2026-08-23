@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Inter_Tight, Instrument_Serif } from "next/font/google";
+import { RecordingProvider } from "@/components/record/recording-provider";
 import "./globals.css";
 
 const interTight = Inter_Tight({
@@ -27,7 +28,9 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
       lang="en"
       className={`${interTight.variable} ${instrumentSerif.variable} antialiased`}
     >
-      <body className="bg-[#f5f5f2] text-[#090b0c]">{children}</body>
+      <body className="bg-[#f5f5f2] text-[#090b0c]">
+        <RecordingProvider>{children}</RecordingProvider>
+      </body>
     </html>
   );
 }

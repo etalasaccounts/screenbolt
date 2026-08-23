@@ -28,8 +28,6 @@ export function SourcePanel({
   mode,
   micEnabled,
   cameraEnabled,
-  onToggleMic,
-  onToggleCamera,
   cameraOptions,
   micOptions,
   cameraDeviceId,
@@ -46,8 +44,6 @@ export function SourcePanel({
   mode: "prepare" | "live";
   micEnabled: boolean;
   cameraEnabled: boolean;
-  onToggleMic: (enabled: boolean) => void;
-  onToggleCamera: (enabled: boolean) => void;
   cameraOptions?: DeviceOption[];
   micOptions?: DeviceOption[];
   cameraDeviceId?: string | null;
@@ -110,29 +106,41 @@ export function SourcePanel({
           <Icon icon="solar:menu-dots-bold" style={{ fontSize: "0.875rem" }} className="text-white/25" />
         </div>
 
-        {recordingType === "screen" && (
+        <div className="mb-3 flex gap-2" role="group" aria-label="Recording source">
           <button
             type="button"
-            onClick={async () => {
-              try {
-                const stream = await navigator.mediaDevices.getDisplayMedia({ video: true });
-                stream.getTracks().forEach(track => track.stop());
-              } catch (err) {
-                // User cancelled the picker
-              }
-            }}
-            className="mb-3 flex w-full items-center gap-2 rounded-lg bg-white/[.12] px-3 py-2.5 text-[0.9375rem] font-medium text-white transition-colors hover:bg-white/[.16]"
+            onClick={() => onSelectRecordingType?.("screen")}
+            disabled={starting}
+            aria-pressed={recordingType === "screen"}
+            className={`flex flex-1 items-center justify-center gap-2 rounded-lg px-3 py-2.5 text-[0.9375rem] font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed ${
+              recordingType === "screen"
+                ? "bg-white/[.20] text-white"
+                : "bg-white/[.08] text-white/80 hover:bg-white/[.16]"
+            }`}
           >
             <Icon icon="solar:monitor-linear" style={{ fontSize: "0.9375rem" }} />
             Screen
           </button>
-        )}
+          <button
+            type="button"
+            onClick={() => onSelectRecordingType?.("camera")}
+            disabled={starting}
+            aria-pressed={recordingType === "camera"}
+            className={`flex flex-1 items-center justify-center gap-2 rounded-lg px-3 py-2.5 text-[0.9375rem] font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed ${
+              recordingType === "camera"
+                ? "bg-white/[.20] text-white"
+                : "bg-white/[.08] text-white/80 hover:bg-white/[.16]"
+            }`}
+          >
+            <Icon icon="material-symbols:videocam" style={{ fontSize: "0.9375rem" }} />
+            Camera
+          </button>
+        </div>
 
         <DeviceRow
           icon={cameraEnabled ? "material-symbols:videocam" : "material-symbols:videocam-off"}
           label="Camera"
           enabled={cameraEnabled}
-          onToggle={() => onToggleCamera(!cameraEnabled)}
           options={cameraOptions ?? []}
           selected={cameraDeviceId ?? null}
           onSelect={onSelectCamera}
@@ -142,7 +150,6 @@ export function SourcePanel({
           icon={micEnabled ? "solar:microphone-large-linear" : "solar:microphone-slash-linear"}
           label="Microphone"
           enabled={micEnabled}
-          onToggle={() => onToggleMic(!micEnabled)}
           options={micOptions ?? []}
           selected={micDeviceId ?? null}
           onSelect={onSelectMic}
@@ -203,7 +210,6 @@ function DeviceRow({
   icon,
   label,
   enabled,
-  onToggle,
   options,
   selected,
   onSelect,
@@ -212,7 +218,6 @@ function DeviceRow({
   icon: string;
   label: string;
   enabled: boolean;
-  onToggle: () => void;
   options: DeviceOption[];
   selected: string | null;
   onSelect?: (deviceId: string) => void;

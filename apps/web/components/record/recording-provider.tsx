@@ -18,7 +18,7 @@
 // dedicated /record page anymore -- "Record" is an action (open the
 // panel), triggered from wherever (navbar, the home page's CTA), not a
 // destination.
-import { createContext, useCallback, useContext, useRef, useState, useSyncExternalStore } from "react";
+import { createContext, useCallback, useContext, useEffect, useRef, useState, useSyncExternalStore } from "react";
 import { createPortal } from "react-dom";
 import { toast } from "sonner";
 
@@ -75,6 +75,29 @@ export function RecordingProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   const recorder = useScreenRecorder({ onScreenShareEnded: handleScreenShareEnded });
+
+  // Keep a stable ref to the recorder so we can clean up on unmount
+  const recorderRef = useRef(recorder);
+  recorderRef.current = recorder;
+
+  // Clean up all acquired media streams and stop any active recording when
+  // the provider unmounts. This is critical for cross-layout navigation: if
+  // the user navigates from the (home) layout to the /d layout (which have
+  // separate RecordingProvider instances), the home layout's provider unmounts
+  // and must release its MediaStreams, otherwise the browser will keep the
+  // camera/screen share indicator on indefinitely.
+  //
+  // Empty dependency list: we want this cleanup to run exactly once on unmount.
+  // The recorderRef captures the current recorder instance, so when the provider
+  // unmounts, the cleanup function calls cancel() on the recorder that was
+  // active at unmount time. This stops all tracks (screen, mic, camera, mixed
+  // recorder stream) and the audio-mix cleanup, reusing the existing stopAllTracks
+  // and stopCamera paths in the hook.
+  useEffect(() => {
+    return () => {
+      recorderRef.current?.cancel();
+    };
+  }, []);
 
   const openPanel = useCallback(() => {
     if (phaseRef.current !== "idle") return; // already mid-flow somewhere
@@ -143,8 +166,6 @@ export function RecordingProvider({ children }: { children: React.ReactNode }) {
                 mode="prepare"
                 micEnabled={recorder.micEnabled}
                 cameraEnabled={recorder.cameraEnabled}
-                onToggleMic={recorder.toggleMic}
-                onToggleCamera={recorder.toggleCamera}
                 cameraOptions={recorder.cameraOptions}
                 micOptions={recorder.micOptions}
                 cameraDeviceId={recorder.cameraDeviceId}
@@ -165,8 +186,6 @@ export function RecordingProvider({ children }: { children: React.ReactNode }) {
                 mode="live"
                 micEnabled={recorder.micEnabled}
                 cameraEnabled={recorder.cameraEnabled}
-                onToggleMic={recorder.toggleMic}
-                onToggleCamera={recorder.toggleCamera}
               />
             )}
 

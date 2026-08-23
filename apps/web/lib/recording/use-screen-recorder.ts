@@ -76,6 +76,9 @@ export function useScreenRecorder({ onScreenShareEnded }: UseScreenRecorderArgs 
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const chunksRef = useRef<Blob[]>([]);
   const audioMixCleanupRef = useRef<() => void>(() => {});
+  // Handler for the screen stream's "ended" event, stored to allow removal
+  // when the stream is torn down or replaced.
+  const screenStreamEndedHandlerRef = useRef<((event: Event) => void) | null>(null);
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const startedAtRef = useRef(0);
   const pausedAccumRef = useRef(0);
@@ -89,6 +92,11 @@ export function useScreenRecorder({ onScreenShareEnded }: UseScreenRecorderArgs 
   }, []);
 
   const stopAllTracks = useCallback(() => {
+    // Remove the screen stream's ended event listener before stopping the track
+    if (screenStreamRef.current && screenStreamEndedHandlerRef.current) {
+      screenStreamRef.current.getVideoTracks()[0]?.removeEventListener("ended", screenStreamEndedHandlerRef.current);
+      screenStreamEndedHandlerRef.current = null;
+    }
     screenStreamRef.current?.getTracks().forEach((t) => t.stop());
     micStreamRef.current?.getTracks().forEach((t) => t.stop());
     recorderStreamRef.current?.getTracks().forEach((t) => t.stop());
@@ -164,15 +172,24 @@ export function useScreenRecorder({ onScreenShareEnded }: UseScreenRecorderArgs 
       recordingSourceRef.current = source;
       try {
         if (source === "screen") {
+          // If a previous screen stream exists, remove its ended event listener
+          if (screenStreamRef.current && screenStreamEndedHandlerRef.current) {
+            screenStreamRef.current.getVideoTracks()[0]?.removeEventListener("ended", screenStreamEndedHandlerRef.current);
+            screenStreamEndedHandlerRef.current = null;
+          }
+
           const screenStream = await navigator.mediaDevices.getDisplayMedia({
             video: true,
             audio: true,
           });
           if (!screenStream.active) throw new Error("Screen sharing was not granted");
 
-          screenStream.getVideoTracks()[0]?.addEventListener("ended", () => {
+          // Create and store the handler so it can be removed later
+          const handler = () => {
             onScreenShareEnded?.();
-          });
+          };
+          screenStreamEndedHandlerRef.current = handler;
+          screenStream.getVideoTracks()[0]?.addEventListener("ended", handler);
           screenStreamRef.current = screenStream;
         } else {
           // Camera-only: no getDisplayMedia at all. Reuse the camera
