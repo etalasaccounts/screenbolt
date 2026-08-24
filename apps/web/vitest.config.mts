@@ -1,5 +1,7 @@
 import { defineConfig } from 'vitest/config';
-import path from 'path';
+import { fileURLToPath } from 'url';
+
+const root = fileURLToPath(new URL('.', import.meta.url));
 
 export default defineConfig({
   test: {
@@ -7,8 +9,8 @@ export default defineConfig({
     include: ['lib/**/*.test.ts'],
   },
   resolve: {
-    alias: {
-      '@': path.resolve(path.dirname(new URL(import.meta.url).pathname), './'),
-    },
+    alias: [
+      { find: '@', replacement: root },
+    ],
   },
 });
