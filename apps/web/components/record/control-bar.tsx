@@ -92,7 +92,7 @@ export function ControlBar({
             micEnabled ? "text-white/70" : "text-[#ff3b30]"
           }`}
         >
-          <Icon icon={micEnabled ? "solar:microphone-linear" : "solar:microphone-slash-linear"} style={{ fontSize: "1.0625rem" }} />
+          <ToggleIcon icon="solar:microphone-linear" off={!micEnabled} />
         </button>
         <button
           type="button"
@@ -102,7 +102,7 @@ export function ControlBar({
             cameraEnabled ? "text-white/70" : "text-white/30"
           }`}
         >
-          <Icon icon={cameraEnabled ? "solar:videocamera-linear" : "solar:videocamera-slash-linear"} style={{ fontSize: "1.0625rem" }} />
+          <ToggleIcon icon="solar:videocamera-linear" off={!cameraEnabled} />
         </button>
 
         <span className="mx-1 h-5 w-px bg-white/10" />
@@ -136,5 +136,36 @@ export function ControlBar({
         </button>
       </div>
     </Rnd>
+  );
+}
+
+// Solar has no crossed-out microphone or videocamera (`muted-linear` and
+// `volume-cross-linear` are speakers), so the off state is the normal glyph
+// with a slash drawn over it. The slash is plain currentColor with no
+// background-coloured cut-out underneath: the bar is translucent glass over
+// arbitrary recorded content, so a "cut" stroke would never match what is
+// behind it.
+function ToggleIcon({ icon, off }: { icon: string; off: boolean }) {
+  return (
+    <span className="relative inline-flex items-center justify-center">
+      <Icon icon={icon} style={{ fontSize: "1.0625rem" }} />
+      {off && (
+        <svg
+          viewBox="0 0 24 24"
+          aria-hidden
+          className="pointer-events-none absolute inset-0 h-full w-full"
+        >
+          <line
+            x1="4"
+            y1="20"
+            x2="20"
+            y2="4"
+            stroke="currentColor"
+            strokeWidth="1.5"
+            strokeLinecap="round"
+          />
+        </svg>
+      )}
+    </span>
   );
 }

@@ -34,6 +34,8 @@ export function SourcePanel({
   micDeviceId,
   onSelectCamera,
   onSelectMic,
+  onToggleCamera,
+  onToggleMic,
   recordingType,
   onSelectRecordingType,
   onStart,
@@ -50,6 +52,8 @@ export function SourcePanel({
   micDeviceId?: string | null;
   onSelectCamera?: (deviceId: string) => void;
   onSelectMic?: (deviceId: string) => void;
+  onToggleCamera?: (enabled: boolean) => void;
+  onToggleMic?: (enabled: boolean) => void;
   recordingType?: "screen" | "camera";
   onSelectRecordingType?: (type: "screen" | "camera") => void;
   onStart?: () => void;
@@ -77,131 +81,117 @@ export function SourcePanel({
   }
 
   return (
-    <Rnd
-      default={{ ...initial, width: 320, height: "auto" }}
-      style={{ position: "fixed", zIndex: 50 }}
-      enableResizing={false}
-      dragHandleClassName="drag-handle"
-      bounds="window"
-    >
-      <div
-        className="overflow-hidden rounded-[22px] p-3"
-        style={{
-          // No saturate() boost here (unlike a typical frosted-glass
-          // recipe) -- this panel floats over an arbitrary, unpredictable
-          // desktop/tab while recording, and boosting saturation of
-          // whatever's behind it can blow out into a distracting colored
-          // glow depending on what's underneath.
-          background: "rgba(13,15,16,.72)",
-          backdropFilter: "blur(22px)",
-          WebkitBackdropFilter: "blur(22px)",
-          border: "1px solid rgba(255,255,255,.14)",
-          boxShadow: "0 18px 50px rgba(0,0,0,.40)",
-        }}
+    // react-rnd positions itself by measuring its parent's bounding rect. Its
+    // parent here is <body>, whose rect top is -scrollY once the page is
+    // scrolled, so react-rnd subtracted the scroll distance and dragged the
+    // panel up off the top of the viewport. This fixed full-viewport layer is
+    // the parent instead: its rect never moves, so the offset stays zero and
+    // the panel holds its place no matter how far the page is scrolled.
+    <div className="pointer-events-none fixed inset-0 z-50">
+      <Rnd
+        default={{ ...initial, width: 320, height: "auto" }}
+        // Absolute inside the fixed layer, and pointer-events restored: the
+        // layer itself is click-through so it doesn't swallow the backdrop or
+        // the Cancel button sitting behind it.
+        style={{ position: "absolute", pointerEvents: "auto" }}
+        enableResizing={false}
+        dragHandleClassName="drag-handle"
+        bounds="parent"
       >
-        <div className="drag-handle mb-2 flex cursor-grab items-center justify-between px-1 active:cursor-grabbing">
-          <span className="text-[0.6875rem] font-normal uppercase tracking-[0.12em] text-white/45">
-            New recording
-          </span>
-          <Icon icon="solar:menu-dots-bold" style={{ fontSize: "0.875rem" }} className="text-white/25" />
-        </div>
+        <div
+          className="overflow-hidden rounded-[22px] p-3"
+          style={{
+            // No saturate() boost here (unlike a typical frosted-glass
+            // recipe) -- this panel floats over an arbitrary, unpredictable
+            // desktop/tab while recording, and boosting saturation of
+            // whatever's behind it can blow out into a distracting colored
+            // glow depending on what's underneath.
+            background: "rgba(13,15,16,.72)",
+            backdropFilter: "blur(22px)",
+            WebkitBackdropFilter: "blur(22px)",
+            border: "1px solid rgba(255,255,255,.14)",
+            boxShadow: "0 18px 50px rgba(0,0,0,.40)",
+          }}
+        >
+          <div className="drag-handle mb-2 flex cursor-grab items-center justify-between px-1 active:cursor-grabbing">
+            <span className="text-[0.6875rem] font-normal uppercase tracking-[0.12em] text-white/45">
+              New recording
+            </span>
+            <Icon icon="solar:menu-dots-bold" style={{ fontSize: "0.875rem" }} className="text-white/25" />
+          </div>
 
-        <div className="mb-3 flex gap-2" role="group" aria-label="Recording source">
+          <div className="mb-3 flex gap-2" role="group" aria-label="Recording source">
+            <button
+              type="button"
+              onClick={() => onSelectRecordingType?.("screen")}
+              disabled={starting}
+              aria-pressed={recordingType === "screen"}
+              className={`flex flex-1 items-center justify-center gap-2 rounded-lg px-3 py-2.5 text-[0.9375rem] font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed ${
+                recordingType === "screen"
+                  ? "bg-white/[.20] text-white"
+                  : "bg-white/[.08] text-white/80 hover:bg-white/[.16]"
+              }`}
+            >
+              <Icon icon="solar:monitor-linear" style={{ fontSize: "0.9375rem" }} />
+              Screen
+            </button>
+            <button
+              type="button"
+              onClick={() => onSelectRecordingType?.("camera")}
+              disabled={starting}
+              aria-pressed={recordingType === "camera"}
+              className={`flex flex-1 items-center justify-center gap-2 rounded-lg px-3 py-2.5 text-[0.9375rem] font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed ${
+                recordingType === "camera"
+                  ? "bg-white/[.20] text-white"
+                  : "bg-white/[.08] text-white/80 hover:bg-white/[.16]"
+              }`}
+            >
+              <Icon icon="material-symbols:videocam" style={{ fontSize: "0.9375rem" }} />
+              Camera
+            </button>
+          </div>
+
+          <DeviceRow
+            icon={cameraEnabled ? "material-symbols:videocam" : "material-symbols:videocam-off"}
+            label="Camera"
+            enabled={cameraEnabled}
+            options={cameraOptions ?? []}
+            selected={cameraDeviceId ?? null}
+            onSelect={onSelectCamera}
+            onToggle={onToggleCamera}
+            noneLabel="No camera"
+          />
+          <DeviceRow
+            icon={micEnabled ? "solar:microphone-large-linear" : "solar:microphone-slash-linear"}
+            label="Microphone"
+            enabled={micEnabled}
+            options={micOptions ?? []}
+            selected={micDeviceId ?? null}
+            onSelect={onSelectMic}
+            onToggle={onToggleMic}
+            noneLabel="No microphone"
+          />
+
+          {error && (
+            <p className="mt-2 rounded-lg bg-red-500/15 px-2.5 py-2 text-[0.75rem] text-red-200">{error}</p>
+          )}
+
           <button
             type="button"
-            onClick={() => onSelectRecordingType?.("screen")}
+            onClick={onStart}
             disabled={starting}
-            aria-pressed={recordingType === "screen"}
-            className={`flex flex-1 items-center justify-center gap-2 rounded-lg px-3 py-2.5 text-[0.9375rem] font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed ${
-              recordingType === "screen"
-                ? "bg-white/[.20] text-white"
-                : "bg-white/[.08] text-white/80 hover:bg-white/[.16]"
-            }`}
+            className="mt-3 flex h-11 w-full items-center justify-center gap-2 rounded-full bg-blue-600 text-[0.875rem] font-medium text-white transition-opacity hover:opacity-90 disabled:opacity-50"
           >
-            <Icon icon="solar:monitor-linear" style={{ fontSize: "0.9375rem" }} />
-            Screen
+            <Icon icon="solar:record-circle-fill" style={{ fontSize: "1.0625rem" }} />
+            {starting ? "Waiting for permission…" : "Start recording"}
           </button>
-          <button
-            type="button"
-            onClick={() => onSelectRecordingType?.("camera")}
-            disabled={starting}
-            aria-pressed={recordingType === "camera"}
-            className={`flex flex-1 items-center justify-center gap-2 rounded-lg px-3 py-2.5 text-[0.9375rem] font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed ${
-              recordingType === "camera"
-                ? "bg-white/[.20] text-white"
-                : "bg-white/[.08] text-white/80 hover:bg-white/[.16]"
-            }`}
-          >
-            <Icon icon="material-symbols:videocam" style={{ fontSize: "0.9375rem" }} />
-            Camera
-          </button>
+          <p className="mt-2 text-center text-[0.6875rem] text-white/35">
+            {recordingType === "camera"
+              ? "Records from your camera only."
+              : "Your browser will ask what to share."}
+          </p>
         </div>
-
-        <DeviceRow
-          icon={cameraEnabled ? "material-symbols:videocam" : "material-symbols:videocam-off"}
-          label="Camera"
-          enabled={cameraEnabled}
-          options={cameraOptions ?? []}
-          selected={cameraDeviceId ?? null}
-          onSelect={onSelectCamera}
-          noneLabel="No camera"
-        />
-        <DeviceRow
-          icon={micEnabled ? "solar:microphone-large-linear" : "solar:microphone-slash-linear"}
-          label="Microphone"
-          enabled={micEnabled}
-          options={micOptions ?? []}
-          selected={micDeviceId ?? null}
-          onSelect={onSelectMic}
-          noneLabel="No microphone"
-        />
-
-        {error && (
-          <p className="mt-2 rounded-lg bg-red-500/15 px-2.5 py-2 text-[0.75rem] text-red-200">{error}</p>
-        )}
-
-        <button
-          type="button"
-          onClick={onStart}
-          disabled={starting}
-          className="mt-3 flex h-11 w-full items-center justify-center gap-2 rounded-full bg-blue-600 text-[0.875rem] font-medium text-white transition-opacity hover:opacity-90 disabled:opacity-50"
-        >
-          <Icon icon="solar:record-circle-fill" style={{ fontSize: "1.0625rem" }} />
-          {starting ? "Waiting for permission…" : "Start recording"}
-        </button>
-        <p className="mt-2 text-center text-[0.6875rem] text-white/35">
-          {recordingType === "camera"
-            ? "Records from your camera only."
-            : "Your browser will ask what to share."}
-        </p>
-      </div>
-    </Rnd>
-  );
-}
-
-function EnableDevicePrompt({ label }: { label: string }) {
-  const [showTooltip, setShowTooltip] = useState(false);
-
-  return (
-    <div className="mt-1.5 flex items-center justify-between">
-      <span className="text-[0.6875rem] text-white/50">{label} is disabled</span>
-      <div className="relative">
-        <button
-          type="button"
-          onClick={() => setShowTooltip(!showTooltip)}
-          className="text-[0.6875rem] text-white/50 underline hover:text-white/70"
-        >
-          Enable
-        </button>
-        {showTooltip && (
-          <>
-            <div className="fixed inset-0 z-40" onClick={() => setShowTooltip(false)} />
-            <div className="absolute top-full right-0 mt-2 z-50 rounded-lg bg-[#090b0c] px-3 py-2 text-[0.6875rem] text-white/80 border border-white/20 w-56">
-              Check your browser permissions for {label.toLowerCase()}. You may need to allow access in your browser settings.
-            </div>
-          </>
-        )}
-      </div>
+      </Rnd>
     </div>
   );
 }
@@ -213,6 +203,7 @@ function DeviceRow({
   options,
   selected,
   onSelect,
+  onToggle,
   noneLabel,
 }: {
   icon: string;
@@ -221,6 +212,7 @@ function DeviceRow({
   options: DeviceOption[];
   selected: string | null;
   onSelect?: (deviceId: string) => void;
+  onToggle?: (enabled: boolean) => void;
   noneLabel: string;
 }) {
   const selectedLabel = options.find((o) => o.deviceId === selected)?.label ?? noneLabel;
@@ -232,6 +224,15 @@ function DeviceRow({
           <Icon icon={icon} style={{ fontSize: "0.9375rem" }} className={enabled ? "text-white" : "text-white/35"} />
           <span className="truncate text-[0.9375rem] font-medium text-white/90">{label}</span>
         </div>
+        {onToggle && (
+          <button
+            type="button"
+            onClick={() => onToggle(!enabled)}
+            className="shrink-0 text-[0.6875rem] text-white/50 underline hover:text-white/80"
+          >
+            {enabled ? "Turn off" : "Enable"}
+          </button>
+        )}
       </div>
       {enabled && options.length > 0 && (
         <select
@@ -249,7 +250,9 @@ function DeviceRow({
       {enabled && options.length === 0 && (
         <p className="mt-1.5 text-[0.6875rem] text-white/35">{selectedLabel}</p>
       )}
-      {!enabled && <EnableDevicePrompt label={label} />}
+      {!enabled && (
+        <p className="mt-1.5 text-[0.6875rem] text-white/35">{label} is off</p>
+      )}
     </div>
   );
 }

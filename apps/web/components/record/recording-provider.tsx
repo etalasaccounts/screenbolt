@@ -172,6 +172,8 @@ export function RecordingProvider({ children }: { children: React.ReactNode }) {
                 micDeviceId={recorder.micDeviceId}
                 onSelectCamera={recorder.setCameraDeviceId}
                 onSelectMic={recorder.setMicDeviceId}
+                onToggleCamera={recorder.toggleCamera}
+                onToggleMic={recorder.toggleMic}
                 recordingType={recordingType}
                 onSelectRecordingType={setRecordingType}
                 onStart={handleStartFromPanel}
