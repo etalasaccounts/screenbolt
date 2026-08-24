@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { ProfileForm } from "@/components/shell/profile-form";
 import { CloudConnections } from "@/components/shell/cloud-connections";
 import { DeviceList } from "@/components/shell/device-list";
@@ -49,6 +50,21 @@ export function SettingsView({ user, workspaces, devices, cloudConfig }: Setting
         <h1 className="text-[2.25rem] font-normal leading-[0.98] tracking-tight text-[#090b0c] md:text-[2.75rem]">
           Your <span className="font-serif-italic">account</span>
         </h1>
+      </div>
+
+      <div className="mb-6 flex gap-2">
+        <Link
+          href="/d/settings"
+          className="rounded-full border border-black/[.08] bg-black/[.06] px-4 py-1.5 text-[0.8125rem] font-medium"
+        >
+          Account
+        </Link>
+        <Link
+          href="/d/settings/billing"
+          className="rounded-full border border-black/[.08] px-4 py-1.5 text-[0.8125rem] font-medium"
+        >
+          Billing
+        </Link>
       </div>
 
       <section className="mb-6 rounded-3xl border border-black/[.08] bg-white p-6 sm:p-7">

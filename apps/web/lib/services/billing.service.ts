@@ -1,6 +1,6 @@
 import { getUserPlan, getPlanLimits, type PlanLimits } from "@/lib/billing/plans";
 import { createSnapToken, verifyWebhookSignature } from "@/lib/billing/midtrans";
-import { upsertSubscription, expireSubscriptions } from "@/lib/db/subscriptions";
+import { getUserSubscription, upsertSubscription, expireSubscriptions } from "@/lib/db/subscriptions";
 
 const PLAN_PRICES: Record<"pro" | "business", number> = {
   pro: 50000,
@@ -13,6 +13,12 @@ const PLAN_LABELS: Record<"pro" | "business", string> = {
 };
 
 export class BillingService {
+  static getUserSubscription(
+    userId: string,
+  ): ReturnType<typeof getUserSubscription> {
+    return getUserSubscription(userId);
+  }
+
   static async getUserPlanWithLimits(
     userId: string,
   ): Promise<{ plan: "free" | "pro" | "business"; limits: PlanLimits }> {
