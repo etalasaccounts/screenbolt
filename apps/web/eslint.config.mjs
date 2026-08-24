@@ -393,6 +393,25 @@ const eslintConfig = defineConfig([
       ],
     },
   },
+  // Next.js wraps the global fetch, and inside that wrapper cancelling a
+  // response body never settles: the request hangs with no error, no log line
+  // and no timeout. It cost three debugging rounds to find as the cause of an
+  // upload frozen at "Finishing…", and it is invisible to unit tests because
+  // plain Node's fetch handles it fine. Read the body instead — even a body
+  // you do not want, which is cheap for the range requests this came up in.
+  {
+    files: ["app/**", "lib/**", "components/**"],
+    rules: {
+      "no-restricted-syntax": [
+        "error",
+        {
+          selector: "MemberExpression[property.name='cancel'][object.property.name='body']",
+          message:
+            "Do not cancel a fetch response body — under Next's patched fetch it never settles and the request hangs silently. Read it instead (e.g. await res.arrayBuffer()).",
+        },
+      ],
+    },
+  },
 ]);
 
 export default eslintConfig;

@@ -3,7 +3,13 @@ import { NextRequest, NextResponse } from "next/server";
 import { getCurrentUser, getCurrentUserOrToken } from "@/lib/auth/server-auth";
 import { UploadService } from "@/lib/services/upload.service";
 
-const MAX_SIZE = 500 * 1024 * 1024; // 500MB single-request ceiling; larger files use the chunked API
+/**
+ * Note this is not the effective ceiling on Vercel, which rejects any request
+ * body over 4.5MB before the handler runs. Web clients slice anything larger
+ * into parts (lib/client/chunked-upload.ts); this guard only still matters for
+ * callers that post whole files, i.e. the Chrome extension.
+ */
+const MAX_SIZE = 500 * 1024 * 1024;
 
 /**
  * Simple upload endpoint: accepts a single multipart `video` file (plus
@@ -36,7 +42,7 @@ export async function POST(request: NextRequest) {
     }
     if (video.size > MAX_SIZE) {
       return NextResponse.json(
-        { error: `File too large (${(video.size / 1024 / 1024).toFixed(1)}MB). Use the chunked upload API.` },
+        { error: `This video is too large to upload in one piece (${(video.size / 1024 / 1024).toFixed(1)}MB).` },
         { status: 413 },
       );
     }

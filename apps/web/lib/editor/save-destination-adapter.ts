@@ -1,4 +1,5 @@
 import { captureThumbnail } from "@/lib/client/capture-thumbnail";
+import { uploadVideo } from "@/lib/client/chunked-upload";
 
 // apps/web's implementation of the shared editor's "save/export destination"
 // adapter point (docs/specs/07-shared-editor.md). apps/extension's
@@ -45,23 +46,35 @@ export function createWebSaveDestination(opts: {
         const [resp, thumbnailBlob] = await Promise.all([fetch(url), captureThumbnail(url)]);
         const blob = await resp.blob();
 
-        const formData = new FormData();
-        formData.append("video", new File([blob], filename, { type: blob.type }));
-        formData.append("title", titleFromFilename(filename));
         const durationSec = Number(contentStateRef.current?.duration) || 0;
-        formData.append("duration", String(Math.round(durationSec)));
-        if (thumbnailBlob) {
-          formData.append("thumbnail", new File([thumbnailBlob], "thumbnail.jpg", { type: "image/jpeg" }));
-        }
 
-        const uploadResp = await fetch("/api/upload", { method: "POST", body: formData });
-        const data = await uploadResp.json().catch(() => ({}));
-        if (!uploadResp.ok || !data?.video?.id) {
-          throw new Error(data?.error || "Upload failed");
-        }
+        // A long recording is a long upload, and the editor's only feedback
+        // channel is this toast -- without a live percentage a multi-minute
+        // save is indistinguishable from a hang, which is exactly when people
+        // close the tab and lose the recording. Throttled to whole percents so
+        // a 500-part upload does not re-render the toast on every chunk.
+        let lastShownMessage = "";
+        const { video } = await uploadVideo(new File([blob], filename, { type: blob.type }), {
+          title: titleFromFilename(filename),
+          durationSeconds: durationSec,
+          thumbnail: thumbnailBlob,
+          onProgress: ({ percent, phase }) => {
+            const message =
+              phase === "finishing" ? "Finishing up…" : `Uploading… ${percent}%`;
+            if (message === lastShownMessage) return;
+            lastShownMessage = message;
+            try {
+              showEditorToast(contentStateRef.current, message, 60_000);
+            } catch {
+              // Same rationale as the catch below: the toast slot is optional.
+            }
+          },
+        });
+
+        if (!video?.id) throw new Error("Upload failed");
 
         setContentState((prev) => ({ ...prev, saved: true }));
-        opts.onUploaded(data.video);
+        opts.onUploaded(video as { id: string });
       } catch (err) {
         const message = err instanceof Error ? err.message : "Upload failed";
         setContentState((prev) => ({ ...prev, downloadError: message }));

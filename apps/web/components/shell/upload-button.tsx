@@ -6,7 +6,7 @@ import { toast } from "sonner";
 import { Icon } from "@iconify/react";
 
 import { captureThumbnail } from "@/lib/client/capture-thumbnail";
-import { apiFetchRaw } from "@/lib/client/api-fetch";
+import { uploadVideo } from "@/lib/client/chunked-upload";
 
 export function UploadButton() {
   // See the matching comment in video-card.tsx -- router.refresh() is a
@@ -14,6 +14,7 @@ export function UploadButton() {
   const queryClient = useQueryClient();
   const inputRef = useRef<HTMLInputElement>(null);
   const [uploading, setUploading] = useState(false);
+  const [status, setStatus] = useState<string | null>(null);
 
   async function handleFile(file: File) {
     if (!file.type.startsWith("video/") && !file.name.match(/\.(webm|mp4|mov|mkv|avi)$/i)) {
@@ -22,24 +23,24 @@ export function UploadButton() {
     }
 
     setUploading(true);
+    setStatus("Uploading… 0%");
     try {
-      const formData = new FormData();
-      formData.append("video", file);
-
       const objectUrl = URL.createObjectURL(file);
       const thumbnailBlob = await captureThumbnail(objectUrl);
       URL.revokeObjectURL(objectUrl);
-      if (thumbnailBlob) {
-        formData.append("thumbnail", new File([thumbnailBlob], "thumbnail.jpg", { type: "image/jpeg" }));
-      }
 
-      await apiFetchRaw('/api/upload', { method: 'POST', body: formData });
+      await uploadVideo(file, {
+        thumbnail: thumbnailBlob,
+        onProgress: ({ percent, phase }) =>
+          setStatus(phase === "finishing" ? "Finishing…" : `Uploading… ${percent}%`),
+      });
       toast.success("Video uploaded");
       queryClient.invalidateQueries({ queryKey: ["videos"] });
     } catch (error) {
       toast.error(error instanceof Error ? error.message : "Upload failed");
     } finally {
       setUploading(false);
+      setStatus(null);
       if (inputRef.current) inputRef.current.value = "";
     }
   }
@@ -63,7 +64,7 @@ export function UploadButton() {
         className="flex h-10 items-center gap-1.5 rounded-full border border-black/[.14] bg-white px-5 text-[0.875rem] text-[#090b0c] transition-colors hover:bg-black/[.04] disabled:opacity-50"
       >
         <Icon icon="solar:upload-linear" style={{ fontSize: "0.9375rem" }} />
-        {uploading ? "Uploading…" : "Upload a video"}
+        {uploading ? (status ?? "Uploading…") : "Upload a video"}
       </button>
     </>
   );

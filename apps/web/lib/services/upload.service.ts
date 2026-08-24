@@ -5,7 +5,7 @@
  * (via lib/storage) and database operations to lib/db.
  */
 
-import { isStorageConfigured, putObject, createMultipartUpload, uploadPart, completeMultipartUpload } from '@/lib/integrations/bunny';
+import { isStorageConfigured, putObject, createMultipartUpload, uploadPart, completeMultipartUpload, abortMultipartUpload } from '@/lib/integrations/bunny';
 import { createVideo } from '@/lib/db/videos';
 import { generateVideoTitleWithTimestamp } from '@/lib/shared/video';
 
@@ -144,6 +144,15 @@ export class UploadService {
     });
 
     return { url: uploaded.url, video: record };
+  }
+
+  /**
+   * Discard an upload the client abandoned, so its parts stop occupying
+   * storage. Best-effort: a caller that never reaches this (tab closed mid
+   * -upload) just leaves parts behind under the temp prefix.
+   */
+  static async abortChunkedUpload(uploadId: string): Promise<void> {
+    await abortMultipartUpload(uploadId);
   }
 
   /**
