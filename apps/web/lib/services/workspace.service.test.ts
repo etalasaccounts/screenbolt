@@ -17,11 +17,15 @@ vi.mock('@/lib/db/workspaces', () => ({
   createWorkspace: vi.fn(),
   setActiveWorkspace: vi.fn(),
   getWorkspace: vi.fn(),
+  renameWorkspace: vi.fn(),
 }));
 
 vi.mock('@/lib/db/workspace-members', () => ({
   isWorkspaceMember: vi.fn(),
   addWorkspaceMember: vi.fn(),
+  getWorkspaceMemberRole: vi.fn(),
+  listWorkspaceMembers: vi.fn(),
+  removeWorkspaceMember: vi.fn(),
 }));
 
 vi.mock('@/lib/db/workspace-invites', () => ({
@@ -35,23 +39,28 @@ import {
   createWorkspace,
   setActiveWorkspace,
   getWorkspace,
+  renameWorkspace,
 } from '@/lib/db/workspaces';
-import { isWorkspaceMember, addWorkspaceMember } from '@/lib/db/workspace-members';
+import { isWorkspaceMember, addWorkspaceMember, getWorkspaceMemberRole, listWorkspaceMembers, removeWorkspaceMember } from '@/lib/db/workspace-members';
 import { findActiveInvite, createInvite, getInviteByToken } from '@/lib/db/workspace-invites';
 
 const mockGetWorkspacesForUser = vi.mocked(getWorkspacesForUser);
 const mockCreateWorkspace = vi.mocked(createWorkspace);
 const mockSetActiveWorkspace = vi.mocked(setActiveWorkspace);
 const mockGetWorkspace = vi.mocked(getWorkspace);
+const mockRenameWorkspace = vi.mocked(renameWorkspace);
 const mockIsWorkspaceMember = vi.mocked(isWorkspaceMember);
 const mockAddWorkspaceMember = vi.mocked(addWorkspaceMember);
+const mockGetWorkspaceMemberRole = vi.mocked(getWorkspaceMemberRole);
+const mockListWorkspaceMembers = vi.mocked(listWorkspaceMembers);
+const mockRemoveWorkspaceMember = vi.mocked(removeWorkspaceMember);
 const mockFindActiveInvite = vi.mocked(findActiveInvite);
 const mockCreateInvite = vi.mocked(createInvite);
 const mockGetInviteByToken = vi.mocked(getInviteByToken);
 
 describe('WorkspaceService', () => {
   beforeEach(() => {
-    vi.clearAllMocks();
+    vi.resetAllMocks();
   });
 
   describe('getWorkspacesForUser', () => {
@@ -344,6 +353,195 @@ describe('WorkspaceService', () => {
         WorkspaceService.acceptInvite('tok', 'user-2')
       ).rejects.toThrow(ValidationError);
       expect.assertions(1);
+    });
+  });
+
+  describe('renameWorkspace', () => {
+    it('renames workspace and returns id and name', async () => {
+      mockGetWorkspaceMemberRole.mockResolvedValueOnce('owner');
+      mockRenameWorkspace.mockResolvedValueOnce({
+        id: 'ws-1',
+        name: 'New Name',
+        userId: 'user-1',
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      } as any);
+
+      const result = await WorkspaceService.renameWorkspace('user-1', 'ws-1', 'New Name');
+
+      expect(result).toEqual({
+        id: 'ws-1',
+        name: 'New Name',
+      });
+      expect(mockRenameWorkspace).toHaveBeenCalledWith('ws-1', 'New Name');
+    });
+
+    it('throws ForbiddenError if user is not an owner', async () => {
+      mockGetWorkspaceMemberRole.mockResolvedValueOnce('member');
+
+      await expect(
+        WorkspaceService.renameWorkspace('user-1', 'ws-1', 'New Name')
+      ).rejects.toThrow(ForbiddenError);
+      expect.assertions(1);
+    });
+
+    it('throws ValidationError if name is empty', async () => {
+      mockGetWorkspaceMemberRole.mockResolvedValueOnce('owner');
+
+      await expect(
+        WorkspaceService.renameWorkspace('user-1', 'ws-1', '')
+      ).rejects.toThrow(ValidationError);
+      expect.assertions(1);
+    });
+
+    it('throws ValidationError if name is only whitespace', async () => {
+      mockGetWorkspaceMemberRole.mockResolvedValueOnce('owner');
+
+      await expect(
+        WorkspaceService.renameWorkspace('user-1', 'ws-1', '   ')
+      ).rejects.toThrow(ValidationError);
+      expect.assertions(1);
+    });
+
+    it('throws NotFoundError if workspace not found', async () => {
+      mockGetWorkspaceMemberRole.mockResolvedValueOnce('owner');
+      mockRenameWorkspace.mockResolvedValueOnce(null as any);
+
+      await expect(
+        WorkspaceService.renameWorkspace('user-1', 'ws-1', 'New Name')
+      ).rejects.toThrow(NotFoundError);
+      expect.assertions(1);
+    });
+  });
+
+  describe('listMembers', () => {
+    it('returns mapped member data with correct sort order', async () => {
+      const members = [
+        {
+          userId: 'user-2',
+          name: 'Bob Member',
+          email: 'bob@example.com',
+          image: null,
+          role: 'member' as const,
+          createdAt: new Date('2026-08-20T10:00:00.000Z'),
+        },
+        {
+          userId: 'user-1',
+          name: 'Alice Owner',
+          email: 'alice@example.com',
+          image: 'https://example.com/alice.jpg',
+          role: 'owner' as const,
+          createdAt: new Date('2026-08-15T10:00:00.000Z'),
+        },
+        {
+          userId: 'user-3',
+          name: 'Charlie Member',
+          email: 'charlie@example.com',
+          image: null,
+          role: 'member' as const,
+          createdAt: new Date('2026-08-10T10:00:00.000Z'),
+        },
+      ];
+      mockGetWorkspaceMemberRole.mockImplementation(async () => 'owner');
+      mockListWorkspaceMembers.mockImplementation(async () => members);
+
+      const result = await WorkspaceService.listMembers('user-1', 'ws-1');
+
+      expect(result.members).toHaveLength(3);
+      expect(result.viewerRole).toBe('owner');
+      // Owner first
+      expect(result.members[0]).toEqual({
+        userId: 'user-1',
+        name: 'Alice Owner',
+        email: 'alice@example.com',
+        image: 'https://example.com/alice.jpg',
+        role: 'owner',
+        joinedAt: '2026-08-15T10:00:00.000Z',
+      });
+      // Then members sorted by joinedAt ascending
+      expect(result.members[1]).toEqual({
+        userId: 'user-3',
+        name: 'Charlie Member',
+        email: 'charlie@example.com',
+        image: null,
+        role: 'member',
+        joinedAt: '2026-08-10T10:00:00.000Z',
+      });
+      expect(result.members[2]).toEqual({
+        userId: 'user-2',
+        name: 'Bob Member',
+        email: 'bob@example.com',
+        image: null,
+        role: 'member',
+        joinedAt: '2026-08-20T10:00:00.000Z',
+      });
+    });
+
+    it('throws ForbiddenError when user is not a member', async () => {
+      mockGetWorkspaceMemberRole.mockImplementation(async () => null);
+
+      await expect(
+        WorkspaceService.listMembers('user-1', 'ws-1')
+      ).rejects.toThrow(ForbiddenError);
+      expect.assertions(1);
+    });
+  });
+
+  describe('removeMember', () => {
+    it('removes a member when acting user is an owner', async () => {
+      mockGetWorkspaceMemberRole.mockImplementation(async (_, userId) => {
+        if (userId === 'user-1') return 'owner';
+        return 'member';
+      });
+
+      await WorkspaceService.removeMember('user-1', 'ws-1', 'user-2');
+
+      expect(mockRemoveWorkspaceMember).toHaveBeenCalledWith('ws-1', 'user-2');
+    });
+
+    it('throws ForbiddenError when acting user is not an owner', async () => {
+      mockGetWorkspaceMemberRole.mockImplementation(async () => 'member');
+
+      await expect(
+        WorkspaceService.removeMember('user-1', 'ws-1', 'user-2')
+      ).rejects.toThrow(ForbiddenError);
+      expect.assertions(1);
+    });
+
+    it('throws NotFoundError when target user is not a member', async () => {
+      mockGetWorkspaceMemberRole.mockImplementation(async (_, userId) => {
+        if (userId === 'user-1') return 'owner';
+        return null;
+      });
+
+      await expect(
+        WorkspaceService.removeMember('user-1', 'ws-1', 'user-2')
+      ).rejects.toThrow(NotFoundError);
+      expect.assertions(1);
+    });
+
+    it('throws ValidationError when target is an owner', async () => {
+      mockGetWorkspaceMemberRole.mockImplementation(async () => 'owner');
+
+      await expect(
+        WorkspaceService.removeMember('user-1', 'ws-1', 'user-2')
+      ).rejects.toThrow(ValidationError);
+      expect.assertions(1);
+    });
+
+    it('throws ValidationError with specific message when acting user targets themselves', async () => {
+      mockGetWorkspaceMemberRole.mockImplementation(async (_, userId) => {
+        if (userId === 'user-1') return 'owner';
+        return 'member';
+      });
+
+      try {
+        await WorkspaceService.removeMember('user-1', 'ws-1', 'user-1');
+      } catch (error) {
+        expect(error).toBeInstanceOf(ValidationError);
+        expect((error as ValidationError).message).toBe('You cannot remove yourself');
+      }
+      expect.assertions(2);
     });
   });
 });

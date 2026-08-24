@@ -95,3 +95,12 @@ export async function countVideos(workspaceId: string) {
   const rows = await db.select({ id: videos.id }).from(videos).where(eq(videos.workspaceId, workspaceId));
   return rows.length;
 }
+
+export async function renameWorkspace(workspaceId: string, name: string) {
+  const [workspace] = await db
+    .update(workspaces)
+    .set({ name, updatedAt: new Date() })
+    .where(eq(workspaces.id, workspaceId))
+    .returning();
+  return workspace ?? null;
+}

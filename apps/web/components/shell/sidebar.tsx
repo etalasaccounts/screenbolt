@@ -148,6 +148,7 @@ export function Sidebar({
 
           <nav className="mt-8 flex flex-col gap-0.5">
             {navItem({ href: "/d", label: "Videos" })}
+            {navItem({ href: "/d/workspace", label: "Workspace" })}
             {navItem({ href: "/d/settings", label: "Settings" })}
           </nav>
         </>
@@ -194,7 +195,11 @@ export function Sidebar({
             {wsOpen && (
               <>
                 <div className="fixed inset-0 z-40" onClick={() => setWsOpen(false)} />
-                <div className="absolute left-0 z-50 mt-2 w-64 rounded-2xl border border-black/[.08] bg-white/95 p-2 shadow-[0_16px_48px_rgba(0,0,0,.12)] backdrop-blur-xl">
+                {/* Opens upward: this card is pinned to the bottom of a full-height
+                    sidebar, so a downward panel would run off the viewport.
+                    Width tracks the card (left-0 right-0) rather than a fixed
+                    w-64, which overhung the 15rem sidebar. */}
+                <div className="absolute bottom-full left-0 right-0 z-50 mb-2 max-h-[60vh] overflow-y-auto rounded-2xl border border-black/[.08] bg-white/95 p-2 shadow-[0_16px_48px_rgba(0,0,0,.12)] backdrop-blur-xl">
                   <p className="px-2 pb-1 pt-1 text-[0.6875rem] uppercase tracking-[0.12rem] text-[#090b0c]/40">
                     Workspaces
                   </p>
