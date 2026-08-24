@@ -1,8 +1,8 @@
-import { NextRequest } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 
 import { getCurrentUser, getCurrentUserOrToken } from "@/lib/auth/server-auth";
 import { assertVideoQuota, assertDurationAllowed } from "@/lib/billing/plans";
-import { ok, fail, handleApiError } from "@/lib/shared/api-response";
+import { fail, handleApiError } from "@/lib/shared/api-response";
 import { UploadService } from "@/lib/services/upload.service";
 
 /**
@@ -76,7 +76,10 @@ export async function POST(request: NextRequest) {
       thumbnail,
     );
 
-    return ok({ url: result.url, video: result.video, service: "bunny" }, 201);
+    return NextResponse.json(
+      { success: true, url: result.url, video: result.video, service: "bunny" },
+      { status: 201 },
+    );
   } catch (error) {
     return handleApiError(error, "POST /api/upload");
   }
