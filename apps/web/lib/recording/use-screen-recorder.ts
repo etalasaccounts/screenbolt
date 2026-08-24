@@ -261,7 +261,7 @@ export function useScreenRecorder({ onScreenShareEnded }: UseScreenRecorderArgs 
     ]);
     recorderStreamRef.current = combined;
 
-    const mimeType = pickSupportedMimeType();
+    const mimeType = pickSupportedMimeType(combined);
     let recorder: MediaRecorder;
     try {
       recorder = mimeType ? new MediaRecorder(combined, { mimeType }) : new MediaRecorder(combined);
