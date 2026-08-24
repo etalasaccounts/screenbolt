@@ -19,7 +19,7 @@ const FAQS = [
   },
   {
     q: "What's included in the free plan?",
-    a: "Up to 25 videos with screen and camera recording, instant sharing, and basic analytics — free forever.",
+    a: "Up to 25 videos with screen and camera recording, instant sharing, and view counts with a time-saved estimate — free forever.",
   },
 ];
 

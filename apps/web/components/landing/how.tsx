@@ -4,7 +4,7 @@ const STEPS = [
   { n: "01", title: "Record", body: "Capture your screen, camera, and voice in one click." },
   { n: "02", title: "Edit", body: "Trim, add chapters, and remove filler words automatically." },
   { n: "03", title: "Share", body: "Copy a link and drop it anywhere — no downloads, no accounts." },
-  { n: "04", title: "Get feedback", body: "See who watched, with reactions and comments in real time." },
+  { n: "04", title: "Get feedback", body: "See who watched, and collect comments right on the video." },
 ];
 
 export function How() {

@@ -33,10 +33,13 @@ function CountUp({ to, className }: { to: number; className?: string }) {
   );
 }
 
+// Every figure here maps to something Screenbolt actually records: how many
+// recordings got watched, how many people watched them, and how long they ran.
+// Nothing on this page should promise a number the dashboard cannot show.
 const BARS = [
-  { label: "Watch time", value: "8,200 min", width: "75%", color: "linear-gradient(90deg,#1DC47D 60.8%,rgba(29,196,125,0) 100%)" },
-  { label: "Unique viewers", value: "4,250", width: "45%", color: "linear-gradient(90deg,#B48F17 55.74%,rgba(180,143,23,0) 100%)" },
-  { label: "Shares", value: "1,860", width: "60%", color: "linear-gradient(90deg,#fff 52.46%,rgba(255,255,255,0) 100%)" },
+  { label: "Recordings watched", value: "18", width: "60%", color: "linear-gradient(90deg,#1DC47D 60.8%,rgba(29,196,125,0) 100%)" },
+  { label: "People who watched", value: "47", width: "75%", color: "linear-gradient(90deg,#B48F17 55.74%,rgba(180,143,23,0) 100%)" },
+  { label: "Total recorded", value: "96 min", width: "45%", color: "linear-gradient(90deg,#fff 52.46%,rgba(255,255,255,0) 100%)" },
 ];
 
 export function Analytics() {
@@ -47,21 +50,21 @@ export function Analytics() {
     >
       <div className="mb-16 text-center">
         <div className="mb-4 text-[0.75rem] font-normal uppercase tracking-[0.125rem] text-[#090b0c]/50">
-          ANALYTICS
+          TIME SAVED
         </div>
         <Reveal y={30} blur={12} duration={800}>
           <h2 className="m-0 text-[#090b0c]">
             <span className="block text-[3.5rem] font-normal leading-none tracking-tight md:text-[4.5rem]">
-              See how your videos
+              See the meetings you
             </span>
             <span className="block font-serif-italic text-[3.5rem] leading-none tracking-tight md:text-[4.5rem]">
-              perform at a glance
+              never had to hold
             </span>
           </h2>
         </Reveal>
         <Reveal y={20} blur={8} delay={200} duration={800}>
           <p className="mt-4 text-[1rem] font-normal text-[#090b0c]/60">
-            Track views, watch time, and engagement in real time.
+            Every recording someone watches is a meeting that didn&apos;t happen. Screenbolt adds up the hours.
           </p>
         </Reveal>
       </div>
@@ -78,10 +81,13 @@ export function Analytics() {
 
           <div className="absolute left-8 right-8 top-8 z-[2] rounded-[20px] border px-7 py-6" style={{ borderColor: "rgba(255,255,255,.20)", background: "rgba(255,255,255,.10)", backdropFilter: "blur(56px)" }}>
             <div className="mb-2 flex items-center justify-between">
-              <span className="text-[0.6875rem] font-normal tracking-[0.09375rem] text-white/60">VIEWS THIS MONTH</span>
-              <span className="text-[0.6875rem] font-normal tracking-[0.09375rem] text-white/60 underline">LAST 30 DAYS</span>
+              <span className="text-[0.6875rem] font-normal tracking-[0.09375rem] text-white/60">MINUTES SAVED</span>
+              <span className="text-[0.6875rem] font-normal tracking-[0.09375rem] text-white/60 underline">LAST 3 MONTHS</span>
             </div>
-            <CountUp to={12480} className="mb-6 text-[2.625rem] font-normal tracking-tight text-white tabular-nums" />
+            <div className="mb-6 flex items-baseline gap-2">
+              <CountUp to={214} className="text-[2.625rem] font-normal tracking-tight text-white tabular-nums" />
+              <span className="text-[0.9375rem] text-white/55">minutes</span>
+            </div>
             <div className="mb-5 w-full border-t border-dashed border-white/20" />
 
             {BARS.map((bar) => (
@@ -100,10 +106,10 @@ export function Analytics() {
 
           <div className="absolute bottom-[22px] left-8 right-8 z-[2]">
             <h3 className="mb-2 text-[1.625rem] font-serif-italic tracking-tight text-white">
-              See the full picture of your video performance.
+              Know what your recordings gave back.
             </h3>
             <p className="m-0 text-[0.8125rem] font-normal leading-[1.6] text-white/65">
-              Screenbolt tracks every view and every minute watched, so you always know what&apos;s landing with your audience.
+              Screenbolt counts who actually watched each recording and turns it into time your team didn&apos;t spend in a call. Estimated from video length &times; viewers.
             </p>
           </div>
         </Reveal>
@@ -120,10 +126,10 @@ export function Analytics() {
 
           <div className="absolute left-8 top-8 z-[2] w-[200px] rounded-2xl bg-white px-[18px] py-4 shadow-2xl">
             <div className="flex items-start justify-between">
-              <CountUp to={925} className="text-[1.375rem] font-normal tracking-tight text-black tabular-nums" />
+              <CountUp to={12} className="text-[1.375rem] font-normal tracking-tight text-black tabular-nums" />
               <Icon icon="solar:info-circle-linear" style={{ fontSize: "1rem", color: "rgba(0,0,0,.35)" }} />
             </div>
-            <div className="mb-3.5 text-[0.75rem] text-black/45">Views today</div>
+            <div className="mb-3.5 text-[0.75rem] text-black/45">People watched</div>
             <button className="flex w-full items-center justify-between rounded-full bg-black py-2.5 pl-3.5 pr-2 text-[0.8125rem] font-normal text-white">
               View video
               <span className="flex h-6 w-6 items-center justify-center rounded-full bg-white/15">
@@ -151,7 +157,7 @@ export function Analytics() {
           <div className="absolute bottom-[22px] left-8 right-8 z-[2]">
             <h3 className="mb-2 text-[1.5rem] font-serif-italic tracking-tight text-white">Record. Share. Done.</h3>
             <p className="m-0 text-[0.8125rem] font-normal leading-[1.6] text-white/65">
-              Share your recording as a link in one click and see who&apos;s watching in real time.
+              Share your recording as a link in one click and see who&apos;s watched it.
             </p>
           </div>
         </Reveal>

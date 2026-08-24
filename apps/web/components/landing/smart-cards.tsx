@@ -16,7 +16,7 @@ const QUESTIONS = [
   },
   {
     q: "What should I title this?",
-    a: "I'd suggest \"New onboarding walkthrough — 2 min\" based on the topics covered and average watch time.",
+    a: "I'd suggest \"New onboarding walkthrough — 2 min\" based on the topics covered.",
   },
 ];
 
@@ -235,7 +235,7 @@ export function SmartCards() {
 
         <div className="absolute bottom-7 left-6 right-6 z-[2]">
           <h3 className="mb-2 text-[1.625rem] font-serif-italic tracking-tight text-white">Ask your videos anything</h3>
-          <p className="text-[0.8125rem] font-normal leading-[1.6] text-white/65">Type a question and Screenbolt&apos;s AI answers from your video&apos;s transcript and viewer data.</p>
+          <p className="text-[0.8125rem] font-normal leading-[1.6] text-white/65">Type a question and Screenbolt&apos;s AI answers from your video&apos;s transcript.</p>
         </div>
       </Reveal>
 
@@ -260,8 +260,13 @@ export function SmartCards() {
         </div>
 
         <div className="absolute bottom-7 left-6 right-6 z-[2]">
-          <h3 className="mb-2 text-[1.625rem] font-serif-italic tracking-tight text-white">Viewer Insights</h3>
-          <p className="text-[0.8125rem] font-normal leading-[1.6] text-white/65">See where viewers watch, rewatch, and drop off — so you can make tighter videos.</p>
+          <div className="mb-2 flex items-center gap-2">
+            <h3 className="text-[1.625rem] font-serif-italic tracking-tight text-white">Viewer Insights</h3>
+            <span className="rounded-full border border-white/25 bg-white/10 px-2.5 py-1 text-[0.625rem] font-normal uppercase tracking-[0.08rem] text-white/75">
+              Coming soon
+            </span>
+          </div>
+          <p className="text-[0.8125rem] font-normal leading-[1.6] text-white/65">Next up: see where viewers watch, rewatch, and drop off — so you can make tighter videos.</p>
         </div>
       </Reveal>
 
