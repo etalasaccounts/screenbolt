@@ -6,6 +6,7 @@ import { makeRecordingAttemptId } from "../../utils/errorCodes";
 import { lifecycle } from "../../utils/lifecycleLog";
 import { sweepRecorderTabs } from "./sweepRecorderTabs";
 import { emitRecordingTelemetry } from "./emitRecordingTelemetry";
+import { fetchPlanLimits } from "./recordingLimits.js";
 
 // `recording` flag isn't set until the recorder iframe inits (seconds later),
 // so countdown-finished + 8s fallback can both fire and open two recorder tabs
@@ -463,6 +464,10 @@ const _startRecordingInner = async (caller) => {
     }, 2500);
   });
   chrome.action.setIcon({ path: "assets/recording-logo.png" });
+  // Fetch plan limits on recording start so the keepalive alarm can enforce duration caps.
+  fetchPlanLimits().then((limits) => {
+    chrome.storage.local.set({ planLimits: limits });
+  }).catch(() => {});
   // chrome.alarms 30s minimum in prod; sub-30s silently bumps or never fires
   if (alarm) {
     const seconds = parseFloat(alarmTime);
