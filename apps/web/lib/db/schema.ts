@@ -147,6 +147,27 @@ export const workspaceInvites = pgTable("workspace_invites", {
 
 export const sourceEnum = pgEnum("source", ["local", "bunny", "drive", "dropbox"]);
 
+export const planEnum = pgEnum("plan", ["free", "pro", "business"]);
+export const subscriptionStatusEnum = pgEnum("subscription_status", ["active", "expired", "cancelled"]);
+
+export const subscriptions = pgTable("subscriptions", {
+  id: text("id")
+    .primaryKey()
+    .$defaultFn(() => crypto.randomUUID()),
+  userId: text("user_id")
+    .notNull()
+    .unique()
+    .references(() => users.id, { onDelete: "cascade" }),
+  plan: planEnum("plan").default("free").notNull(),
+  status: subscriptionStatusEnum("status").default("active").notNull(),
+  midtransOrderId: text("midtrans_order_id").unique(),
+  midtransTransactionId: text("midtrans_transaction_id"),
+  currentPeriodStart: timestamp("current_period_start", { withTimezone: true, mode: "date" }),
+  currentPeriodEnd: timestamp("current_period_end", { withTimezone: true, mode: "date" }),
+  createdAt: timestamp("created_at", { withTimezone: true, mode: "date" }).defaultNow().notNull(),
+  updatedAt: timestamp("updated_at", { withTimezone: true, mode: "date" }).defaultNow().notNull(),
+});
+
 export const pairingStatusEnum = pgEnum("pairing_status", ["pending", "approved", "expired"]);
 
 export const videos = pgTable("videos", {
@@ -258,11 +279,12 @@ export const authSchema = {
 // Relational query API (db.query.*)
 // ---------------------------------------------------------------------------
 
-export const usersRelations = relations(users, ({ many }) => ({
+export const usersRelations = relations(users, ({ many, one }) => ({
   workspaces: many(workspaces),
   videos: many(videos),
   videoViews: many(videoViews),
   comments: many(comments),
+  subscription: one(subscriptions, { fields: [users.id], references: [subscriptions.userId] }),
 }));
 
 export const workspacesRelations = relations(workspaces, ({ one, many }) => ({
@@ -319,3 +341,9 @@ export type DeviceToken = typeof deviceTokens.$inferSelect;
 export type PairingRequest = typeof pairingRequests.$inferSelect;
 export type WorkspaceMember = typeof workspaceMembers.$inferSelect;
 export type WorkspaceInvite = typeof workspaceInvites.$inferSelect;
+
+export const subscriptionsRelations = relations(subscriptions, ({ one }) => ({
+  user: one(users, { fields: [subscriptions.userId], references: [users.id] }),
+}));
+
+export type Subscription = typeof subscriptions.$inferSelect;
