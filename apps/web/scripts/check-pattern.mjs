@@ -100,6 +100,11 @@ const EXEMPT = {
     reason:
       "Public endpoint: Midtrans payment notification webhook. Authentication is performed via SHA512 signature verification on the payload rather than a user session.",
   },
+  "app\\api\\billing\\cron\\route.ts": {
+    rules: ["auth", "envelope", "no-manual-status"],
+    reason:
+      "Bearer-token-secured cron endpoint: called by an external scheduler with Authorization: Bearer <CRON_SECRET>. No user session exists; authentication is the shared secret rather than a user session. Response shape is a plain { ok: true } or { error } rather than the ok()/fail() envelope.",
+  },
 };
 
 /**

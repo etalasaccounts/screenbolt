@@ -1,6 +1,6 @@
 import { getUserPlan, getPlanLimits, type PlanLimits } from "@/lib/billing/plans";
 import { createSnapToken, verifyWebhookSignature } from "@/lib/billing/midtrans";
-import { upsertSubscription } from "@/lib/db/subscriptions";
+import { upsertSubscription, expireSubscriptions } from "@/lib/db/subscriptions";
 
 const PLAN_PRICES: Record<"pro" | "business", number> = {
   pro: 50000,
@@ -89,5 +89,9 @@ export class BillingService {
     }
 
     return { valid: true };
+  }
+
+  static async runDailyExpiry(): Promise<void> {
+    await expireSubscriptions();
   }
 }
