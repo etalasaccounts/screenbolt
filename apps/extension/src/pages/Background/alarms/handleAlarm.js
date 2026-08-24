@@ -21,6 +21,7 @@ import {
   PAIRING_POLL_ALARM,
 } from "./alarmConstants";
 import { runPairingAlarmBackstop } from "../pairing/pairingClient";
+import { checkDurationLimit } from "../recording/recordingLimits.js";
 
 export { FIRST_CHUNK_WATCHDOG_ALARM, RECORDER_KEEPALIVE_ALARM };
 
@@ -138,6 +139,28 @@ export const handleAlarm = async (alarm) => {
         type: "recorder-keepalive-ping",
       });
     } catch {}
+
+    // Duration limit enforcement: check elapsed time against plan limits on every tick.
+    if (snap.recording) {
+      try {
+        const { planLimits, recordingStartTime } = await chrome.storage.local.get([
+          "planLimits",
+          "recordingStartTime",
+        ]);
+        const maxDuration = planLimits?.maxDurationSeconds ?? 300;
+        if (recordingStartTime && checkDurationLimit(Number(recordingStartTime), maxDuration)) {
+          stopRecording();
+          const minutes = Math.round(maxDuration / 60);
+          chrome.notifications.create({
+            type: "basic",
+            iconUrl: "assets/logo.png",
+            title: "Recording limit reached",
+            message: `Your plan allows recordings up to ${minutes} minute${minutes !== 1 ? "s" : ""}. Upgrade to record longer.`,
+          });
+          return;
+        }
+      } catch {}
+    }
 
     const WATCHDOG_STALE_MS = 90_000; // chunks arrive every 2s; 45x headroom
     const notReady = !snap.firstChunkAt;
