@@ -2,6 +2,7 @@ import { NextRequest } from "next/server";
 import { z } from "zod";
 
 import { getCurrentUser, getCurrentUserOrToken } from "@/lib/auth/server-auth";
+import { assertVideoQuota, assertDurationAllowed } from "@/lib/billing/plans";
 import { UploadService } from "@/lib/services/upload.service";
 import { ok, handleApiError, fail } from "@/lib/shared/api-response";
 
@@ -51,10 +52,16 @@ export async function POST(request: NextRequest) {
       return fail("Storage is not configured (BUNNY_STORAGE_ZONE/BUNNY_STORAGE_ACCESS_KEY/BUNNY_PULL_ZONE_HOST missing)", "SERVICE_UNAVAILABLE", 503);
     }
 
+    await assertVideoQuota(user.id);
+
     const body = await request.json();
     const parsed = completeSchema.safeParse(body);
     if (!parsed.success) {
       return fail("Validation error", "VALIDATION_ERROR", 400);
+    }
+
+    if (parsed.data.duration != null) {
+      await assertDurationAllowed(user.id, parsed.data.duration);
     }
 
     const result = await UploadService.completeChunkedUpload(
