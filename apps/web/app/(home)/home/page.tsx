@@ -7,10 +7,11 @@ import { Icon } from "@iconify/react";
 import { VideoCard } from "@/components/shell/video-card";
 import { UploadButton } from "@/components/shell/upload-button";
 import { useVideos } from "@/lib/hooks/use-videos";
+import { TimeSavedBanner } from "@/components/shell/time-saved-banner";
 
 export default function HomePage() {
   const router = useRouter();
-  const { data: videos, isLoading, error } = useVideos();
+  const { data, isLoading, error } = useVideos();
 
   useEffect(() => {
     if (error instanceof Error && error.message === "NO_ACTIVE_WORKSPACE") {
@@ -18,13 +19,15 @@ export default function HomePage() {
     }
   }, [error, router]);
 
-  if (isLoading || !videos) {
+  if (isLoading || !data) {
     return (
       <div className="flex items-center justify-center py-24">
         <Icon icon="solar:refresh-linear" className="animate-spin text-[#090b0c]/30" style={{ fontSize: "1.5rem" }} />
       </div>
     );
   }
+
+  const { videos, timeSaved } = data;
 
   return (
     <div>
@@ -47,6 +50,8 @@ export default function HomePage() {
           <UploadButton />
         </div>
       </div>
+
+      <TimeSavedBanner timeSaved={timeSaved} />
 
       {videos.length === 0 ? (
         <div className="flex flex-col items-center justify-center rounded-3xl border border-black/[.08] bg-white px-6 py-24 text-center">

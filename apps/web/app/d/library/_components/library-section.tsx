@@ -9,7 +9,7 @@ import { LibraryView } from "./library-view";
 
 export function LibrarySection() {
   const router = useRouter();
-  const { data: videos, isLoading, error } = useVideos();
+  const { data, isLoading, error } = useVideos();
 
   useEffect(() => {
     if (error instanceof Error && error.message === "NO_ACTIVE_WORKSPACE") {
@@ -18,7 +18,7 @@ export function LibrarySection() {
   }, [error, router]);
 
   // Loading state - show skeleton
-  if (isLoading || !videos) {
+  if (isLoading || !data) {
     return <LibrarySkeleton />;
   }
 
@@ -33,5 +33,5 @@ export function LibrarySection() {
   }
 
   // Success state - render dumb view component
-  return <LibraryView videos={videos} />;
+  return <LibraryView videos={data.videos} timeSaved={data.timeSaved} />;
 }

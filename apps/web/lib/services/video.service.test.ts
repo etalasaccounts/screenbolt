@@ -26,8 +26,10 @@ vi.mock('@/lib/db/comments', () => ({
   createComment: vi.fn(),
 }));
 
-// Mock the shared utilities
-vi.mock('@/lib/shared/video', () => ({
+// Mock only the title generator; countExternalViewers and calculateTimeSaved are
+// pure domain logic and are exercised for real.
+vi.mock('@/lib/shared/video', async (importOriginal) => ({
+  ...(await importOriginal<typeof import('@/lib/shared/video')>()),
   generateVideoTitleWithTimestamp: vi.fn(() => 'Recording 2024-01-01 12:00:00'),
 }));
 
@@ -65,6 +67,9 @@ describe('VideoService', () => {
   });
 
   describe('listVideos', () => {
+    const OWNER = 'user-1';
+    const recent = new Date();
+
     it('returns videos with view count calculated from videoViews array', async () => {
       mockGetVideos.mockResolvedValueOnce([
         {
@@ -74,22 +79,23 @@ describe('VideoService', () => {
           thumbnailUrl: 'https://example.com/thumb1.jpg',
           duration: 60,
           source: 'bunny',
+          userId: OWNER,
           createdAt: new Date('2024-01-01'),
           updatedAt: new Date('2024-01-01'),
           videoViews: [
-            { id: 'view-1' },
-            { id: 'view-2' },
-            { id: 'view-3' },
+            { id: 'view-1', userId: 'viewer-a', viewedAt: recent },
+            { id: 'view-2', userId: 'viewer-b', viewedAt: recent },
+            { id: 'view-3', userId: null, viewedAt: recent },
           ],
-          user: { id: 'user-1', name: 'Test User' },
+          user: { id: OWNER, name: 'Test User' },
           workspace: { id: 'ws-1', name: 'Personal' },
         },
       ] as any);
 
       const result = await VideoService.listVideos('ws-1');
 
-      expect(result).toHaveLength(1);
-      expect(result[0]).toEqual({
+      expect(result.videos).toHaveLength(1);
+      expect(result.videos[0]).toEqual({
         id: 'v-1',
         title: 'Video 1',
         videoUrl: 'https://example.com/video1.mp4',
@@ -99,9 +105,35 @@ describe('VideoService', () => {
         createdAt: new Date('2024-01-01'),
         updatedAt: new Date('2024-01-01'),
         views: 3,
-        user: { id: 'user-1', name: 'Test User' },
+        user: { id: OWNER, name: 'Test User' },
         workspace: { id: 'ws-1', name: 'Personal' },
       });
+    });
+
+    it('excludes the owner from the view count', async () => {
+      mockGetVideos.mockResolvedValueOnce([
+        {
+          id: 'v-1',
+          title: 'Video 1',
+          videoUrl: 'https://example.com/video1.mp4',
+          thumbnailUrl: null,
+          duration: 60,
+          source: 'bunny',
+          userId: OWNER,
+          createdAt: new Date('2024-01-01'),
+          updatedAt: new Date('2024-01-01'),
+          videoViews: [
+            { id: 'view-1', userId: OWNER, viewedAt: recent },
+            { id: 'view-2', userId: 'viewer-a', viewedAt: recent },
+          ],
+          user: { id: OWNER },
+          workspace: { id: 'ws-1' },
+        },
+      ] as any);
+
+      const result = await VideoService.listVideos('ws-1');
+
+      expect(result.videos[0].views).toBe(1);
     });
 
     it('correctly calculates views count as zero for video with no views', async () => {
@@ -113,25 +145,28 @@ describe('VideoService', () => {
           thumbnailUrl: null,
           duration: 120,
           source: 'local',
+          userId: OWNER,
           createdAt: new Date('2024-01-01'),
           updatedAt: new Date('2024-01-01'),
           videoViews: [],
-          user: { id: 'user-1' },
+          user: { id: OWNER },
           workspace: { id: 'ws-1' },
         },
       ] as any);
 
       const result = await VideoService.listVideos('ws-1');
 
-      expect(result[0].views).toBe(0);
+      expect(result.videos[0].views).toBe(0);
     });
 
-    it('returns empty array when workspace has no videos', async () => {
+    it('returns empty list and zero time saved when workspace has no videos', async () => {
       mockGetVideos.mockResolvedValueOnce([]);
 
       const result = await VideoService.listVideos('ws-1');
 
-      expect(result).toEqual([]);
+      expect(result.videos).toEqual([]);
+      expect(result.timeSaved.seconds).toBe(0);
+      expect(result.timeSaved.videoCount).toBe(0);
     });
 
     it('maps multiple videos with correct view counts', async () => {
@@ -143,10 +178,11 @@ describe('VideoService', () => {
           thumbnailUrl: null,
           duration: 60,
           source: 'bunny',
+          userId: OWNER,
           createdAt: new Date('2024-01-01'),
           updatedAt: new Date('2024-01-01'),
-          videoViews: [{ id: 'view-1' }],
-          user: { id: 'user-1' },
+          videoViews: [{ id: 'view-1', userId: 'viewer-a', viewedAt: recent }],
+          user: { id: OWNER },
           workspace: { id: 'ws-1' },
         },
         {
@@ -156,19 +192,52 @@ describe('VideoService', () => {
           thumbnailUrl: null,
           duration: 120,
           source: 'drive',
+          userId: OWNER,
           createdAt: new Date('2024-01-02'),
           updatedAt: new Date('2024-01-02'),
-          videoViews: [{ id: 'view-2' }, { id: 'view-3' }],
-          user: { id: 'user-1' },
+          videoViews: [
+            { id: 'view-2', userId: 'viewer-a', viewedAt: recent },
+            { id: 'view-3', userId: 'viewer-b', viewedAt: recent },
+          ],
+          user: { id: OWNER },
           workspace: { id: 'ws-1' },
         },
       ] as any);
 
       const result = await VideoService.listVideos('ws-1');
 
-      expect(result).toHaveLength(2);
-      expect(result[0].views).toBe(1);
-      expect(result[1].views).toBe(2);
+      expect(result.videos).toHaveLength(2);
+      expect(result.videos[0].views).toBe(1);
+      expect(result.videos[1].views).toBe(2);
+    });
+
+    it('reports time saved as video length times outside viewers', async () => {
+      mockGetVideos.mockResolvedValueOnce([
+        {
+          id: 'v-1',
+          title: 'Video 1',
+          videoUrl: 'https://example.com/video1.mp4',
+          thumbnailUrl: null,
+          duration: 300, // 5 minutes
+          source: 'bunny',
+          userId: OWNER,
+          createdAt: new Date('2024-01-01'),
+          updatedAt: new Date('2024-01-01'),
+          videoViews: [
+            { id: 'view-1', userId: OWNER, viewedAt: recent },
+            { id: 'view-2', userId: 'viewer-a', viewedAt: recent },
+            { id: 'view-3', userId: 'viewer-b', viewedAt: recent },
+          ],
+          user: { id: OWNER },
+          workspace: { id: 'ws-1' },
+        },
+      ] as any);
+
+      const result = await VideoService.listVideos('ws-1');
+
+      // 5 minutes x 2 outside viewers; the owner's own view does not count.
+      expect(result.timeSaved.seconds).toBe(600);
+      expect(result.timeSaved.videoCount).toBe(1);
     });
   });
 

@@ -18,27 +18,38 @@ import {
   recordVideoView,
 } from '@/lib/db/videos';
 import { createComment as dbCreateComment } from '@/lib/db/comments';
-import { generateVideoTitleWithTimestamp } from '@/lib/shared/video';
+import {
+  generateVideoTitleWithTimestamp,
+  calculateTimeSaved,
+  countExternalViewers,
+} from '@/lib/shared/video';
 
 export class VideoService {
   /**
-   * List all videos in a workspace, serialized for API response.
+   * List all videos in a workspace, serialized for API response, plus the
+   * workspace's time-saved estimate (see lib/shared/video.ts for the formula).
    */
   static async listVideos(workspaceId: string) {
     const videos = await getVideos(workspaceId);
-    return videos.map((v) => ({
-      id: v.id,
-      title: v.title,
-      videoUrl: v.videoUrl,
-      thumbnailUrl: v.thumbnailUrl,
-      duration: v.duration,
-      source: v.source,
-      createdAt: v.createdAt,
-      updatedAt: v.updatedAt,
-      views: v.videoViews.length,
-      user: v.user,
-      workspace: v.workspace,
-    }));
+
+    return {
+      videos: videos.map((v) => ({
+        id: v.id,
+        title: v.title,
+        videoUrl: v.videoUrl,
+        thumbnailUrl: v.thumbnailUrl,
+        duration: v.duration,
+        source: v.source,
+        createdAt: v.createdAt,
+        updatedAt: v.updatedAt,
+        // Owner excluded: "12 views" should mean twelve other people, not
+        // eleven plus you re-opening your own recording.
+        views: countExternalViewers(v.videoViews, v.userId),
+        user: v.user,
+        workspace: v.workspace,
+      })),
+      timeSaved: calculateTimeSaved(videos),
+    };
   }
 
   /**

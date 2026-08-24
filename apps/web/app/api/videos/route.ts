@@ -23,9 +23,9 @@ export async function GET() {
       return fail("No active workspace", "NO_ACTIVE_WORKSPACE", 400);
     }
 
-    const videos = await VideoService.listVideos(user.activeWorkspaceId);
+    const { videos, timeSaved } = await VideoService.listVideos(user.activeWorkspaceId);
 
-    return ok({ videos });
+    return ok({ videos, timeSaved });
   } catch (error) {
     return handleApiError(error, "GET /api/videos");
   }

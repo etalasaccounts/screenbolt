@@ -4,6 +4,7 @@ import { z } from "zod";
 import { getCurrentUser } from "@/lib/auth/server-auth";
 import { VideoService } from "@/lib/services/video.service";
 import { ok, handleApiError, fail } from "@/lib/shared/api-response";
+import { countExternalViewers } from "@/lib/shared/video";
 
 type RouteContext = { params: Promise<{ id: string }> };
 
@@ -16,7 +17,12 @@ const updateSchema = z.object({
   isPublic: z.boolean().optional(),
 });
 
-function serialize(video: Record<string, unknown> & { videoViews?: Array<{ id: string }> }) {
+function serialize(
+  video: Record<string, unknown> & {
+    userId?: string;
+    videoViews?: Array<{ userId: string | null; viewedAt: Date }>;
+  },
+) {
   return {
     id: video.id,
     title: video.title,
@@ -27,7 +33,8 @@ function serialize(video: Record<string, unknown> & { videoViews?: Array<{ id: s
     isPublic: video.isPublic,
     createdAt: video.createdAt,
     updatedAt: video.updatedAt,
-    views: video.videoViews?.length ?? 0,
+    // Owner excluded, so the count means "other people who watched".
+    views: video.videoViews ? countExternalViewers(video.videoViews, video.userId ?? "") : 0,
     user: video.user,
     workspace: video.workspace,
     comments: video.comments,

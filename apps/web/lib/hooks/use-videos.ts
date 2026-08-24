@@ -11,14 +11,25 @@ interface VideoListItem {
   user: { name: string | null; email: string | null } | null;
 }
 
-async function fetchVideos(): Promise<VideoListItem[]> {
+interface TimeSaved {
+  seconds: number;
+  videoCount: number;
+  windowDays: number;
+}
+
+interface VideoLibrary {
+  videos: VideoListItem[];
+  timeSaved: TimeSaved;
+}
+
+async function fetchVideos(): Promise<VideoLibrary> {
   const res = await fetch("/api/videos");
   if (res.status === 400) {
     throw new Error("NO_ACTIVE_WORKSPACE");
   }
   if (!res.ok) throw new Error("Failed to load videos");
   const body = await res.json();
-  return body.data.videos;
+  return { videos: body.data.videos, timeSaved: body.data.timeSaved };
 }
 
 export function useVideos() {

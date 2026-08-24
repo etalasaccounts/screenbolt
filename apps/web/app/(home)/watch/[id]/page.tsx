@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import { VideoService } from "@/lib/services/video.service";
 import { getCurrentUser } from "@/lib/auth/server-auth";
 import { formatDate, formatDuration, getUserInitials } from "@/lib/client/format";
+import { countExternalViewers } from "@/lib/shared/video";
 import { VideoPlayer } from "@/components/shell/video-player";
 import { ViewTracker } from "@/components/shell/view-tracker";
 import { CommentSection, type SerializedComment } from "@/components/shell/comment-section";
@@ -97,6 +98,9 @@ export default async function WatchPage({
 
   const playbackUrl = video.videoUrl;
 
+  // The owner opening their own recording is not an audience.
+  const viewerCount = countExternalViewers(video.videoViews, video.user.id);
+
   return (
     <div className="mx-auto max-w-4xl">
       <ViewTracker videoId={video.id} />
@@ -125,7 +129,7 @@ export default async function WatchPage({
             ) : null}
             <span>·</span>
             <span>
-              {video.videoViews.length} {video.videoViews.length === 1 ? "view" : "views"}
+              {viewerCount} {viewerCount === 1 ? "view" : "views"}
             </span>
           </div>
         </div>

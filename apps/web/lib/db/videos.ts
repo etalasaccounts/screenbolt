@@ -15,8 +15,10 @@ export async function getVideos(workspaceId: string) {
       workspace: {
         columns: { id: true, name: true },
       },
+      // userId and viewedAt are needed to attribute views: the owner's own views
+      // are excluded from counts, and time-saved is windowed by date.
       videoViews: {
-        columns: { id: true },
+        columns: { id: true, userId: true, viewedAt: true },
       },
     },
   });
@@ -33,8 +35,10 @@ export async function getVideo(id: string) {
         workspace: {
           columns: { id: true, name: true },
         },
+        // userId and viewedAt are needed to attribute views: the owner's own views
+        // are excluded from counts, and time-saved is windowed by date.
         videoViews: {
-          columns: { id: true },
+          columns: { id: true, userId: true, viewedAt: true },
         },
       },
     })) ?? null

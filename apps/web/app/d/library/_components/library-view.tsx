@@ -1,6 +1,12 @@
 import { Icon } from "@iconify/react";
 import { VideoCard } from "@/components/shell/video-card";
 import { UploadButton } from "@/components/shell/upload-button";
+import { TimeSavedBanner, type TimeSaved } from "@/components/shell/time-saved-banner";
+
+interface LibraryViewProps {
+  videos: Video[];
+  timeSaved: TimeSaved;
+}
 
 interface Video {
   id: string;
@@ -13,11 +19,7 @@ interface Video {
   user: { name: string | null; email: string | null } | null;
 }
 
-interface LibraryViewProps {
-  videos: Video[];
-}
-
-export function LibraryView({ videos }: LibraryViewProps) {
+export function LibraryView({ videos, timeSaved }: LibraryViewProps) {
   return (
     <div>
       <div className="mb-9 flex flex-col gap-6 border-b border-black/[.07] pb-8 sm:flex-row sm:items-end sm:justify-between">
@@ -39,6 +41,8 @@ export function LibraryView({ videos }: LibraryViewProps) {
           <UploadButton />
         </div>
       </div>
+
+      <TimeSavedBanner timeSaved={timeSaved} />
 
       {videos.length === 0 ? (
         <div className="flex flex-col items-center justify-center rounded-3xl border border-black/[.08] bg-white px-6 py-24 text-center">
