@@ -11,6 +11,7 @@ import { authSchema } from "@/lib/db/schema";
 import { authConfig } from "@/lib/auth/config";
 import { getUserByEmail } from "@/lib/db/users";
 import { ensureActiveWorkspace } from "@/lib/db/workspaces";
+import { upsertSubscription } from "@/lib/db/subscriptions";
 
 const credentialsSchema = z.object({
   email: z.string().email(),
@@ -72,6 +73,18 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         await ensureActiveWorkspace(user.id);
       } catch (error) {
         console.error("Failed to provision Personal workspace:", error);
+      }
+      try {
+        await upsertSubscription({
+          userId: user.id,
+          plan: "free",
+          status: "active",
+          midtransOrderId: null,
+          currentPeriodStart: null,
+          currentPeriodEnd: null,
+        });
+      } catch (error) {
+        console.error("Failed to provision free subscription:", error);
       }
     },
   },
