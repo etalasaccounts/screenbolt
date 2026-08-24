@@ -1,6 +1,8 @@
-import { NextRequest, NextResponse } from "next/server";
+import { NextRequest } from "next/server";
 
 import { getCurrentUser, getCurrentUserOrToken } from "@/lib/auth/server-auth";
+import { assertVideoQuota, assertDurationAllowed } from "@/lib/billing/plans";
+import { ok, fail, handleApiError } from "@/lib/shared/api-response";
 import { UploadService } from "@/lib/services/upload.service";
 
 /**
@@ -24,31 +26,38 @@ export async function POST(request: NextRequest) {
   try {
     let user = await getCurrentUser();
     if (!user) user = await getCurrentUserOrToken(request);
-    if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    if (!user.activeWorkspaceId) return NextResponse.json({ error: "No active workspace" }, { status: 400 });
+    if (!user) return fail("Unauthorized", "UNAUTHORIZED", 401);
+    if (!user.activeWorkspaceId) return fail("No active workspace", "VALIDATION_ERROR", 400);
 
     if (!UploadService.checkStorageConfiguration()) {
-      return NextResponse.json(
-        { error: "Storage is not configured (BUNNY_STORAGE_ZONE/BUNNY_STORAGE_ACCESS_KEY/BUNNY_PULL_ZONE_HOST missing)" },
-        { status: 503 },
+      return fail(
+        "Storage is not configured (BUNNY_STORAGE_ZONE/BUNNY_STORAGE_ACCESS_KEY/BUNNY_PULL_ZONE_HOST missing)",
+        "SERVICE_UNAVAILABLE",
+        503,
       );
     }
+
+    await assertVideoQuota(user.id);
 
     const formData = await request.formData();
 
     const video = formData.get("video");
     if (!(video instanceof File)) {
-      return NextResponse.json({ error: "No video file provided" }, { status: 400 });
+      return fail("No video file provided", "VALIDATION_ERROR", 400);
     }
     if (video.size > MAX_SIZE) {
-      return NextResponse.json(
-        { error: `This video is too large to upload in one piece (${(video.size / 1024 / 1024).toFixed(1)}MB).` },
-        { status: 413 },
+      return fail(
+        `File too large (${(video.size / 1024 / 1024).toFixed(1)}MB). Use the chunked upload API.`,
+        "FILE_TOO_LARGE",
+        413,
       );
     }
 
     const title = (formData.get("title") as string) || undefined;
     const duration = formData.get("duration") ? Number(formData.get("duration")) : null;
+    if (duration && !isNaN(duration)) {
+      await assertDurationAllowed(user.id, duration);
+    }
     const workspaceId = (formData.get("workspaceId") as string) || user.activeWorkspaceId;
 
     // Optional thumbnail
@@ -67,20 +76,8 @@ export async function POST(request: NextRequest) {
       thumbnail,
     );
 
-    return NextResponse.json(
-      {
-        success: true,
-        url: result.url,
-        video: result.video,
-        service: "bunny",
-      },
-      { status: 201 },
-    );
+    return ok({ url: result.url, video: result.video, service: "bunny" }, 201);
   } catch (error) {
-    console.error("POST /api/upload error:", error);
-    return NextResponse.json(
-      { error: "Upload failed", details: error instanceof Error ? error.message : String(error) },
-      { status: 500 },
-    );
+    return handleApiError(error, "POST /api/upload");
   }
 }
