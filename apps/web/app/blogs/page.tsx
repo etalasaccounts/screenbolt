@@ -3,7 +3,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { Icon } from "@iconify/react";
 
-import { PublicHeader } from "@/components/shell/public-header";
+import { SiteHeader } from "@/components/shell/site-header";
 import { Footer } from "@/components/landing/footer";
 import { Reveal } from "@/components/landing/reveal";
 import { listBlogPosts } from "@/lib/blog/blog";
@@ -21,6 +21,21 @@ export const metadata: Metadata = {
     description:
       "Guides, tips, and product notes on screen recording, async communication, and sharing HD video with your team.",
     url: "https://screenbolt.com/blogs",
+    images: [
+      {
+        url: "/opengraph-image.png",
+        width: 1536,
+        height: 1024,
+        alt: "Screenbolt Blog — screen recording guides and tips",
+      },
+    ],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Screenbolt Blog — Screen Recording Guides & Tips",
+    description:
+      "Guides, tips, and product notes on screen recording, async communication, and sharing HD video with your team.",
+    images: ["/opengraph-image.png"],
   },
 };
 
@@ -53,7 +68,7 @@ export default function BlogsPage() {
   return (
     <div className="min-h-screen bg-[#f5f5f2] text-[#090b0c]">
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
-      <PublicHeader />
+      <SiteHeader />
 
       <main>
         <section className="overflow-hidden px-5 pb-16 pt-16 md:px-12 md:pt-24">
@@ -83,7 +98,7 @@ export default function BlogsPage() {
                 >
                   <Image
                     src={featured.coverImage}
-                    alt=""
+                    alt={featured.imageAlt}
                     fill
                     sizes="(max-width: 1024px) 100vw, 1280px"
                     className="absolute inset-0 z-0 object-cover transition-transform duration-700 group-hover:scale-105"
@@ -101,7 +116,7 @@ export default function BlogsPage() {
                       {featured.excerpt}
                     </p>
                     <div className="mt-2 flex items-center gap-2 text-[0.8125rem] font-normal text-white/60">
-                      <span>{formatDate(featured.publishedAt)}</span>
+                      <time dateTime={featured.publishedAt}>{formatDate(featured.publishedAt)}</time>
                       <span>·</span>
                       <span>{featured.readingTime} min read</span>
                     </div>
@@ -120,7 +135,7 @@ export default function BlogsPage() {
                     <div className="relative h-52 w-full overflow-hidden">
                       <Image
                         src={post.coverImage}
-                        alt=""
+                        alt={post.imageAlt}
                         fill
                         sizes="(max-width: 768px) 100vw, 33vw"
                         className="absolute inset-0 z-0 object-cover transition-transform duration-700 group-hover:scale-105"
@@ -140,7 +155,7 @@ export default function BlogsPage() {
                       </p>
                       <div className="mt-6 flex items-center justify-between">
                         <span className="text-[0.75rem] font-normal text-[#090b0c]/40">
-                          {formatDate(post.publishedAt)} · {post.readingTime} min
+                          <time dateTime={post.publishedAt}>{formatDate(post.publishedAt)}</time> · {post.readingTime} min
                         </span>
                         <span className="flex h-7 w-7 items-center justify-center rounded-full bg-[#090b0c] text-white transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5">
                           <Icon icon="solar:arrow-right-up-linear" style={{ fontSize: ".75rem" }} />
