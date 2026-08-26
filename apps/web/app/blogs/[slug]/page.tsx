@@ -32,6 +32,7 @@ export async function generateMetadata({
   if (!post) return {};
 
   const url = `https://screenbolt.com/blogs/${post.slug}`;
+  const ogImage = `/blog/${post.slug}-og.png`;
 
   return {
     title: post.seo.title,
@@ -50,20 +51,13 @@ export async function generateMetadata({
       publishedTime: post.publishedAt,
       modifiedTime: post.updatedAt,
       authors: [post.author.name],
-      images: [
-        {
-          url: post.ogImage,
-          width: 1536,
-          height: 1024,
-          alt: post.imageAlt,
-        },
-      ],
+      images: [{ url: ogImage, width: 1200, height: 630, alt: post.imageAlt }],
     },
     twitter: {
       card: "summary_large_image",
       title: post.seo.title,
       description: post.seo.description,
-      images: [post.ogImage],
+      images: [ogImage],
     },
   };
 }
@@ -169,7 +163,10 @@ export default async function BlogPostPage({
     "@type": "BlogPosting",
     headline: post.title,
     description: post.seo.description,
-    image: [`https://screenbolt.com${post.ogImage}`, `https://screenbolt.com${post.coverImage}`],
+    image: [
+      `https://screenbolt.com/blog/${post.slug}-og.png`,
+      `https://screenbolt.com${post.coverImage}`,
+    ],
     datePublished: post.publishedAt,
     dateModified: post.updatedAt,
     keywords: post.seo.keywords.join(", "),

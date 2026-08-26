@@ -11,9 +11,9 @@ export type BlogPost = {
   title: string;
   excerpt: string;
   coverImage: string;
-  /** Dedicated 1200x630 social-share image, distinct from the in-page cover. */
-  ogImage: string;
-  /** Descriptive alt text for the cover/OG image (accessibility + SEO). */
+  /** Descriptive alt text for the cover image (accessibility + SEO).
+   *  Social-share OG/Twitter images are generated at
+   *  app/blogs/[slug]/opengraph-image.tsx, not stored per post. */
   imageAlt: string;
   category: string;
   publishedAt: string;
