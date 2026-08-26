@@ -76,7 +76,7 @@ export function Analytics() {
           duration={800}
           className="relative min-h-[480px] flex-[1.4] overflow-hidden rounded-3xl"
         >
-          <Image src="/artwork-green-wall.webp" alt="" fill className="absolute inset-0 z-0 object-cover" />
+          <Image src="/artwork-green-wall.webp" alt="" fill sizes="(max-width: 1024px) 100vw, 55vw" className="absolute inset-0 z-0 object-cover" />
           <div className="absolute inset-0 z-[1] bg-black/[.42]" />
 
           <div className="absolute left-8 right-8 top-8 z-[2] rounded-[20px] border px-7 py-6" style={{ borderColor: "rgba(255,255,255,.20)", background: "rgba(255,255,255,.10)", backdropFilter: "blur(56px)" }}>
@@ -120,7 +120,7 @@ export function Analytics() {
           duration={800}
           className="relative min-h-[480px] flex-1 overflow-hidden rounded-3xl"
         >
-          <Image src="/artwork-blue-glass.webp" alt="" fill className="absolute inset-0 z-0 object-cover" />
+          <Image src="/artwork-blue-glass.webp" alt="" fill sizes="(max-width: 1024px) 100vw, 45vw" className="absolute inset-0 z-0 object-cover" />
           <div className="absolute inset-0 z-[1] bg-black/[.42]" />
           <div className="absolute right-6 top-6 z-[2] text-[0.6875rem] font-normal tracking-[0.09375rem] text-white/70 underline">TODAY</div>
 
@@ -147,7 +147,7 @@ export function Analytics() {
           />
           <div className="absolute bottom-[160px] right-6 z-[3] flex items-center gap-2">
             <div className="flex items-center gap-2 rounded-full py-2 pl-2.5 pr-4 backdrop-blur-md" style={{ background: "rgba(255,255,255,.15)" }}>
-              <Image src="/logo.svg" alt="" width={18} height={18} className="h-[18px] w-auto" />
+              <Image src="/logo.svg" alt="" width={613} height={93} className="h-[18px] w-auto" />
             </div>
             <button className="flex h-9 w-9 items-center justify-center rounded-full text-white backdrop-blur-md" style={{ background: "rgba(255,255,255,.15)" }}>
               <Icon icon="solar:arrow-right-up-linear" style={{ fontSize: "1rem" }} />

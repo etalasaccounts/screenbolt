@@ -8,7 +8,7 @@ const EXPLORE = [
 
 const COMPANY = [
   { href: "#", label: "About" },
-  { href: "#", label: "Blog" },
+  { href: "/blogs", label: "Blog" },
   { href: "#", label: "Careers" },
   { href: "#", label: "Contact" },
 ];
@@ -20,7 +20,7 @@ export function Footer() {
         <div className="grid gap-14 border-b border-black/15 pb-16 md:grid-cols-2 lg:grid-cols-4">
           <div className="md:col-span-2">
             <a href="#" className="flex items-center">
-              <Image src="/logo.svg" alt="Screenbolt" width={100} height={22} className="h-[22px] w-auto brightness-0" />
+              <Image src="/logo.svg" alt="Screenbolt" width={613} height={93} className="h-[22px] w-auto brightness-0" />
             </a>
             <p className="mt-6 max-w-sm text-[1.375rem] font-normal leading-snug tracking-tight text-[#090b0c]">
               The fastest way to record your screen and share it with anyone.

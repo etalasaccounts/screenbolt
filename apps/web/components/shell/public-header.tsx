@@ -12,8 +12,8 @@ export function PublicHeader() {
         <Image
           src="/logo.svg"
           alt="Screenbolt"
-          width={100}
-          height={21}
+          width={613}
+          height={93}
           className="h-[21px] w-auto brightness-0"
           priority
         />

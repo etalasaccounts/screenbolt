@@ -6,7 +6,7 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
     <div className="flex min-h-screen flex-col bg-[#f5f5f2] text-[#090b0c]">
       <header className="flex justify-center px-6 pt-10">
         <Link href="/">
-          <Image src="/logo.svg" alt="Screenbolt" width={100} height={22} className="h-[22px] w-auto brightness-0" priority />
+          <Image src="/logo.svg" alt="Screenbolt" width={613} height={93} className="h-[22px] w-auto brightness-0" priority />
         </Link>
       </header>
       <main className="flex flex-1 items-center justify-center px-6 py-10">{children}</main>

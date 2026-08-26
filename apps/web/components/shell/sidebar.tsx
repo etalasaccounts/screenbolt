@@ -132,7 +132,7 @@ export function Sidebar({
   const sidebarBody = (
     <div className="flex h-full flex-col px-5 py-6">
       <Link href={user ? "/home" : "/"} className="flex items-center">
-        <Image src="/logo.svg" alt="Screenbolt" width={100} height={21} className="h-[21px] w-auto brightness-0" priority />
+        <Image src="/logo.svg" alt="Screenbolt" width={613} height={93} className="h-[21px] w-auto brightness-0" priority />
       </Link>
 
       {user && (
@@ -295,7 +295,7 @@ export function Sidebar({
       {/* Mobile: slim top bar + full-screen overlay */}
       <header className="sticky top-0 z-40 flex h-14 items-center justify-between border-b border-black/[.06] bg-[#f5f5f2]/85 px-4 backdrop-blur-md md:hidden">
         <Link href={user ? "/home" : "/"} className="flex items-center">
-          <Image src="/logo.svg" alt="Screenbolt" width={92} height={20} className="h-[20px] w-auto brightness-0" priority />
+          <Image src="/logo.svg" alt="Screenbolt" width={613} height={93} className="h-[20px] w-auto brightness-0" priority />
         </Link>
         <button
           type="button"

@@ -1,4 +1,5 @@
 import Image from "next/image";
+import Link from "next/link";
 import { Icon } from "@iconify/react";
 import { Reveal } from "./reveal";
 
@@ -37,8 +38,8 @@ export function Hero() {
             <Image
               src="/logo.svg"
               alt="Screenbolt"
-              width={100}
-              height={22}
+              width={613}
+              height={93}
               className="h-[22px] w-auto"
               priority
             />
@@ -71,6 +72,12 @@ export function Hero() {
             >
               Pricing
             </a>
+            <Link
+              href="/blogs"
+              className="rounded-full px-4 py-2 text-[0.875rem] font-normal text-white/80 transition-colors hover:bg-white/10"
+            >
+              Blog
+            </Link>
           </div>
 
           <div className="ml-auto flex items-center gap-2">

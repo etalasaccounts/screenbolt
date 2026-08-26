@@ -49,7 +49,7 @@ function QaRotator() {
         <p className="mb-3 text-[1rem] font-normal leading-[1.4] text-white">{current.q}</p>
         <div className="flex items-start gap-2">
           <div className="flex h-5 shrink-0 items-center justify-center rounded-md bg-white/15 px-1.5">
-            <Image src="/logo.svg" alt="" width={16} height={8} className="h-2 w-auto opacity-80" />
+            <Image src="/logo.svg" alt="" width={613} height={93} className="h-2 w-auto opacity-80" />
           </div>
           <p className="m-0 text-[0.75rem] font-normal leading-[1.6] text-white/55">{current.a}</p>
         </div>
@@ -210,13 +210,13 @@ export function SmartCards() {
   return (
     <div className="mt-16 flex flex-col items-stretch gap-4 lg:flex-row">
       <Reveal y={40} delay={200} duration={700} className="relative min-h-[560px] flex-1 overflow-hidden rounded-3xl">
-        <Image src="/artwork-daisy.webp" alt="" fill className="absolute inset-0 z-0 object-cover" />
+        <Image src="/artwork-daisy.webp" alt="" fill sizes="(max-width: 1024px) 100vw, 33vw" className="absolute inset-0 z-0 object-cover" />
         <div className="absolute inset-0 z-[1] bg-black/50" />
 
         <div className="absolute left-6 right-6 top-8 z-[2] rounded-[20px] border p-5" style={{ borderColor: "rgba(255,255,255,.20)", background: "rgba(255,255,255,.10)", backdropFilter: "blur(56px)" }}>
           <div className="mb-4 flex items-center gap-2.5">
             <div className="flex h-10 items-center justify-center rounded-xl bg-white px-3">
-              <Image src="/logo.svg" alt="" width={40} height={12} className="h-3 w-auto brightness-0" />
+              <Image src="/logo.svg" alt="" width={613} height={93} className="h-3 w-auto brightness-0" />
             </div>
             <span className="text-[1rem] font-normal text-white">Screenbolt</span>
           </div>
@@ -240,7 +240,7 @@ export function SmartCards() {
       </Reveal>
 
       <Reveal y={40} delay={350} duration={700} className="relative min-h-[560px] flex-1 overflow-hidden rounded-3xl">
-        <Image src="/artwork-yard.webp" alt="" fill className="absolute inset-0 z-0 object-cover" />
+        <Image src="/artwork-yard.webp" alt="" fill sizes="(max-width: 1024px) 100vw, 33vw" className="absolute inset-0 z-0 object-cover" />
         <div className="absolute inset-0 z-[1] bg-black/20" />
 
         <div className="absolute left-6 right-6 top-8 z-[2]">
@@ -271,7 +271,7 @@ export function SmartCards() {
       </Reveal>
 
       <Reveal y={40} delay={500} duration={700} className="relative min-h-[560px] flex-1 overflow-hidden rounded-3xl">
-        <Image src="/sky-artwork.webp" alt="" fill className="absolute inset-0 z-0 object-cover" />
+        <Image src="/sky-artwork.webp" alt="" fill sizes="(max-width: 1024px) 100vw, 33vw" className="absolute inset-0 z-0 object-cover" />
         <div className="absolute inset-0 z-[1] bg-black/30" />
 
         <SmartChaptersTree />
