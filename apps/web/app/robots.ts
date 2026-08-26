@@ -44,6 +44,6 @@ export default function robots(): MetadataRoute.Robots {
         disallow: ["/d", "/d/*", "/api", "/api/*"],
       },
     ],
-    sitemap: "https://screenbolt.app/sitemap.xml",
+    sitemap: "https://screenbolt.com/sitemap.xml",
   };
 }

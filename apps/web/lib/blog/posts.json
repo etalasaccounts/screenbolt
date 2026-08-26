@@ -1,0 +1,206 @@
+{
+  "posts": [
+    {
+      "slug": "how-to-record-your-screen-for-free",
+      "title": "How to Record Your Screen for Free (No Download Required)",
+      "excerpt": "A step-by-step guide to capturing HD screen recordings in your browser — no software install, no watermark, no credit card.",
+      "coverImage": "/artwork-landscape.webp",
+      "category": "Guides",
+      "publishedAt": "2026-02-02",
+      "updatedAt": "2026-02-02",
+      "readingTime": 5,
+      "author": { "name": "Screenbolt Team", "role": "Product" },
+      "seo": {
+        "title": "How to Record Your Screen for Free — No Download Required",
+        "description": "Learn how to record your screen for free directly in your browser. No downloads, no watermarks — open Screenbolt, hit record, and share an HD video in seconds.",
+        "keywords": [
+          "screen recorder free",
+          "record screen online",
+          "how to record screen",
+          "free screen recording software",
+          "screen capture without download"
+        ]
+      },
+      "content": [
+        { "type": "paragraph", "text": "Most screen recorders still ask you to install something before you can hit record: a desktop app, a browser extension, sometimes both. If you just need to capture a bug, walk a teammate through a change, or answer a question once instead of typing it out five times, that setup cost is the whole reason you don't bother." },
+        { "type": "heading", "text": "What you need before you start" },
+        { "type": "list", "items": [
+          "A Chromium-based browser (Chrome, Edge, Brave) — screen capture APIs work best here",
+          "Nothing to install — Screenbolt records from the browser tab itself",
+          "A microphone if you want to narrate, though it's optional",
+          "The tab, window, or full screen you want to capture"
+        ] },
+        { "type": "paragraph", "text": "That's it. There's no plan to pick and no trial to start — recording is free, and it stays free for your first 25 videos." },
+        { "type": "heading", "text": "Recording your screen in three steps" },
+        { "type": "list", "items": [
+          "Open Screenbolt and choose what to share: a browser tab, an application window, or your entire screen",
+          "Hit record — a small floating control bar appears so you can pause, add your camera, or stop without losing your place",
+          "Stop recording and you're dropped straight into the video, ready to trim or share"
+        ] },
+        { "type": "paragraph", "text": "There's no export step, no rendering wait, and no file to upload manually. The moment you stop recording, the video already has a link." },
+        { "type": "heading", "text": "Trimming and sharing your recording" },
+        { "type": "paragraph", "text": "Before you send anything, you can trim the dead air off the start and end, so the first thing your viewer sees is the point, not you finding the right tab. Once it looks right, copy the link — anyone who opens it watches instantly, no account or download required on their end either." },
+        { "type": "quote", "text": "The best screen recorder is the one you actually use — which usually means the one with zero setup between the idea and the recording." },
+        { "type": "heading", "text": "When a recording beats a screenshot" },
+        { "type": "paragraph", "text": "A screenshot answers what something looks like. A recording answers what to do about it — the click sequence, the timing, the exact error that shows up after step three. If your message would take more than two screenshots to explain, it's faster to just record it." }
+      ]
+    },
+    {
+      "slug": "screen-recording-vs-typing-async-communication",
+      "title": "Screen Recording vs. Typing: Why Video Wins for Async Communication",
+      "excerpt": "Long Slack threads and messy bug reports cost more time than they save. Here's when a 90-second recording beats 900 words.",
+      "coverImage": "/grass-artwork.webp",
+      "category": "Productivity",
+      "publishedAt": "2026-01-26",
+      "updatedAt": "2026-01-26",
+      "readingTime": 6,
+      "author": { "name": "Screenbolt Team", "role": "Product" },
+      "seo": {
+        "title": "Screen Recording vs. Typing — Why Video Wins for Async Work",
+        "description": "Typed updates and bug reports eat more time than they save. See why short screen recordings communicate faster and clearer for async, remote teams.",
+        "keywords": [
+          "async communication",
+          "screen recording for remote teams",
+          "video vs text communication",
+          "async video updates",
+          "loom alternative"
+        ]
+      },
+      "content": [
+        { "type": "paragraph", "text": "Async work was supposed to save time. In practice, a lot of it gets spent writing careful paragraphs to describe something that would take ten seconds to just show — a layout bug, a confusing flow, a piece of feedback that's really about tone and pacing, not words on a page." },
+        { "type": "heading", "text": "Where text quietly costs more" },
+        { "type": "list", "items": [
+          "Bug reports that need three follow-up questions before anyone can reproduce the issue",
+          "Design feedback that reads harsher in text than it was meant, because tone doesn't survive typing",
+          "Status updates that get skimmed, not read, so the important line gets missed",
+          "Walkthroughs that turn into numbered lists no one can actually follow while clicking along"
+        ] },
+        { "type": "paragraph", "text": "None of these are really about typing speed. They're about information density — screen state, tone, and sequence are hard to compress into sentences, and easy to just show." },
+        { "type": "heading", "text": "What a short recording fixes" },
+        { "type": "paragraph", "text": "A 90-second recording carries the same context a written report needs three paragraphs to build: what you clicked, what happened, what you expected instead, said in your own voice with the right amount of urgency. The viewer watches once and knows exactly what you meant — no back-and-forth to clarify." },
+        { "type": "quote", "text": "Text is precise but slow to write and easy to misread. A recording is faster to make and almost impossible to misunderstand." },
+        { "type": "heading", "text": "It still respects async" },
+        { "type": "paragraph", "text": "The point of async isn't typing — it's not requiring both people online at once. A recording keeps that: your teammate watches it on their own time, at their own pace, and can rewatch the confusing part instead of asking you to repeat yourself in a call." },
+        { "type": "heading", "text": "When to still just type it" },
+        { "type": "paragraph", "text": "Recording isn't the answer to everything. A one-line status, a link, a quick yes or no — text is still faster there. The rule of thumb: if you'd need to describe what's on your screen, record it. If you'd just need a sentence, type it." }
+      ]
+    },
+    {
+      "slug": "best-free-screen-recorder-for-teams",
+      "title": "The Best Free Screen Recorder for Teams and Workspaces",
+      "excerpt": "What actually matters when a whole team shares one recorder — shared workspaces, viewer insight, and links that just work.",
+      "coverImage": "/artwork-blue-glass.webp",
+      "category": "Teams",
+      "publishedAt": "2026-01-19",
+      "updatedAt": "2026-01-19",
+      "readingTime": 6,
+      "author": { "name": "Screenbolt Team", "role": "Product" },
+      "seo": {
+        "title": "Best Free Screen Recorder for Teams and Workspaces",
+        "description": "Picking a screen recorder for a whole team is different from picking one for yourself. Here's what to look for — workspaces, shared libraries, and viewer tracking.",
+        "keywords": [
+          "screen recorder for teams",
+          "team screen recording software",
+          "workspace video sharing",
+          "free screen recorder for business",
+          "shared video library"
+        ]
+      },
+      "content": [
+        { "type": "paragraph", "text": "A screen recorder that works for one person doesn't automatically work for a team. The moment five people are recording, the question stops being \"can I capture my screen\" and becomes \"can anyone find the right video, know who's watched it, and trust the link still works next month.\"" },
+        { "type": "heading", "text": "Individual vs. team screen recording" },
+        { "type": "paragraph", "text": "A solo user needs a recorder and a share link. A team needs that, plus a shared home for every recording someone made — organized by workspace, not scattered across personal downloads folders and expiring links nobody bookmarked." },
+        { "type": "heading", "text": "What to actually look for" },
+        { "type": "list", "items": [
+          "Shared workspaces — every teammate's recordings live in one library, not their own account silo",
+          "No sign-up for viewers — a link a client or new hire can open without creating an account",
+          "View tracking — knowing whether a recording was actually watched changes how you use it",
+          "A free tier that survives real usage, not one that runs out after your third onboarding video"
+        ] },
+        { "type": "paragraph", "text": "Screenbolt's workspace model covers all four: invite teammates into a shared workspace, every recording lands in one library, and the time-saved view on the workspace shows how much writing everyone skipped by recording instead." },
+        { "type": "quote", "text": "A team tool isn't the one with the most features — it's the one where finding last week's recording doesn't require asking who made it." },
+        { "type": "heading", "text": "Rolling it out without a rollout" },
+        { "type": "paragraph", "text": "The best sign a team tool is right: nobody needs a training session to use it. If recording your screen takes the same three steps as recording anything else — pick what to share, hit record, stop — the team adopts it because it's genuinely faster, not because it was mandated." }
+      ]
+    },
+    {
+      "slug": "share-screen-recording-instantly-no-signup",
+      "title": "How to Share a Screen Recording Instantly — No Sign-Up for Viewers",
+      "excerpt": "The fastest recordings are the ones anyone can watch immediately. Here's how link-based sharing removes every point of friction.",
+      "coverImage": "/sky-artwork.webp",
+      "category": "Sharing",
+      "publishedAt": "2026-01-12",
+      "updatedAt": "2026-01-12",
+      "readingTime": 4,
+      "author": { "name": "Screenbolt Team", "role": "Product" },
+      "seo": {
+        "title": "Share a Screen Recording Instantly — No Sign-Up for Viewers",
+        "description": "Send a screen recording that anyone can watch immediately, no account or download required. Here's how link-based sharing actually works.",
+        "keywords": [
+          "share screen recording",
+          "video sharing no signup",
+          "instant video link",
+          "share hd video link",
+          "screen recording link"
+        ]
+      },
+      "content": [
+        { "type": "paragraph", "text": "Every extra step between sending a recording and someone actually watching it loses viewers. \"Create an account to view this video\" is one of the most effective ways to make sure a client never opens your walkthrough at all." },
+        { "type": "heading", "text": "Why sign-up walls kill recordings" },
+        { "type": "paragraph", "text": "A recording is usually sent to someone once — a client, a candidate, a teammate on another team. Asking a one-time viewer to register for an account they'll never use again is a bigger ask than the video itself. Most people just close the tab." },
+        { "type": "heading", "text": "How instant sharing should work" },
+        { "type": "list", "items": [
+          "Stop recording and the video already has a shareable link — no manual upload step",
+          "Anyone who opens the link watches immediately in the browser",
+          "No account, no app, no download on the viewer's end",
+          "The recorder still sees who watched, and for how long"
+        ] },
+        { "type": "paragraph", "text": "That last point matters more than it seems. Frictionless sharing doesn't mean giving up visibility — you can send a link with zero barriers and still know whether it landed." },
+        { "type": "quote", "text": "The right amount of friction for a viewer is none. The right amount of visibility for the sender is everything." },
+        { "type": "heading", "text": "Good defaults for sensitive recordings" },
+        { "type": "paragraph", "text": "Not every recording is meant for a public link — internal reviews, unreleased features, anything with customer data deserves privacy by default. The link should always be private until you choose to share it, never public because you forgot to change a setting." }
+      ]
+    },
+    {
+      "slug": "hd-screen-recording-tips-no-lag",
+      "title": "HD Screen Recording Without Lag: 7 Tips for Smooth Captures",
+      "excerpt": "Choppy recordings ruin good demos. These seven adjustments keep your captures crisp at full resolution without draining your CPU.",
+      "coverImage": "/artwork-green-wall.webp",
+      "category": "Tips",
+      "publishedAt": "2026-01-05",
+      "updatedAt": "2026-01-05",
+      "readingTime": 7,
+      "author": { "name": "Screenbolt Team", "role": "Product" },
+      "seo": {
+        "title": "HD Screen Recording Without Lag — 7 Tips for Smooth Captures",
+        "description": "Stop choppy screen recordings. Seven practical tips for capturing smooth, HD screen recordings in your browser without overloading your CPU.",
+        "keywords": [
+          "hd screen recording",
+          "screen recording lag fix",
+          "smooth screen capture",
+          "record screen without lag",
+          "screen recording tips"
+        ]
+      },
+      "content": [
+        { "type": "paragraph", "text": "A choppy recording undercuts even a good demo — viewers notice stutter before they notice the feature you're showing them. Most lag isn't a hardware problem; it's a handful of small settings competing for the same resources while you record." },
+        { "type": "heading", "text": "1. Record the tab or window, not the full screen" },
+        { "type": "paragraph", "text": "Capturing your entire display forces the encoder to process every pixel on it, including things the viewer never needs to see. Sharing just the relevant tab or app window is lighter to encode and looks cleaner besides." },
+        { "type": "heading", "text": "2. Close tabs and apps you're not using" },
+        { "type": "paragraph", "text": "Background tabs still consume CPU and memory. A dozen open tabs competing with your recorder for resources is the single most common cause of dropped frames." },
+        { "type": "heading", "text": "3. Plug in before you record" },
+        { "type": "paragraph", "text": "Laptops throttle performance on battery power to save energy — exactly what you don't want mid-recording. Plug in first, especially for anything longer than a couple of minutes." },
+        { "type": "heading", "text": "4. Skip the camera bubble for demanding captures" },
+        { "type": "paragraph", "text": "Compositing a live webcam feed on top of your screen adds real overhead. For heavy, graphics-intensive demos, record screen-only and add narration instead — the recording stays smoother, and viewers usually care more about what's on screen anyway." },
+        { "type": "heading", "text": "5. Let it finish processing before you jump away" },
+        { "type": "paragraph", "text": "Right after you stop recording, there's a brief encode step. Switching tabs or closing the window during that moment is the most common cause of a corrupted file." },
+        { "type": "list", "items": [
+          "6. Keep the browser updated — capture APIs get real performance fixes release to release",
+          "7. Restart your browser occasionally — a tab that's been open for days accumulates memory that competes with recording"
+        ] },
+        { "type": "quote", "text": "Smooth recordings aren't about better hardware — they're about giving the encoder fewer things to fight with while it works." },
+        { "type": "paragraph", "text": "None of this requires new equipment. It's mostly about giving your browser room to do one job well instead of ten jobs adequately." }
+      ]
+    }
+  ]
+}

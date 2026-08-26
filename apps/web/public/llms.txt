@@ -20,9 +20,9 @@ Screenbolt lets you record your screen with webcam and audio, get an instant sha
 - Business: $25/user/month — team workspaces, team analytics, SSO and admin controls
 
 ## Pages
-- [Homepage](https://screenbolt.app/): Product overview, key features, testimonials, and pricing
-- [Privacy Policy](https://screenbolt.app/privacy): How user data is collected and handled
-- [Terms of Service](https://screenbolt.app/terms): Terms and conditions of use
+- [Homepage](https://screenbolt.com/): Product overview, key features, testimonials, and pricing
+- [Privacy Policy](https://screenbolt.com/privacy): How user data is collected and handled
+- [Terms of Service](https://screenbolt.com/terms): Terms and conditions of use
 
 ## How it works
 1. Record: Capture your screen, camera, and voice in one click

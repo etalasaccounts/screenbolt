@@ -17,24 +17,45 @@ const instrumentSerif = Instrument_Serif({
 });
 
 export const metadata: Metadata = {
-  metadataBase: new URL("https://screenbolt.app"),
-  title: "Screenbolt",
+  metadataBase: new URL("https://screenbolt.com"),
+  title: {
+    default: "Screenbolt — Free Screen Recorder & Instant Video Sharing",
+    template: "%s — Screenbolt",
+  },
   description:
-    "Record your screen and share it in seconds. The fastest way to record your screen and share it with anyone.",
+    "Screenbolt is a free screen recorder that lets you capture your screen and share it instantly. Record, trim, and send HD screen recordings with a link — no download required.",
+  keywords: [
+    "screen recorder",
+    "screen recording",
+    "record screen online",
+    "share screen recording",
+    "free screen recorder",
+    "screen video sharing",
+    "Screenbolt",
+  ],
   openGraph: {
     type: "website",
     siteName: "Screenbolt",
-    title: "Screenbolt",
+    title: "Screenbolt — Free Screen Recorder & Instant Video Sharing",
     description:
-      "Record your screen and share it in seconds. The fastest way to record your screen and share it with anyone.",
-    url: "https://screenbolt.app",
+      "Capture your screen and share it in seconds. Screenbolt is the fastest free screen recorder for instant HD video sharing — no download required.",
+    url: "https://screenbolt.com",
     locale: "en_US",
+    images: [
+      {
+        url: "/opengraph-image.png",
+        width: 1536,
+        height: 1024,
+        alt: "Screenbolt — Free screen recorder for instant HD video sharing",
+      },
+    ],
   },
   twitter: {
     card: "summary_large_image",
-    title: "Screenbolt",
+    title: "Screenbolt — Free Screen Recorder & Instant Video Sharing",
     description:
-      "Record your screen and share it in seconds. The fastest way to record your screen and share it with anyone.",
+      "Capture your screen and share it in seconds. The fastest free screen recorder for instant HD video sharing — no download required.",
+    images: ["/opengraph-image.png"],
   },
 };
 

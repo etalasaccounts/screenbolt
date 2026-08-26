@@ -30,7 +30,7 @@ export async function generateMetadata({
       title: `${video.title} - Screenbolt`,
       description: "Watch this screen recording on Screenbolt.",
       alternates: {
-        canonical: `https://screenbolt.app/watch/${video.id}`,
+        canonical: `https://screenbolt.com/watch/${video.id}`,
       },
       openGraph: {
         title: video.title,
