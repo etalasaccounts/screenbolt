@@ -43,6 +43,9 @@ yarn-error.log*
 *.tsbuildinfo
 next-env.d.ts
 
+# OG image generator cache (raw gpt-image-1 backgrounds, not for repo)
+apps/web/public/blog/.og-bg/
+
 # legacy cruft
 *.old
 *.backup-old.svg

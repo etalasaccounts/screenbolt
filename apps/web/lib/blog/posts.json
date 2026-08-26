@@ -5,13 +5,16 @@
       "title": "How to Record Your Screen for Free (No Download Required)",
       "excerpt": "A step-by-step guide to capturing HD screen recordings in your browser — no software install, no watermark, no credit card.",
       "coverImage": "/blog/how-to-record-your-screen-for-free-cover.jpg",
-      "ogImage": "/blog/og-default.jpg",
+      "ogImage": "/blog/how-to-record-your-screen-for-free-og.jpg",
       "imageAlt": "A person recording their screen on a laptop at a wooden desk",
       "category": "Guides",
       "publishedAt": "2026-02-02",
       "updatedAt": "2026-02-02",
       "readingTime": 5,
-      "author": { "name": "Screenbolt Team", "role": "Product" },
+      "author": {
+        "name": "Screenbolt Team",
+        "role": "Product"
+      },
       "seo": {
         "title": "How to Record Your Screen for Free — No Download Required",
         "description": "Learn how to record your screen for free directly in your browser. No downloads, no watermarks — open Screenbolt, hit record, and share an HD video in seconds.",
@@ -25,27 +28,63 @@
         ]
       },
       "content": [
-        { "type": "paragraph", "text": "Most screen recorders still ask you to install something before you can hit record: a desktop app, a browser extension, sometimes both. If you just need to capture a bug, walk a teammate through a change, or answer a question once instead of typing it out five times, that setup cost is the whole reason you don't bother." },
-        { "type": "heading", "text": "What you need before you start" },
-        { "type": "list", "items": [
-          "A Chromium-based browser (Chrome, Edge, Brave) — the browser's built-in [Screen Capture API](https://developer.mozilla.org/en-US/docs/Web/API/Screen_Capture_API) works best here",
-          "Nothing to install — Screenbolt records from the browser tab itself",
-          "A microphone if you want to narrate, though it's optional",
-          "The tab, window, or full screen you want to capture"
-        ] },
-        { "type": "paragraph", "text": "That's it. There's no plan to pick and no trial to start — recording is free, and it stays free for your first 25 videos once you [create a free account](/signup)." },
-        { "type": "heading", "text": "Recording your screen in three steps" },
-        { "type": "list", "items": [
-          "Open Screenbolt and choose what to share: a browser tab, an application window, or your entire screen",
-          "Hit record — a small floating control bar appears so you can pause, add your camera, or stop without losing your place",
-          "Stop recording and you're dropped straight into the video, ready to trim or share"
-        ] },
-        { "type": "paragraph", "text": "There's no export step, no rendering wait, and no file to upload manually. The moment you stop recording, the video already has a link." },
-        { "type": "heading", "text": "Trimming and sharing your recording" },
-        { "type": "paragraph", "text": "Before you send anything, you can trim the dead air off the start and end, so the first thing your viewer sees is the point, not you finding the right tab. Once it looks right, copy the link — [anyone who opens it watches instantly](/blogs/share-screen-recording-instantly-no-signup), no account or download required on their end either." },
-        { "type": "quote", "text": "The best screen recorder is the one you actually use — which usually means the one with zero setup between the idea and the recording." },
-        { "type": "heading", "text": "When a recording beats a screenshot" },
-        { "type": "paragraph", "text": "A screenshot answers what something looks like. A recording answers what to do about it — the click sequence, the timing, the exact error that shows up after step three. If your message would take more than two screenshots to explain, it's faster to just record it — and if the capture ever looks choppy, these [tips for smooth HD recording](/blogs/hd-screen-recording-tips-no-lag) fix it." }
+        {
+          "type": "paragraph",
+          "text": "Most screen recorders still ask you to install something before you can hit record: a desktop app, a browser extension, sometimes both. If you just need to capture a bug, walk a teammate through a change, or answer a question once instead of typing it out five times, that setup cost is the whole reason you don't bother."
+        },
+        {
+          "type": "heading",
+          "text": "What you need before you start"
+        },
+        {
+          "type": "list",
+          "items": [
+            "A Chromium-based browser (Chrome, Edge, Brave) — the browser's built-in [Screen Capture API](https://developer.mozilla.org/en-US/docs/Web/API/Screen_Capture_API) works best here",
+            "Nothing to install — Screenbolt records from the browser tab itself",
+            "A microphone if you want to narrate, though it's optional",
+            "The tab, window, or full screen you want to capture"
+          ]
+        },
+        {
+          "type": "paragraph",
+          "text": "That's it. There's no plan to pick and no trial to start — recording is free, and it stays free for your first 25 videos once you [create a free account](/signup)."
+        },
+        {
+          "type": "heading",
+          "text": "Recording your screen in three steps"
+        },
+        {
+          "type": "list",
+          "items": [
+            "Open Screenbolt and choose what to share: a browser tab, an application window, or your entire screen",
+            "Hit record — a small floating control bar appears so you can pause, add your camera, or stop without losing your place",
+            "Stop recording and you're dropped straight into the video, ready to trim or share"
+          ]
+        },
+        {
+          "type": "paragraph",
+          "text": "There's no export step, no rendering wait, and no file to upload manually. The moment you stop recording, the video already has a link."
+        },
+        {
+          "type": "heading",
+          "text": "Trimming and sharing your recording"
+        },
+        {
+          "type": "paragraph",
+          "text": "Before you send anything, you can trim the dead air off the start and end, so the first thing your viewer sees is the point, not you finding the right tab. Once it looks right, copy the link — [anyone who opens it watches instantly](/blogs/share-screen-recording-instantly-no-signup), no account or download required on their end either."
+        },
+        {
+          "type": "quote",
+          "text": "The best screen recorder is the one you actually use — which usually means the one with zero setup between the idea and the recording."
+        },
+        {
+          "type": "heading",
+          "text": "When a recording beats a screenshot"
+        },
+        {
+          "type": "paragraph",
+          "text": "A screenshot answers what something looks like. A recording answers what to do about it — the click sequence, the timing, the exact error that shows up after step three. If your message would take more than two screenshots to explain, it's faster to just record it — and if the capture ever looks choppy, these [tips for smooth HD recording](/blogs/hd-screen-recording-tips-no-lag) fix it."
+        }
       ]
     },
     {
@@ -53,13 +92,16 @@
       "title": "HD Screen Recording Without Lag: 7 Tips for Smooth Captures",
       "excerpt": "Choppy recordings ruin good demos. These seven adjustments keep your captures crisp at full resolution without draining your CPU.",
       "coverImage": "/blog/hd-screen-recording-tips-no-lag-cover.jpg",
-      "ogImage": "/blog/og-default.jpg",
+      "ogImage": "/blog/hd-screen-recording-tips-no-lag-og.jpg",
       "imageAlt": "A desk setup with a laptop and external monitor used for video editing",
       "category": "Tips",
       "publishedAt": "2026-01-28",
       "updatedAt": "2026-01-28",
       "readingTime": 7,
-      "author": { "name": "Screenbolt Team", "role": "Product" },
+      "author": {
+        "name": "Screenbolt Team",
+        "role": "Product"
+      },
       "seo": {
         "title": "HD Screen Recording Without Lag — 7 Tips for Smooth Captures",
         "description": "Stop choppy screen recordings. Seven practical tips for capturing smooth, HD screen recordings in your browser without overloading your CPU.",
@@ -73,23 +115,65 @@
         ]
       },
       "content": [
-        { "type": "paragraph", "text": "A choppy recording undercuts even a good demo — viewers notice stutter before they notice the feature you're showing them. Most lag isn't a hardware problem; it's a handful of small settings competing for the same resources while you record. If you're just getting started, begin with [how to record your screen for free](/blogs/how-to-record-your-screen-for-free), then come back for the polish." },
-        { "type": "heading", "text": "1. Record the tab or window, not the full screen" },
-        { "type": "paragraph", "text": "Capturing your entire display forces the encoder to process every pixel on it, including things the viewer never needs to see. Sharing just the relevant tab or app window is lighter to encode and looks cleaner besides." },
-        { "type": "heading", "text": "2. Close tabs and apps you're not using" },
-        { "type": "paragraph", "text": "Background tabs still consume CPU and memory. A dozen open tabs competing with your recorder for resources is the single most common cause of dropped frames." },
-        { "type": "heading", "text": "3. Plug in before you record" },
-        { "type": "paragraph", "text": "Laptops throttle performance on battery power to save energy — exactly what you don't want mid-recording. Plug in first, especially for anything longer than a couple of minutes." },
-        { "type": "heading", "text": "4. Skip the camera bubble for demanding captures" },
-        { "type": "paragraph", "text": "Compositing a live webcam feed on top of your screen adds real overhead. For heavy, graphics-intensive demos, record screen-only and add narration instead — the recording stays smoother, and viewers usually care more about what's on screen anyway." },
-        { "type": "heading", "text": "5. Let it finish processing before you jump away" },
-        { "type": "paragraph", "text": "Right after you stop recording, there's a brief encode step. Most browsers write to the efficient [WebM format](https://www.webmproject.org/), which keeps files small — but switching tabs or closing the window during that moment is still the most common cause of a corrupted file." },
-        { "type": "list", "items": [
-          "6. Keep the browser updated — the [MediaRecorder encoder](https://developer.mozilla.org/en-US/docs/Web/API/MediaRecorder) gets real performance fixes release to release",
-          "7. Restart your browser occasionally — a tab that's been open for days accumulates memory that competes with recording"
-        ] },
-        { "type": "quote", "text": "Smooth recordings aren't about better hardware — they're about giving the encoder fewer things to fight with while it works." },
-        { "type": "paragraph", "text": "None of this requires new equipment. It's mostly about giving your browser room to do one job well instead of ten jobs adequately. Once your capture is crisp, [share it instantly with a link](/blogs/share-screen-recording-instantly-no-signup) — or [record a test clip free](/signup) and try these as you go." }
+        {
+          "type": "paragraph",
+          "text": "A choppy recording undercuts even a good demo — viewers notice stutter before they notice the feature you're showing them. Most lag isn't a hardware problem; it's a handful of small settings competing for the same resources while you record. If you're just getting started, begin with [how to record your screen for free](/blogs/how-to-record-your-screen-for-free), then come back for the polish."
+        },
+        {
+          "type": "heading",
+          "text": "1. Record the tab or window, not the full screen"
+        },
+        {
+          "type": "paragraph",
+          "text": "Capturing your entire display forces the encoder to process every pixel on it, including things the viewer never needs to see. Sharing just the relevant tab or app window is lighter to encode and looks cleaner besides."
+        },
+        {
+          "type": "heading",
+          "text": "2. Close tabs and apps you're not using"
+        },
+        {
+          "type": "paragraph",
+          "text": "Background tabs still consume CPU and memory. A dozen open tabs competing with your recorder for resources is the single most common cause of dropped frames."
+        },
+        {
+          "type": "heading",
+          "text": "3. Plug in before you record"
+        },
+        {
+          "type": "paragraph",
+          "text": "Laptops throttle performance on battery power to save energy — exactly what you don't want mid-recording. Plug in first, especially for anything longer than a couple of minutes."
+        },
+        {
+          "type": "heading",
+          "text": "4. Skip the camera bubble for demanding captures"
+        },
+        {
+          "type": "paragraph",
+          "text": "Compositing a live webcam feed on top of your screen adds real overhead. For heavy, graphics-intensive demos, record screen-only and add narration instead — the recording stays smoother, and viewers usually care more about what's on screen anyway."
+        },
+        {
+          "type": "heading",
+          "text": "5. Let it finish processing before you jump away"
+        },
+        {
+          "type": "paragraph",
+          "text": "Right after you stop recording, there's a brief encode step. Most browsers write to the efficient [WebM format](https://www.webmproject.org/), which keeps files small — but switching tabs or closing the window during that moment is still the most common cause of a corrupted file."
+        },
+        {
+          "type": "list",
+          "items": [
+            "6. Keep the browser updated — the [MediaRecorder encoder](https://developer.mozilla.org/en-US/docs/Web/API/MediaRecorder) gets real performance fixes release to release",
+            "7. Restart your browser occasionally — a tab that's been open for days accumulates memory that competes with recording"
+          ]
+        },
+        {
+          "type": "quote",
+          "text": "Smooth recordings aren't about better hardware — they're about giving the encoder fewer things to fight with while it works."
+        },
+        {
+          "type": "paragraph",
+          "text": "None of this requires new equipment. It's mostly about giving your browser room to do one job well instead of ten jobs adequately. Once your capture is crisp, [share it instantly with a link](/blogs/share-screen-recording-instantly-no-signup) — or [record a test clip free](/signup) and try these as you go."
+        }
       ]
     },
     {
@@ -97,13 +181,16 @@
       "title": "How to Share a Screen Recording Instantly — No Sign-Up for Viewers",
       "excerpt": "The fastest recordings are the ones anyone can watch immediately. Here's how link-based sharing removes every point of friction.",
       "coverImage": "/blog/share-screen-recording-instantly-no-signup-cover.jpg",
-      "ogImage": "/blog/og-default.jpg",
+      "ogImage": "/blog/share-screen-recording-instantly-no-signup-og.jpg",
       "imageAlt": "Hands typing on a laptop while sharing a recording from a desk",
       "category": "Sharing",
       "publishedAt": "2026-01-19",
       "updatedAt": "2026-01-19",
       "readingTime": 4,
-      "author": { "name": "Screenbolt Team", "role": "Product" },
+      "author": {
+        "name": "Screenbolt Team",
+        "role": "Product"
+      },
       "seo": {
         "title": "Share a Screen Recording Instantly — No Sign-Up for Viewers",
         "description": "Send a screen recording that anyone can watch immediately, no account or download required. Here's how link-based sharing actually works.",
@@ -117,20 +204,47 @@
         ]
       },
       "content": [
-        { "type": "paragraph", "text": "Every extra step between sending a recording and someone actually watching it loses viewers. \"Create an account to view this video\" is one of the most effective ways to make sure a client never opens your walkthrough at all." },
-        { "type": "heading", "text": "Why sign-up walls kill recordings" },
-        { "type": "paragraph", "text": "A recording is usually sent to someone once — a client, a candidate, a teammate on another team. Asking a one-time viewer to register for an account they'll never use again is a bigger ask than the video itself. Most people just close the tab." },
-        { "type": "heading", "text": "How instant sharing should work" },
-        { "type": "list", "items": [
-          "Stop recording and the video already has a shareable link — no manual upload step",
-          "Anyone who opens the link [watches immediately in the browser](https://developer.mozilla.org/en-US/docs/Web/HTML/Element/video)",
-          "No account, no app, no download on the viewer's end",
-          "The recorder still sees who watched, and for how long"
-        ] },
-        { "type": "paragraph", "text": "That last point matters more than it seems. Frictionless sharing doesn't mean giving up visibility — you can send a link with zero barriers and still know whether it landed. [Record and share your first video free](/signup) to see it end to end." },
-        { "type": "quote", "text": "The right amount of friction for a viewer is none. The right amount of visibility for the sender is everything." },
-        { "type": "heading", "text": "Good defaults for sensitive recordings" },
-        { "type": "paragraph", "text": "Not every recording is meant for a public link — internal reviews, unreleased features, anything with customer data deserves privacy by default. The link should always be private until you choose to share it, never public because you forgot to change a setting. New to this? Start with [how to record your screen for free](/blogs/how-to-record-your-screen-for-free), or see [what teams should look for in a recorder](/blogs/best-free-screen-recorder-for-teams)." }
+        {
+          "type": "paragraph",
+          "text": "Every extra step between sending a recording and someone actually watching it loses viewers. \"Create an account to view this video\" is one of the most effective ways to make sure a client never opens your walkthrough at all."
+        },
+        {
+          "type": "heading",
+          "text": "Why sign-up walls kill recordings"
+        },
+        {
+          "type": "paragraph",
+          "text": "A recording is usually sent to someone once — a client, a candidate, a teammate on another team. Asking a one-time viewer to register for an account they'll never use again is a bigger ask than the video itself. Most people just close the tab."
+        },
+        {
+          "type": "heading",
+          "text": "How instant sharing should work"
+        },
+        {
+          "type": "list",
+          "items": [
+            "Stop recording and the video already has a shareable link — no manual upload step",
+            "Anyone who opens the link [watches immediately in the browser](https://developer.mozilla.org/en-US/docs/Web/HTML/Element/video)",
+            "No account, no app, no download on the viewer's end",
+            "The recorder still sees who watched, and for how long"
+          ]
+        },
+        {
+          "type": "paragraph",
+          "text": "That last point matters more than it seems. Frictionless sharing doesn't mean giving up visibility — you can send a link with zero barriers and still know whether it landed. [Record and share your first video free](/signup) to see it end to end."
+        },
+        {
+          "type": "quote",
+          "text": "The right amount of friction for a viewer is none. The right amount of visibility for the sender is everything."
+        },
+        {
+          "type": "heading",
+          "text": "Good defaults for sensitive recordings"
+        },
+        {
+          "type": "paragraph",
+          "text": "Not every recording is meant for a public link — internal reviews, unreleased features, anything with customer data deserves privacy by default. The link should always be private until you choose to share it, never public because you forgot to change a setting. New to this? Start with [how to record your screen for free](/blogs/how-to-record-your-screen-for-free), or see [what teams should look for in a recorder](/blogs/best-free-screen-recorder-for-teams)."
+        }
       ]
     },
     {
@@ -138,13 +252,16 @@
       "title": "Screen Recording vs. Typing: Why Video Wins for Async Communication",
       "excerpt": "Long Slack threads and messy bug reports cost more time than they save. Here's when a 90-second recording beats 900 words.",
       "coverImage": "/blog/screen-recording-vs-typing-async-communication-cover.jpg",
-      "ogImage": "/blog/og-default.jpg",
+      "ogImage": "/blog/screen-recording-vs-typing-async-communication-og.jpg",
       "imageAlt": "A person on a video call with their team from a home office",
       "category": "Productivity",
       "publishedAt": "2026-01-12",
       "updatedAt": "2026-01-12",
       "readingTime": 6,
-      "author": { "name": "Screenbolt Team", "role": "Product" },
+      "author": {
+        "name": "Screenbolt Team",
+        "role": "Product"
+      },
       "seo": {
         "title": "Screen Recording vs. Typing — Why Video Wins for Async Work",
         "description": "Typed updates and bug reports eat more time than they save. See why short screen recordings communicate faster and clearer for async, remote teams.",
@@ -158,22 +275,55 @@
         ]
       },
       "content": [
-        { "type": "paragraph", "text": "Async work was supposed to save time. In practice, a lot of it gets spent writing careful paragraphs to describe something that would take ten seconds to just show — a layout bug, a confusing flow, a piece of feedback that's really about tone and pacing, not words on a page." },
-        { "type": "heading", "text": "Where text quietly costs more" },
-        { "type": "list", "items": [
-          "Bug reports that need three follow-up questions before anyone can reproduce the issue",
-          "Design feedback that reads harsher in text than it was meant, because tone doesn't survive typing",
-          "Status updates that get skimmed, not read, so the important line gets missed",
-          "Walkthroughs that turn into numbered lists no one can actually follow while clicking along"
-        ] },
-        { "type": "paragraph", "text": "None of these are really about typing speed. They're about information density — screen state, tone, and sequence are hard to compress into sentences, and easy to just show." },
-        { "type": "heading", "text": "What a short recording fixes" },
-        { "type": "paragraph", "text": "A [90-second recording](/blogs/how-to-record-your-screen-for-free) carries the same context a written report needs three paragraphs to build: what you clicked, what happened, what you expected instead, said in your own voice with the right amount of urgency. The viewer watches once and knows exactly what you meant — no back-and-forth to clarify. [Record your first one free](/signup) and see the difference." },
-        { "type": "quote", "text": "Text is precise but slow to write and easy to misread. A recording is faster to make and almost impossible to misunderstand." },
-        { "type": "heading", "text": "It still respects async" },
-        { "type": "paragraph", "text": "The point of async isn't typing — [good asynchronous communication](https://handbook.gitlab.com/handbook/communication/) is about not requiring both people online at once. A recording keeps that: your teammate watches it on their own time, at their own pace, and can rewatch the confusing part instead of asking you to repeat yourself in a call." },
-        { "type": "heading", "text": "When to still just type it" },
-        { "type": "paragraph", "text": "Recording isn't the answer to everything. A one-line status, a link, a quick yes or no — text is still faster there. The rule of thumb: if you'd need to describe what's on your screen, record it. If you'd just need a sentence, type it. For a whole team, the same logic scales — here's [what to look for in a team recorder](/blogs/best-free-screen-recorder-for-teams)." }
+        {
+          "type": "paragraph",
+          "text": "Async work was supposed to save time. In practice, a lot of it gets spent writing careful paragraphs to describe something that would take ten seconds to just show — a layout bug, a confusing flow, a piece of feedback that's really about tone and pacing, not words on a page."
+        },
+        {
+          "type": "heading",
+          "text": "Where text quietly costs more"
+        },
+        {
+          "type": "list",
+          "items": [
+            "Bug reports that need three follow-up questions before anyone can reproduce the issue",
+            "Design feedback that reads harsher in text than it was meant, because tone doesn't survive typing",
+            "Status updates that get skimmed, not read, so the important line gets missed",
+            "Walkthroughs that turn into numbered lists no one can actually follow while clicking along"
+          ]
+        },
+        {
+          "type": "paragraph",
+          "text": "None of these are really about typing speed. They're about information density — screen state, tone, and sequence are hard to compress into sentences, and easy to just show."
+        },
+        {
+          "type": "heading",
+          "text": "What a short recording fixes"
+        },
+        {
+          "type": "paragraph",
+          "text": "A [90-second recording](/blogs/how-to-record-your-screen-for-free) carries the same context a written report needs three paragraphs to build: what you clicked, what happened, what you expected instead, said in your own voice with the right amount of urgency. The viewer watches once and knows exactly what you meant — no back-and-forth to clarify. [Record your first one free](/signup) and see the difference."
+        },
+        {
+          "type": "quote",
+          "text": "Text is precise but slow to write and easy to misread. A recording is faster to make and almost impossible to misunderstand."
+        },
+        {
+          "type": "heading",
+          "text": "It still respects async"
+        },
+        {
+          "type": "paragraph",
+          "text": "The point of async isn't typing — [good asynchronous communication](https://handbook.gitlab.com/handbook/communication/) is about not requiring both people online at once. A recording keeps that: your teammate watches it on their own time, at their own pace, and can rewatch the confusing part instead of asking you to repeat yourself in a call."
+        },
+        {
+          "type": "heading",
+          "text": "When to still just type it"
+        },
+        {
+          "type": "paragraph",
+          "text": "Recording isn't the answer to everything. A one-line status, a link, a quick yes or no — text is still faster there. The rule of thumb: if you'd need to describe what's on your screen, record it. If you'd just need a sentence, type it. For a whole team, the same logic scales — here's [what to look for in a team recorder](/blogs/best-free-screen-recorder-for-teams)."
+        }
       ]
     },
     {
@@ -181,13 +331,16 @@
       "title": "The Best Free Screen Recorder for Teams and Workspaces",
       "excerpt": "What actually matters when a whole team shares one recorder — shared workspaces, viewer insight, and links that just work.",
       "coverImage": "/blog/best-free-screen-recorder-for-teams-cover.jpg",
-      "ogImage": "/blog/og-default.jpg",
+      "ogImage": "/blog/best-free-screen-recorder-for-teams-og.jpg",
       "imageAlt": "A team gathered around a laptop reviewing work together",
       "category": "Teams",
       "publishedAt": "2026-01-05",
       "updatedAt": "2026-01-05",
       "readingTime": 6,
-      "author": { "name": "Screenbolt Team", "role": "Product" },
+      "author": {
+        "name": "Screenbolt Team",
+        "role": "Product"
+      },
       "seo": {
         "title": "Best Free Screen Recorder for Teams and Workspaces",
         "description": "Picking a screen recorder for a whole team is different from picking one for yourself. Here's what to look for — workspaces, shared libraries, and viewer tracking.",
@@ -201,20 +354,47 @@
         ]
       },
       "content": [
-        { "type": "paragraph", "text": "A screen recorder that works for one person doesn't automatically work for a team. The moment five people are recording, the question stops being \"can I capture my screen\" and becomes \"can anyone find the right video, know who's watched it, and trust the link still works next month.\"" },
-        { "type": "heading", "text": "Individual vs. team screen recording" },
-        { "type": "paragraph", "text": "A solo user needs a recorder and a share link. A team needs that, plus a shared home for every recording someone made — organized by workspace, not scattered across personal downloads folders and expiring links nobody bookmarked. The teams that get the most out of it also lean on strong [asynchronous communication habits](https://handbook.gitlab.com/handbook/communication/), where a recording replaces a meeting rather than adding one." },
-        { "type": "heading", "text": "What to actually look for" },
-        { "type": "list", "items": [
-          "Shared workspaces — every teammate's recordings live in one library, not their own account silo",
-          "No sign-up for viewers — [a link a client or new hire can open](/blogs/share-screen-recording-instantly-no-signup) without creating an account",
-          "View tracking — knowing whether a recording was actually watched changes how you use it",
-          "A free tier that survives real usage, not one that runs out after your third onboarding video"
-        ] },
-        { "type": "paragraph", "text": "Screenbolt's workspace model covers all four: [invite teammates into a shared workspace](/signup), every recording lands in one library, and the time-saved view on the workspace shows how much writing everyone skipped by recording instead." },
-        { "type": "quote", "text": "A team tool isn't the one with the most features — it's the one where finding last week's recording doesn't require asking who made it." },
-        { "type": "heading", "text": "Rolling it out without a rollout" },
-        { "type": "paragraph", "text": "The best sign a team tool is right: nobody needs a training session to use it. If recording your screen takes the same three steps as recording anything else — pick what to share, hit record, stop — the team adopts it because it's genuinely faster, not because it was mandated. It's the same reason [video beats text for async updates](/blogs/screen-recording-vs-typing-async-communication)." }
+        {
+          "type": "paragraph",
+          "text": "A screen recorder that works for one person doesn't automatically work for a team. The moment five people are recording, the question stops being \"can I capture my screen\" and becomes \"can anyone find the right video, know who's watched it, and trust the link still works next month.\""
+        },
+        {
+          "type": "heading",
+          "text": "Individual vs. team screen recording"
+        },
+        {
+          "type": "paragraph",
+          "text": "A solo user needs a recorder and a share link. A team needs that, plus a shared home for every recording someone made — organized by workspace, not scattered across personal downloads folders and expiring links nobody bookmarked. The teams that get the most out of it also lean on strong [asynchronous communication habits](https://handbook.gitlab.com/handbook/communication/), where a recording replaces a meeting rather than adding one."
+        },
+        {
+          "type": "heading",
+          "text": "What to actually look for"
+        },
+        {
+          "type": "list",
+          "items": [
+            "Shared workspaces — every teammate's recordings live in one library, not their own account silo",
+            "No sign-up for viewers — [a link a client or new hire can open](/blogs/share-screen-recording-instantly-no-signup) without creating an account",
+            "View tracking — knowing whether a recording was actually watched changes how you use it",
+            "A free tier that survives real usage, not one that runs out after your third onboarding video"
+          ]
+        },
+        {
+          "type": "paragraph",
+          "text": "Screenbolt's workspace model covers all four: [invite teammates into a shared workspace](/signup), every recording lands in one library, and the time-saved view on the workspace shows how much writing everyone skipped by recording instead."
+        },
+        {
+          "type": "quote",
+          "text": "A team tool isn't the one with the most features — it's the one where finding last week's recording doesn't require asking who made it."
+        },
+        {
+          "type": "heading",
+          "text": "Rolling it out without a rollout"
+        },
+        {
+          "type": "paragraph",
+          "text": "The best sign a team tool is right: nobody needs a training session to use it. If recording your screen takes the same three steps as recording anything else — pick what to share, hit record, stop — the team adopts it because it's genuinely faster, not because it was mandated. It's the same reason [video beats text for async updates](/blogs/screen-recording-vs-typing-async-communication)."
+        }
       ]
     },
     {
@@ -222,13 +402,16 @@
       "title": "The Best Free Loom Alternative for Screen Recording in 2026",
       "excerpt": "Loom's free plan caps your videos and can stamp a watermark on your work. Here's a genuinely free alternative that records in HD, shares with a link, and never makes you pick a plan first.",
       "coverImage": "/blog/free-loom-alternative-cover.jpg",
-      "ogImage": "/blog/og-default.jpg",
+      "ogImage": "/blog/free-loom-alternative-og.jpg",
       "imageAlt": "A laptop on a desk showing a screen recording being reviewed",
       "category": "Comparisons",
       "publishedAt": "2026-08-20",
       "updatedAt": "2026-08-20",
       "readingTime": 6,
-      "author": { "name": "Screenbolt Team", "role": "Product" },
+      "author": {
+        "name": "Screenbolt Team",
+        "role": "Product"
+      },
       "seo": {
         "title": "Best Free Loom Alternative — HD Screen Recording, No Watermark",
         "description": "Looking for a free Loom alternative? Screenbolt records HD screen video in your browser, shares with a link, and adds no watermark — no download, no credit card.",
@@ -242,23 +425,56 @@
         ]
       },
       "content": [
-        { "type": "paragraph", "text": "Loom made async video normal, and for a lot of teams it's still the default. But the moment you actually lean on the free plan, the edges show up: a cap on how many videos you can keep, limits on length, and branding on your recordings that you didn't ask for. If you just want to record something and send it, those limits are the whole friction." },
-        { "type": "heading", "text": "What a Loom alternative actually needs to do" },
-        { "type": "list", "items": [
-          "Record in HD without installing a desktop app or extension",
-          "Give you a share link that [anyone can open with no sign-up](/blogs/share-screen-recording-instantly-no-signup)",
-          "Leave your recordings clean — [no watermark on free videos](/blogs/screen-recorder-no-watermark)",
-          "Still show the sender who watched, and for how long",
-          "A free tier that survives real usage, not one that runs out after a few clips"
-        ] },
-        { "type": "paragraph", "text": "That's a short list, but most free recorders miss at least one of them — usually the watermark or the video cap. Screenbolt is built around exactly these: [recording is free](/blogs/how-to-record-your-screen-for-free) for your first 25 videos, and the recordings are yours, unbranded." },
-        { "type": "heading", "text": "Recording without installing anything" },
-        { "type": "paragraph", "text": "Where Loom nudges you toward its desktop app, Screenbolt records straight from the browser tab — pick a tab, window, or your full screen, hit record, and you're done. There's no separate app to keep updated and nothing to approve in IT. If you've never recorded in the browser before, [here's the three-step version](/blogs/how-to-record-your-screen-for-free)." },
-        { "type": "heading", "text": "Sharing without a sign-up wall" },
-        { "type": "paragraph", "text": "The best part of async video is that the other person watches on their own time. That only works if they can actually open the link — no account, no download. Screenbolt links [play instantly in any browser](/blogs/share-screen-recording-instantly-no-signup), and you still see whether it was watched." },
-        { "type": "quote", "text": "The best recorder isn't the one with the most features — it's the one that gets out of the way between the idea and the link." },
-        { "type": "heading", "text": "When Loom still makes sense" },
-        { "type": "paragraph", "text": "If your whole team already lives in Loom and depends on its deeper integrations, switching for its own sake isn't worth it. But if you're picking a recorder now — or the free-plan limits are starting to bite — a browser recorder with HD, no watermark, and instant links covers what most people actually use. [Record your first video free](/signup) and compare it against what you're paying for." }
+        {
+          "type": "paragraph",
+          "text": "Loom made async video normal, and for a lot of teams it's still the default. But the moment you actually lean on the free plan, the edges show up: a cap on how many videos you can keep, limits on length, and branding on your recordings that you didn't ask for. If you just want to record something and send it, those limits are the whole friction."
+        },
+        {
+          "type": "heading",
+          "text": "What a Loom alternative actually needs to do"
+        },
+        {
+          "type": "list",
+          "items": [
+            "Record in HD without installing a desktop app or extension",
+            "Give you a share link that [anyone can open with no sign-up](/blogs/share-screen-recording-instantly-no-signup)",
+            "Leave your recordings clean — [no watermark on free videos](/blogs/screen-recorder-no-watermark)",
+            "Still show the sender who watched, and for how long",
+            "A free tier that survives real usage, not one that runs out after a few clips"
+          ]
+        },
+        {
+          "type": "paragraph",
+          "text": "That's a short list, but most free recorders miss at least one of them — usually the watermark or the video cap. Screenbolt is built around exactly these: [recording is free](/blogs/how-to-record-your-screen-for-free) for your first 25 videos, and the recordings are yours, unbranded."
+        },
+        {
+          "type": "heading",
+          "text": "Recording without installing anything"
+        },
+        {
+          "type": "paragraph",
+          "text": "Where Loom nudges you toward its desktop app, Screenbolt records straight from the browser tab — pick a tab, window, or your full screen, hit record, and you're done. There's no separate app to keep updated and nothing to approve in IT. If you've never recorded in the browser before, [here's the three-step version](/blogs/how-to-record-your-screen-for-free)."
+        },
+        {
+          "type": "heading",
+          "text": "Sharing without a sign-up wall"
+        },
+        {
+          "type": "paragraph",
+          "text": "The best part of async video is that the other person watches on their own time. That only works if they can actually open the link — no account, no download. Screenbolt links [play instantly in any browser](/blogs/share-screen-recording-instantly-no-signup), and you still see whether it was watched."
+        },
+        {
+          "type": "quote",
+          "text": "The best recorder isn't the one with the most features — it's the one that gets out of the way between the idea and the link."
+        },
+        {
+          "type": "heading",
+          "text": "When Loom still makes sense"
+        },
+        {
+          "type": "paragraph",
+          "text": "If your whole team already lives in Loom and depends on its deeper integrations, switching for its own sake isn't worth it. But if you're picking a recorder now — or the free-plan limits are starting to bite — a browser recorder with HD, no watermark, and instant links covers what most people actually use. [Record your first video free](/signup) and compare it against what you're paying for."
+        }
       ]
     },
     {
@@ -266,13 +482,16 @@
       "title": "How to Record Your Screen in Full HD (1080p) for Free",
       "excerpt": "Blurry recordings make good work look sloppy. Here's how to capture crisp 1080p screen video in your browser — free, with no export settings to wrestle with.",
       "coverImage": "/blog/record-full-hd-1080p-screen-free-cover.jpg",
-      "ogImage": "/blog/og-default.jpg",
+      "ogImage": "/blog/record-full-hd-1080p-screen-free-og.jpg",
       "imageAlt": "A high-resolution monitor displaying crisp detailed interface work",
       "category": "Guides",
       "publishedAt": "2026-08-04",
       "updatedAt": "2026-08-04",
       "readingTime": 5,
-      "author": { "name": "Screenbolt Team", "role": "Product" },
+      "author": {
+        "name": "Screenbolt Team",
+        "role": "Product"
+      },
       "seo": {
         "title": "Record Full HD 1080p Screen Video Free — Crisp, No Blur",
         "description": "Learn how to record your screen in full HD 1080p for free, directly in the browser. Get crisp, sharp captures without downloads or complicated export settings.",
@@ -286,26 +505,59 @@
         ]
       },
       "content": [
-        { "type": "paragraph", "text": "Resolution is the first thing a viewer notices and the last thing they can un-see. A sharp 1080p walkthrough reads as careful and professional; a soft, pixelated one makes the exact same work look rushed. The good news is that recording in full HD isn't about better hardware — it's about not throwing resolution away before you hit record." },
-        { "type": "heading", "text": "Why recordings look blurry (and it's usually not the recorder)" },
-        { "type": "paragraph", "text": "Most soft captures come from something upstream of the recorder: a display running below 1080p, a browser zoomed past 100% so text is enlarged and then re-compressed, or a full-screen capture that gets scaled down to fit. The recorder faithfully captures whatever it's given — so the trick is to give it a clean, full-resolution source." },
-        { "type": "heading", "text": "Set your display and browser up for 1080p" },
-        { "type": "list", "items": [
-          "Run your display at its native resolution — 1080p or higher, not a scaled-down mode",
-          "Reset browser zoom to 100% (Ctrl+0 / Cmd+0) so nothing is artificially enlarged",
-          "Record the specific tab or window instead of a scaled full screen — it's sharper and [lighter to encode](/blogs/hd-screen-recording-tips-no-lag)",
-          "Close the clutter you don't need on screen so the encoder isn't processing extra pixels"
-        ] },
-        { "type": "paragraph", "text": "If your captures also stutter, not just soften, that's a separate problem — these [seven tips for lag-free HD recording](/blogs/hd-screen-recording-tips-no-lag) fix the smoothness side." },
-        { "type": "heading", "text": "Recording in HD, step by step" },
-        { "type": "list", "items": [
-          "Open Screenbolt and choose what to share — a tab, a window, or the full screen",
-          "Hit record; the floating control bar lets you pause or stop without losing your place",
-          "Stop, and you land straight in the finished HD video — no export step, no rendering wait"
-        ] },
-        { "type": "paragraph", "text": "There's no quality slider to second-guess. The recording keeps the resolution of what you shared, written to an efficient [WebM file](https://www.webmproject.org/) so it stays sharp without becoming huge. If you're brand new to browser recording, start with [how to record your screen for free](/blogs/how-to-record-your-screen-for-free)." },
-        { "type": "quote", "text": "Full HD isn't a setting you turn on — it's resolution you avoid losing between your screen and the recorder." },
-        { "type": "paragraph", "text": "Once it's captured, [trim the dead air off both ends](/blogs/trim-screen-recording-online) so the crisp footage is the first thing anyone sees. [Record a test clip free](/signup) and check the sharpness for yourself." }
+        {
+          "type": "paragraph",
+          "text": "Resolution is the first thing a viewer notices and the last thing they can un-see. A sharp 1080p walkthrough reads as careful and professional; a soft, pixelated one makes the exact same work look rushed. The good news is that recording in full HD isn't about better hardware — it's about not throwing resolution away before you hit record."
+        },
+        {
+          "type": "heading",
+          "text": "Why recordings look blurry (and it's usually not the recorder)"
+        },
+        {
+          "type": "paragraph",
+          "text": "Most soft captures come from something upstream of the recorder: a display running below 1080p, a browser zoomed past 100% so text is enlarged and then re-compressed, or a full-screen capture that gets scaled down to fit. The recorder faithfully captures whatever it's given — so the trick is to give it a clean, full-resolution source."
+        },
+        {
+          "type": "heading",
+          "text": "Set your display and browser up for 1080p"
+        },
+        {
+          "type": "list",
+          "items": [
+            "Run your display at its native resolution — 1080p or higher, not a scaled-down mode",
+            "Reset browser zoom to 100% (Ctrl+0 / Cmd+0) so nothing is artificially enlarged",
+            "Record the specific tab or window instead of a scaled full screen — it's sharper and [lighter to encode](/blogs/hd-screen-recording-tips-no-lag)",
+            "Close the clutter you don't need on screen so the encoder isn't processing extra pixels"
+          ]
+        },
+        {
+          "type": "paragraph",
+          "text": "If your captures also stutter, not just soften, that's a separate problem — these [seven tips for lag-free HD recording](/blogs/hd-screen-recording-tips-no-lag) fix the smoothness side."
+        },
+        {
+          "type": "heading",
+          "text": "Recording in HD, step by step"
+        },
+        {
+          "type": "list",
+          "items": [
+            "Open Screenbolt and choose what to share — a tab, a window, or the full screen",
+            "Hit record; the floating control bar lets you pause or stop without losing your place",
+            "Stop, and you land straight in the finished HD video — no export step, no rendering wait"
+          ]
+        },
+        {
+          "type": "paragraph",
+          "text": "There's no quality slider to second-guess. The recording keeps the resolution of what you shared, written to an efficient [WebM file](https://www.webmproject.org/) so it stays sharp without becoming huge. If you're brand new to browser recording, start with [how to record your screen for free](/blogs/how-to-record-your-screen-for-free)."
+        },
+        {
+          "type": "quote",
+          "text": "Full HD isn't a setting you turn on — it's resolution you avoid losing between your screen and the recorder."
+        },
+        {
+          "type": "paragraph",
+          "text": "Once it's captured, [trim the dead air off both ends](/blogs/trim-screen-recording-online) so the crisp footage is the first thing anyone sees. [Record a test clip free](/signup) and check the sharpness for yourself."
+        }
       ]
     },
     {
@@ -313,13 +565,16 @@
       "title": "How to Record Your Screen With Audio (System Sound + Mic)",
       "excerpt": "A silent screen recording only tells half the story. Here's how to capture your microphone, your system audio, or both — cleanly, in the browser.",
       "coverImage": "/blog/record-screen-with-audio-cover.jpg",
-      "ogImage": "/blog/og-default.jpg",
+      "ogImage": "/blog/record-screen-with-audio-og.jpg",
       "imageAlt": "A microphone beside a laptop set up for narrated screen recording",
       "category": "Guides",
       "publishedAt": "2026-07-15",
       "updatedAt": "2026-07-15",
       "readingTime": 6,
-      "author": { "name": "Screenbolt Team", "role": "Product" },
+      "author": {
+        "name": "Screenbolt Team",
+        "role": "Product"
+      },
       "seo": {
         "title": "Record Screen With Audio — System Sound + Mic, Free & In-Browser",
         "description": "Capture your screen with audio: narrate with your mic, include system sound, or both. A clear, free guide to recording screen video with sound in your browser.",
@@ -333,27 +588,63 @@
         ]
       },
       "content": [
-        { "type": "paragraph", "text": "A screen recording without sound asks the viewer to guess what you meant. Add your voice, and a two-minute walkthrough carries tone, emphasis, and the little \"click here, not there\" asides that a silent capture can't. Getting audio right is mostly about knowing which of the two kinds you actually need." },
-        { "type": "heading", "text": "Two kinds of audio, and when you need each" },
-        { "type": "list", "items": [
-          "Microphone — for narration: walkthroughs, feedback, onboarding, anything you talk over",
-          "System audio — the sound coming from your computer: demoing a video, an app's alerts, or a call",
-          "Both together — narrating over something that also makes sound, like reviewing a video with commentary"
-        ] },
-        { "type": "paragraph", "text": "The browser asks permission for each source separately — the same [screen-and-audio capture API](https://developer.mozilla.org/en-US/docs/Web/API/MediaDevices/getDisplayMedia) that powers in-browser recording — so you're always in control of what's being picked up." },
-        { "type": "heading", "text": "Recording your microphone" },
-        { "type": "paragraph", "text": "Enable your mic before you start, pick the right input if you have more than one, and do a quick two-second test. Most \"bad audio\" is just a forgotten built-in mic when a headset was plugged in, or a room with too much echo." },
-        { "type": "heading", "text": "Capturing system audio" },
-        { "type": "paragraph", "text": "When you share a browser tab, you can include that tab's audio — ideal for demoing a video or a web app's sounds. Full-screen and window captures are more limited depending on your browser and OS, so if system sound matters, sharing the tab is the reliable path." },
-        { "type": "quote", "text": "Silent recordings make people rewind. A recording with your voice makes them nod along." },
-        { "type": "heading", "text": "Getting clean audio" },
-        { "type": "list", "items": [
-          "Record in the quietest room you can, away from fans and traffic",
-          "Keep your hands off the keyboard while narrating — key clatter is the most common ruined take",
-          "Wear headphones so system audio doesn't bleed back into your mic as an echo",
-          "Say the first sentence, stop, and play it back before recording the whole thing"
-        ] },
-        { "type": "paragraph", "text": "Audio pairs naturally with a face — if you want viewers to see you too, here's [how to record your screen and webcam together](/blogs/record-screen-with-webcam). And if you're weighing whether to record at all, this is [when a recording beats typing it out](/blogs/screen-recording-vs-typing-async-communication). [Record your first narrated clip free](/signup)." }
+        {
+          "type": "paragraph",
+          "text": "A screen recording without sound asks the viewer to guess what you meant. Add your voice, and a two-minute walkthrough carries tone, emphasis, and the little \"click here, not there\" asides that a silent capture can't. Getting audio right is mostly about knowing which of the two kinds you actually need."
+        },
+        {
+          "type": "heading",
+          "text": "Two kinds of audio, and when you need each"
+        },
+        {
+          "type": "list",
+          "items": [
+            "Microphone — for narration: walkthroughs, feedback, onboarding, anything you talk over",
+            "System audio — the sound coming from your computer: demoing a video, an app's alerts, or a call",
+            "Both together — narrating over something that also makes sound, like reviewing a video with commentary"
+          ]
+        },
+        {
+          "type": "paragraph",
+          "text": "The browser asks permission for each source separately — the same [screen-and-audio capture API](https://developer.mozilla.org/en-US/docs/Web/API/MediaDevices/getDisplayMedia) that powers in-browser recording — so you're always in control of what's being picked up."
+        },
+        {
+          "type": "heading",
+          "text": "Recording your microphone"
+        },
+        {
+          "type": "paragraph",
+          "text": "Enable your mic before you start, pick the right input if you have more than one, and do a quick two-second test. Most \"bad audio\" is just a forgotten built-in mic when a headset was plugged in, or a room with too much echo."
+        },
+        {
+          "type": "heading",
+          "text": "Capturing system audio"
+        },
+        {
+          "type": "paragraph",
+          "text": "When you share a browser tab, you can include that tab's audio — ideal for demoing a video or a web app's sounds. Full-screen and window captures are more limited depending on your browser and OS, so if system sound matters, sharing the tab is the reliable path."
+        },
+        {
+          "type": "quote",
+          "text": "Silent recordings make people rewind. A recording with your voice makes them nod along."
+        },
+        {
+          "type": "heading",
+          "text": "Getting clean audio"
+        },
+        {
+          "type": "list",
+          "items": [
+            "Record in the quietest room you can, away from fans and traffic",
+            "Keep your hands off the keyboard while narrating — key clatter is the most common ruined take",
+            "Wear headphones so system audio doesn't bleed back into your mic as an echo",
+            "Say the first sentence, stop, and play it back before recording the whole thing"
+          ]
+        },
+        {
+          "type": "paragraph",
+          "text": "Audio pairs naturally with a face — if you want viewers to see you too, here's [how to record your screen and webcam together](/blogs/record-screen-with-webcam). And if you're weighing whether to record at all, this is [when a recording beats typing it out](/blogs/screen-recording-vs-typing-async-communication). [Record your first narrated clip free](/signup)."
+        }
       ]
     },
     {
@@ -361,13 +652,16 @@
       "title": "How to Record Your Screen and Webcam at the Same Time",
       "excerpt": "A face in the corner turns a screen recording into a conversation. Here's how to add your webcam without the setup headache.",
       "coverImage": "/blog/record-screen-with-webcam-cover.jpg",
-      "ogImage": "/blog/og-default.jpg",
+      "ogImage": "/blog/record-screen-with-webcam-og.jpg",
       "imageAlt": "A person presenting to their webcam while sharing their screen",
       "category": "Guides",
       "publishedAt": "2026-06-28",
       "updatedAt": "2026-06-28",
       "readingTime": 5,
-      "author": { "name": "Screenbolt Team", "role": "Product" },
+      "author": {
+        "name": "Screenbolt Team",
+        "role": "Product"
+      },
       "seo": {
         "title": "Record Screen and Webcam Together — Facecam Screen Recorder",
         "description": "Add a webcam bubble to your screen recording so viewers see your face while you present. A simple, free guide to recording screen and camera at once.",
@@ -381,31 +675,61 @@
         ]
       },
       "content": [
-        { "type": "paragraph", "text": "There's a reason product updates and onboarding videos put a face in the corner: people trust a person more than a disembodied cursor. A small webcam bubble adds tone and eye contact to a screen recording, which turns \"here's a feature\" into \"let me show you this.\"" },
-        { "type": "heading", "text": "When the camera bubble helps (and when to skip it)" },
-        { "type": "list", "items": [
-          "Great for personal updates, onboarding, feedback, and intros where warmth matters",
-          "Great for sales and demo videos, where the viewer is deciding whether to trust you",
-          "Skip it for heavy, graphics-intensive demos — [compositing a live camera adds overhead](/blogs/hd-screen-recording-tips-no-lag) and can cause stutter",
-          "Skip it when the screen is the whole point and your face would just cover content"
-        ] },
-        { "type": "paragraph", "text": "The rule of thumb: use the camera when the message is partly about you, and drop it when the message is entirely on screen." },
-        { "type": "heading", "text": "Adding your webcam" },
-        { "type": "list", "items": [
-          "Enable your camera before recording and grant the browser permission",
-          "Position the bubble in a corner that doesn't sit over important content",
-          "Pair it with your mic so your voice and face are in sync — here's [how to record screen audio cleanly](/blogs/record-screen-with-audio)",
-          "Do a quick test frame before the real take"
-        ] },
-        { "type": "heading", "text": "Framing and lighting basics" },
-        { "type": "list", "items": [
-          "Put the camera at eye level so you're not filming up your own nose",
-          "Face your light source — a window in front of you beats one behind you",
-          "Keep the background simple so the viewer looks at you, not your shelf",
-          "Move the bubble to the emptiest corner of whatever you're sharing"
-        ] },
-        { "type": "quote", "text": "The screen shows what happened. Your face shows how much it matters." },
-        { "type": "paragraph", "text": "A face-and-screen recording is the backbone of a good [product demo video](/blogs/how-to-make-product-demo-video) — same setup, tighter script. [Record one free](/signup) and see how much warmer it lands than text." }
+        {
+          "type": "paragraph",
+          "text": "There's a reason product updates and onboarding videos put a face in the corner: people trust a person more than a disembodied cursor. A small webcam bubble adds tone and eye contact to a screen recording, which turns \"here's a feature\" into \"let me show you this.\""
+        },
+        {
+          "type": "heading",
+          "text": "When the camera bubble helps (and when to skip it)"
+        },
+        {
+          "type": "list",
+          "items": [
+            "Great for personal updates, onboarding, feedback, and intros where warmth matters",
+            "Great for sales and demo videos, where the viewer is deciding whether to trust you",
+            "Skip it for heavy, graphics-intensive demos — [compositing a live camera adds overhead](/blogs/hd-screen-recording-tips-no-lag) and can cause stutter",
+            "Skip it when the screen is the whole point and your face would just cover content"
+          ]
+        },
+        {
+          "type": "paragraph",
+          "text": "The rule of thumb: use the camera when the message is partly about you, and drop it when the message is entirely on screen."
+        },
+        {
+          "type": "heading",
+          "text": "Adding your webcam"
+        },
+        {
+          "type": "list",
+          "items": [
+            "Enable your camera before recording and grant the browser permission",
+            "Position the bubble in a corner that doesn't sit over important content",
+            "Pair it with your mic so your voice and face are in sync — here's [how to record screen audio cleanly](/blogs/record-screen-with-audio)",
+            "Do a quick test frame before the real take"
+          ]
+        },
+        {
+          "type": "heading",
+          "text": "Framing and lighting basics"
+        },
+        {
+          "type": "list",
+          "items": [
+            "Put the camera at eye level so you're not filming up your own nose",
+            "Face your light source — a window in front of you beats one behind you",
+            "Keep the background simple so the viewer looks at you, not your shelf",
+            "Move the bubble to the emptiest corner of whatever you're sharing"
+          ]
+        },
+        {
+          "type": "quote",
+          "text": "The screen shows what happened. Your face shows how much it matters."
+        },
+        {
+          "type": "paragraph",
+          "text": "A face-and-screen recording is the backbone of a good [product demo video](/blogs/how-to-make-product-demo-video) — same setup, tighter script. [Record one free](/signup) and see how much warmer it lands than text."
+        }
       ]
     },
     {
@@ -413,13 +737,16 @@
       "title": "How to Make a Product Demo Video That Actually Converts",
       "excerpt": "A good demo video sells the product without a sales call. Here's how to script, record, and share one that gets watched to the end.",
       "coverImage": "/blog/how-to-make-product-demo-video-cover.jpg",
-      "ogImage": "/blog/og-default.jpg",
+      "ogImage": "/blog/how-to-make-product-demo-video-og.jpg",
       "imageAlt": "A laptop showing a polished product demo being recorded",
       "category": "Marketing",
       "publishedAt": "2026-06-10",
       "updatedAt": "2026-06-10",
       "readingTime": 7,
-      "author": { "name": "Screenbolt Team", "role": "Product" },
+      "author": {
+        "name": "Screenbolt Team",
+        "role": "Product"
+      },
       "seo": {
         "title": "How to Make a Product Demo Video That Converts — Free Guide",
         "description": "Plan, record, and share a product demo video that converts. A practical guide to scripting, recording in HD, and sharing a demo link anyone can watch instantly.",
@@ -433,29 +760,68 @@
         ]
       },
       "content": [
-        { "type": "paragraph", "text": "A demo video does the work of a sales call that scales: the viewer watches when they're ready, at their own pace, and sees the product actually working instead of reading about it. The ones that convert aren't the most polished — they're the clearest. Here's how to make one that gets watched all the way through." },
-        { "type": "heading", "text": "Start with one job, not the whole product" },
-        { "type": "paragraph", "text": "The most common demo mistake is showing everything. A viewer can only hold one \"aha\" at a time, so pick the single thing your product does best and build the whole video around that one flow. The tour can wait for later." },
-        { "type": "heading", "text": "Write a loose script, not a word-for-word one" },
-        { "type": "list", "items": [
-          "Hook in the first ten seconds — the problem, stated the way your viewer feels it",
-          "The one flow — the shortest path from problem to the moment it's solved",
-          "The payoff — what changed, shown on screen, not just claimed",
-          "One clear call to action — where to go next, said once"
-        ] },
-        { "type": "paragraph", "text": "A word-for-word script makes you sound like you're reading. Bullet points keep you natural while making sure you don't ramble — the same reason [a short recording beats a written wall of text](/blogs/screen-recording-vs-typing-async-communication)." },
-        { "type": "heading", "text": "Recording it clean" },
-        { "type": "list", "items": [
-          "Record in [full HD](/blogs/record-full-hd-1080p-screen-free) so the interface is sharp, not soft",
-          "Get [clean audio](/blogs/record-screen-with-audio) — a quiet room and a quick level check beat any mic upgrade",
-          "Add your [webcam](/blogs/record-screen-with-webcam) if the pitch is partly about trust",
-          "Share the tab or window, not a cluttered full screen"
-        ] },
-        { "type": "heading", "text": "Trim ruthlessly" },
-        { "type": "paragraph", "text": "The first ten seconds decide whether the rest gets watched, so cut the throat-clearing. [Trim the dead air off both ends](/blogs/trim-screen-recording-online) until the video opens on the point, not on you finding the right tab." },
-        { "type": "quote", "text": "Nobody finishes a demo because it was thorough. They finish because it was clear and it respected their time." },
-        { "type": "heading", "text": "Share it where it gets watched" },
-        { "type": "paragraph", "text": "A demo behind a sign-up wall is a demo nobody sees. Send a link that [plays instantly with no account required](/blogs/share-screen-recording-instantly-no-signup), and you still get to see who watched and how far they got. [Record your first demo free](/signup) and put it in front of someone today." }
+        {
+          "type": "paragraph",
+          "text": "A demo video does the work of a sales call that scales: the viewer watches when they're ready, at their own pace, and sees the product actually working instead of reading about it. The ones that convert aren't the most polished — they're the clearest. Here's how to make one that gets watched all the way through."
+        },
+        {
+          "type": "heading",
+          "text": "Start with one job, not the whole product"
+        },
+        {
+          "type": "paragraph",
+          "text": "The most common demo mistake is showing everything. A viewer can only hold one \"aha\" at a time, so pick the single thing your product does best and build the whole video around that one flow. The tour can wait for later."
+        },
+        {
+          "type": "heading",
+          "text": "Write a loose script, not a word-for-word one"
+        },
+        {
+          "type": "list",
+          "items": [
+            "Hook in the first ten seconds — the problem, stated the way your viewer feels it",
+            "The one flow — the shortest path from problem to the moment it's solved",
+            "The payoff — what changed, shown on screen, not just claimed",
+            "One clear call to action — where to go next, said once"
+          ]
+        },
+        {
+          "type": "paragraph",
+          "text": "A word-for-word script makes you sound like you're reading. Bullet points keep you natural while making sure you don't ramble — the same reason [a short recording beats a written wall of text](/blogs/screen-recording-vs-typing-async-communication)."
+        },
+        {
+          "type": "heading",
+          "text": "Recording it clean"
+        },
+        {
+          "type": "list",
+          "items": [
+            "Record in [full HD](/blogs/record-full-hd-1080p-screen-free) so the interface is sharp, not soft",
+            "Get [clean audio](/blogs/record-screen-with-audio) — a quiet room and a quick level check beat any mic upgrade",
+            "Add your [webcam](/blogs/record-screen-with-webcam) if the pitch is partly about trust",
+            "Share the tab or window, not a cluttered full screen"
+          ]
+        },
+        {
+          "type": "heading",
+          "text": "Trim ruthlessly"
+        },
+        {
+          "type": "paragraph",
+          "text": "The first ten seconds decide whether the rest gets watched, so cut the throat-clearing. [Trim the dead air off both ends](/blogs/trim-screen-recording-online) until the video opens on the point, not on you finding the right tab."
+        },
+        {
+          "type": "quote",
+          "text": "Nobody finishes a demo because it was thorough. They finish because it was clear and it respected their time."
+        },
+        {
+          "type": "heading",
+          "text": "Share it where it gets watched"
+        },
+        {
+          "type": "paragraph",
+          "text": "A demo behind a sign-up wall is a demo nobody sees. Send a link that [plays instantly with no account required](/blogs/share-screen-recording-instantly-no-signup), and you still get to see who watched and how far they got. [Record your first demo free](/signup) and put it in front of someone today."
+        }
       ]
     },
     {
@@ -463,13 +829,16 @@
       "title": "The Best Free Screen Recorder With No Watermark",
       "excerpt": "A watermark on your recording is an ad for someone else's product stamped over your work. Here's how to record HD video that's clean and yours.",
       "coverImage": "/blog/screen-recorder-no-watermark-cover.jpg",
-      "ogImage": "/blog/og-default.jpg",
+      "ogImage": "/blog/screen-recorder-no-watermark-og.jpg",
       "imageAlt": "A clean screen recording playing back without any overlaid branding",
       "category": "Tips",
       "publishedAt": "2026-05-22",
       "updatedAt": "2026-05-22",
       "readingTime": 4,
-      "author": { "name": "Screenbolt Team", "role": "Product" },
+      "author": {
+        "name": "Screenbolt Team",
+        "role": "Product"
+      },
       "seo": {
         "title": "Free Screen Recorder No Watermark — Clean HD Recordings",
         "description": "Record HD screen video with no watermark, free. Screenbolt records in your browser and never brands your recordings — no download, no credit card.",
@@ -483,19 +852,43 @@
         ]
       },
       "content": [
-        { "type": "paragraph", "text": "You record a clean walkthrough for a client, hit share, and there it is in the corner: another company's logo, stamped over your work. Free screen recorders love watermarks because your recordings become free advertising — and a standing nudge to upgrade. The problem is that it's your name on the video, not theirs." },
-        { "type": "heading", "text": "Why free recorders add watermarks" },
-        { "type": "paragraph", "text": "A watermark does two jobs for the recorder's maker: it markets their product every time your video is shared, and it makes the free tier just annoying enough that you pay to remove it. Neither of those jobs has anything to do with your recording being good." },
-        { "type": "heading", "text": "What a watermark actually costs you" },
-        { "type": "list", "items": [
-          "It looks unprofessional to a client or prospect who doesn't know the tool",
-          "It pulls the eye away from what you're actually showing",
-          "It brands your work as someone else's product",
-          "It sometimes sits right over the content you needed the viewer to see"
-        ] },
-        { "type": "paragraph", "text": "Screenbolt doesn't watermark your recordings — not on the free tier, not anywhere. What you record is what you share, clean. If you're just getting started, here's [how to record your screen for free](/blogs/how-to-record-your-screen-for-free)." },
-        { "type": "quote", "text": "Your recording should carry your point, not someone else's logo." },
-        { "type": "paragraph", "text": "Clean recordings pair with the rest of a good capture: [full HD sharpness](/blogs/record-full-hd-1080p-screen-free) and a [link anyone can open without signing up](/blogs/share-screen-recording-instantly-no-signup). [Record a watermark-free clip free](/signup) and see the difference." }
+        {
+          "type": "paragraph",
+          "text": "You record a clean walkthrough for a client, hit share, and there it is in the corner: another company's logo, stamped over your work. Free screen recorders love watermarks because your recordings become free advertising — and a standing nudge to upgrade. The problem is that it's your name on the video, not theirs."
+        },
+        {
+          "type": "heading",
+          "text": "Why free recorders add watermarks"
+        },
+        {
+          "type": "paragraph",
+          "text": "A watermark does two jobs for the recorder's maker: it markets their product every time your video is shared, and it makes the free tier just annoying enough that you pay to remove it. Neither of those jobs has anything to do with your recording being good."
+        },
+        {
+          "type": "heading",
+          "text": "What a watermark actually costs you"
+        },
+        {
+          "type": "list",
+          "items": [
+            "It looks unprofessional to a client or prospect who doesn't know the tool",
+            "It pulls the eye away from what you're actually showing",
+            "It brands your work as someone else's product",
+            "It sometimes sits right over the content you needed the viewer to see"
+          ]
+        },
+        {
+          "type": "paragraph",
+          "text": "Screenbolt doesn't watermark your recordings — not on the free tier, not anywhere. What you record is what you share, clean. If you're just getting started, here's [how to record your screen for free](/blogs/how-to-record-your-screen-for-free)."
+        },
+        {
+          "type": "quote",
+          "text": "Your recording should carry your point, not someone else's logo."
+        },
+        {
+          "type": "paragraph",
+          "text": "Clean recordings pair with the rest of a good capture: [full HD sharpness](/blogs/record-full-hd-1080p-screen-free) and a [link anyone can open without signing up](/blogs/share-screen-recording-instantly-no-signup). [Record a watermark-free clip free](/signup) and see the difference."
+        }
       ]
     },
     {
@@ -503,13 +896,16 @@
       "title": "How to Record a Browser Tab in Chrome (No Extension)",
       "excerpt": "You don't need an extension to record a Chrome tab. Here's how to capture just the tab you want — cleanly, with its audio, straight from the browser.",
       "coverImage": "/blog/record-google-chrome-tab-cover.jpg",
-      "ogImage": "/blog/og-default.jpg",
+      "ogImage": "/blog/record-google-chrome-tab-og.jpg",
       "imageAlt": "A Chrome browser window with a single tab being recorded",
       "category": "Guides",
       "publishedAt": "2026-05-05",
       "updatedAt": "2026-05-05",
       "readingTime": 5,
-      "author": { "name": "Screenbolt Team", "role": "Product" },
+      "author": {
+        "name": "Screenbolt Team",
+        "role": "Product"
+      },
       "seo": {
         "title": "Record a Chrome Tab Without an Extension — Free & Clean",
         "description": "Record a single browser tab in Chrome without installing an extension. Capture just the tab you need, with its audio, using the browser's built-in screen capture.",
@@ -523,26 +919,53 @@
         ]
       },
       "content": [
-        { "type": "paragraph", "text": "Recording a single browser tab is the cleanest capture you can make — no desktop clutter, no other windows sliding into frame, just the one thing you want to show. And despite what a hundred extensions in the Chrome Web Store suggest, you don't need to install anything to do it." },
-        { "type": "heading", "text": "Tab, window, or full screen — pick the smallest that works" },
-        { "type": "paragraph", "text": "Sharing a single tab is lighter to encode and looks tidier than a full-screen capture that catches your taskbar and notifications. It's the same reason full-screen recording is the [first thing to change when a capture stutters](/blogs/hd-screen-recording-tips-no-lag). Chrome exposes this through the browser's built-in [Screen Capture API](https://developer.mozilla.org/en-US/docs/Web/API/Screen_Capture_API), which is what a browser recorder uses under the hood." },
-        { "type": "heading", "text": "Recording just the tab" },
-        { "type": "list", "items": [
-          "Open Screenbolt and start a recording",
-          "In the browser's share prompt, choose the \"Chrome Tab\" option",
-          "Pick the exact tab you want to capture",
-          "Tick \"share tab audio\" if the tab plays sound you need in the recording",
-          "Hit record — only that tab is captured, nothing else on your screen"
-        ] },
-        { "type": "heading", "text": "Why tab capture beats an extension" },
-        { "type": "list", "items": [
-          "Nothing to install, review, or keep updated",
-          "No broad extension permissions reading your browsing",
-          "A cleaner output — just the tab, no surrounding chrome",
-          "It works the same across Chromium browsers like Edge and Brave"
-        ] },
-        { "type": "quote", "text": "The cleanest recording is the one that shows exactly one thing and nothing else." },
-        { "type": "paragraph", "text": "Recording outside the browser too? Here's [how to record your whole screen on Windows for free](/blogs/record-screen-on-windows-free). And once you've captured the tab, [trim it down](/blogs/trim-screen-recording-online) before you share. [Try it free](/signup)." }
+        {
+          "type": "paragraph",
+          "text": "Recording a single browser tab is the cleanest capture you can make — no desktop clutter, no other windows sliding into frame, just the one thing you want to show. And despite what a hundred extensions in the Chrome Web Store suggest, you don't need to install anything to do it."
+        },
+        {
+          "type": "heading",
+          "text": "Tab, window, or full screen — pick the smallest that works"
+        },
+        {
+          "type": "paragraph",
+          "text": "Sharing a single tab is lighter to encode and looks tidier than a full-screen capture that catches your taskbar and notifications. It's the same reason full-screen recording is the [first thing to change when a capture stutters](/blogs/hd-screen-recording-tips-no-lag). Chrome exposes this through the browser's built-in [Screen Capture API](https://developer.mozilla.org/en-US/docs/Web/API/Screen_Capture_API), which is what a browser recorder uses under the hood."
+        },
+        {
+          "type": "heading",
+          "text": "Recording just the tab"
+        },
+        {
+          "type": "list",
+          "items": [
+            "Open Screenbolt and start a recording",
+            "In the browser's share prompt, choose the \"Chrome Tab\" option",
+            "Pick the exact tab you want to capture",
+            "Tick \"share tab audio\" if the tab plays sound you need in the recording",
+            "Hit record — only that tab is captured, nothing else on your screen"
+          ]
+        },
+        {
+          "type": "heading",
+          "text": "Why tab capture beats an extension"
+        },
+        {
+          "type": "list",
+          "items": [
+            "Nothing to install, review, or keep updated",
+            "No broad extension permissions reading your browsing",
+            "A cleaner output — just the tab, no surrounding chrome",
+            "It works the same across Chromium browsers like Edge and Brave"
+          ]
+        },
+        {
+          "type": "quote",
+          "text": "The cleanest recording is the one that shows exactly one thing and nothing else."
+        },
+        {
+          "type": "paragraph",
+          "text": "Recording outside the browser too? Here's [how to record your whole screen on Windows for free](/blogs/record-screen-on-windows-free). And once you've captured the tab, [trim it down](/blogs/trim-screen-recording-online) before you share. [Try it free](/signup)."
+        }
       ]
     },
     {
@@ -550,13 +973,16 @@
       "title": "Answer Support Tickets Faster With Screen Recordings",
       "excerpt": "Some fixes take five screenshots and three replies to explain — or one 60-second recording. Here's how support teams close tickets with video.",
       "coverImage": "/blog/screen-recording-for-customer-support-cover.jpg",
-      "ogImage": "/blog/og-default.jpg",
+      "ogImage": "/blog/screen-recording-for-customer-support-og.jpg",
       "imageAlt": "A support agent recording a short walkthrough at their desk",
       "category": "Support",
       "publishedAt": "2026-04-18",
       "updatedAt": "2026-04-18",
       "readingTime": 6,
-      "author": { "name": "Screenbolt Team", "role": "Product" },
+      "author": {
+        "name": "Screenbolt Team",
+        "role": "Product"
+      },
       "seo": {
         "title": "Screen Recording for Customer Support — Close Tickets Faster",
         "description": "Use short screen recordings to answer support tickets faster. Show the fix instead of typing it, cut the back-and-forth, and send a link customers watch instantly.",
@@ -570,21 +996,51 @@
         ]
       },
       "content": [
-        { "type": "paragraph", "text": "Every support team has the ticket that takes five screenshots and three back-and-forth replies to resolve — where the customer keeps clicking the wrong thing because a written step is ambiguous. That entire thread is usually one 60-second recording: show the fix, send the link, ticket closed." },
-        { "type": "heading", "text": "Where text-only support quietly loses time" },
-        { "type": "list", "items": [
-          "Multi-step fixes where the customer loses the thread by step three",
-          "Interfaces that are genuinely hard to describe in words",
-          "Non-technical customers who need to see it, not read it",
-          "The same question, asked ten times a week, retyped every time"
-        ] },
-        { "type": "paragraph", "text": "None of these are about typing speed. They're about the fact that [screen state and sequence are hard to compress into sentences](/blogs/screen-recording-vs-typing-async-communication) — and easy to just show." },
-        { "type": "heading", "text": "Recording a fix once, reusing it forever" },
-        { "type": "paragraph", "text": "The repeat questions are the biggest win. Record the answer to each common one once, and you've got a small library your whole team can send instead of retyping. For a team, that library lives best in a [shared workspace](/blogs/best-free-screen-recorder-for-teams) so anyone can grab last week's recording without asking who made it." },
-        { "type": "heading", "text": "Sending a link the customer can just open" },
-        { "type": "paragraph", "text": "A customer mid-problem will not create an account to watch your fix. The link has to [play instantly, no sign-up, no download](/blogs/share-screen-recording-instantly-no-signup) — and you still get to see whether they actually watched it before you close the ticket." },
-        { "type": "quote", "text": "The fastest support reply isn't the shortest one to type — it's the one the customer doesn't have to ask about twice." },
-        { "type": "paragraph", "text": "Start with the three or four questions your queue repeats most, record each once, and measure the reply time before and after. [Record your first support clip free](/signup)." }
+        {
+          "type": "paragraph",
+          "text": "Every support team has the ticket that takes five screenshots and three back-and-forth replies to resolve — where the customer keeps clicking the wrong thing because a written step is ambiguous. That entire thread is usually one 60-second recording: show the fix, send the link, ticket closed."
+        },
+        {
+          "type": "heading",
+          "text": "Where text-only support quietly loses time"
+        },
+        {
+          "type": "list",
+          "items": [
+            "Multi-step fixes where the customer loses the thread by step three",
+            "Interfaces that are genuinely hard to describe in words",
+            "Non-technical customers who need to see it, not read it",
+            "The same question, asked ten times a week, retyped every time"
+          ]
+        },
+        {
+          "type": "paragraph",
+          "text": "None of these are about typing speed. They're about the fact that [screen state and sequence are hard to compress into sentences](/blogs/screen-recording-vs-typing-async-communication) — and easy to just show."
+        },
+        {
+          "type": "heading",
+          "text": "Recording a fix once, reusing it forever"
+        },
+        {
+          "type": "paragraph",
+          "text": "The repeat questions are the biggest win. Record the answer to each common one once, and you've got a small library your whole team can send instead of retyping. For a team, that library lives best in a [shared workspace](/blogs/best-free-screen-recorder-for-teams) so anyone can grab last week's recording without asking who made it."
+        },
+        {
+          "type": "heading",
+          "text": "Sending a link the customer can just open"
+        },
+        {
+          "type": "paragraph",
+          "text": "A customer mid-problem will not create an account to watch your fix. The link has to [play instantly, no sign-up, no download](/blogs/share-screen-recording-instantly-no-signup) — and you still get to see whether they actually watched it before you close the ticket."
+        },
+        {
+          "type": "quote",
+          "text": "The fastest support reply isn't the shortest one to type — it's the one the customer doesn't have to ask about twice."
+        },
+        {
+          "type": "paragraph",
+          "text": "Start with the three or four questions your queue repeats most, record each once, and measure the reply time before and after. [Record your first support clip free](/signup)."
+        }
       ]
     },
     {
@@ -592,13 +1048,16 @@
       "title": "How to Record Your Screen on Windows for Free (No App to Install)",
       "excerpt": "The Xbox Game Bar is clunky and misses half of what you need. Here's how to record your Windows screen for free in the browser — any app, any window, with a share link.",
       "coverImage": "/blog/record-screen-on-windows-free-cover.jpg",
-      "ogImage": "/blog/og-default.jpg",
+      "ogImage": "/blog/record-screen-on-windows-free-og.jpg",
       "imageAlt": "A Windows laptop recording the screen from within the browser",
       "category": "Guides",
       "publishedAt": "2026-03-30",
       "updatedAt": "2026-03-30",
       "readingTime": 5,
-      "author": { "name": "Screenbolt Team", "role": "Product" },
+      "author": {
+        "name": "Screenbolt Team",
+        "role": "Product"
+      },
       "seo": {
         "title": "Record Screen on Windows Free — No App, No Download",
         "description": "Record your screen on Windows 10 or 11 for free without installing an app. Capture any window or your whole screen in the browser and share it with a link.",
@@ -612,25 +1071,55 @@
         ]
       },
       "content": [
-        { "type": "paragraph", "text": "Windows does ship with a screen recorder — the Xbox Game Bar — but the moment you try to record File Explorer, the desktop, or two apps at once, you hit its walls. It was built for games, and it acts like it. For actual work, recording in the browser is both freer and more flexible." },
-        { "type": "heading", "text": "Why the built-in Windows recorder falls short" },
-        { "type": "list", "items": [
-          "It refuses to record the desktop and File Explorer, only app windows",
-          "It's awkward for capturing a single tab or switching between windows",
-          "There's no instant share link — you're left with a file to upload somewhere",
-          "You end up managing video files in a folder instead of just sending a link"
-        ] },
-        { "type": "paragraph", "text": "A browser recorder doesn't care what it's pointed at — a tab, any window, or the full screen — and it hands you a link the moment you stop. If you've never recorded in the browser, here's [the three-step version](/blogs/how-to-record-your-screen-for-free)." },
-        { "type": "heading", "text": "Recording on Windows in three steps" },
-        { "type": "list", "items": [
-          "Open Screenbolt in Chrome, Edge, or Brave and start a recording",
-          "Choose what to share — a browser tab, an app window, or your entire screen",
-          "Stop when you're done, and you're dropped straight into the finished video with a link"
-        ] },
-        { "type": "heading", "text": "Keeping it full HD and smooth on Windows" },
-        { "type": "paragraph", "text": "For a sharp result, record at your display's native resolution — here's [how to capture in full HD](/blogs/record-full-hd-1080p-screen-free). And on a laptop, plug in first: Windows throttles performance on battery, which is one of the [most common causes of dropped frames](/blogs/hd-screen-recording-tips-no-lag)." },
-        { "type": "quote", "text": "The best screen recorder on Windows isn't an app you install — it's the browser you already have open." },
-        { "type": "paragraph", "text": "Because it runs in the browser, the same steps work on a Mac or a Chromebook too. [Record your first Windows clip free](/signup) — no download, no account hoops." }
+        {
+          "type": "paragraph",
+          "text": "Windows does ship with a screen recorder — the Xbox Game Bar — but the moment you try to record File Explorer, the desktop, or two apps at once, you hit its walls. It was built for games, and it acts like it. For actual work, recording in the browser is both freer and more flexible."
+        },
+        {
+          "type": "heading",
+          "text": "Why the built-in Windows recorder falls short"
+        },
+        {
+          "type": "list",
+          "items": [
+            "It refuses to record the desktop and File Explorer, only app windows",
+            "It's awkward for capturing a single tab or switching between windows",
+            "There's no instant share link — you're left with a file to upload somewhere",
+            "You end up managing video files in a folder instead of just sending a link"
+          ]
+        },
+        {
+          "type": "paragraph",
+          "text": "A browser recorder doesn't care what it's pointed at — a tab, any window, or the full screen — and it hands you a link the moment you stop. If you've never recorded in the browser, here's [the three-step version](/blogs/how-to-record-your-screen-for-free)."
+        },
+        {
+          "type": "heading",
+          "text": "Recording on Windows in three steps"
+        },
+        {
+          "type": "list",
+          "items": [
+            "Open Screenbolt in Chrome, Edge, or Brave and start a recording",
+            "Choose what to share — a browser tab, an app window, or your entire screen",
+            "Stop when you're done, and you're dropped straight into the finished video with a link"
+          ]
+        },
+        {
+          "type": "heading",
+          "text": "Keeping it full HD and smooth on Windows"
+        },
+        {
+          "type": "paragraph",
+          "text": "For a sharp result, record at your display's native resolution — here's [how to capture in full HD](/blogs/record-full-hd-1080p-screen-free). And on a laptop, plug in first: Windows throttles performance on battery, which is one of the [most common causes of dropped frames](/blogs/hd-screen-recording-tips-no-lag)."
+        },
+        {
+          "type": "quote",
+          "text": "The best screen recorder on Windows isn't an app you install — it's the browser you already have open."
+        },
+        {
+          "type": "paragraph",
+          "text": "Because it runs in the browser, the same steps work on a Mac or a Chromebook too. [Record your first Windows clip free](/signup) — no download, no account hoops."
+        }
       ]
     },
     {
@@ -638,13 +1127,16 @@
       "title": "How to Trim and Edit a Screen Recording Online (No Software)",
       "excerpt": "The best edit is usually just cutting the dead air off both ends. Here's how to trim a screen recording in the browser — no editor to download.",
       "coverImage": "/blog/trim-screen-recording-online-cover.jpg",
-      "ogImage": "/blog/og-default.jpg",
+      "ogImage": "/blog/trim-screen-recording-online-og.jpg",
       "imageAlt": "A screen recording being trimmed on a timeline in the browser",
       "category": "Tips",
       "publishedAt": "2026-03-12",
       "updatedAt": "2026-03-12",
       "readingTime": 4,
-      "author": { "name": "Screenbolt Team", "role": "Product" },
+      "author": {
+        "name": "Screenbolt Team",
+        "role": "Product"
+      },
       "seo": {
         "title": "Trim a Screen Recording Online Free — No Editor to Install",
         "description": "Trim the dead air off your screen recording online, free. Cut the start and end in the browser so viewers see the point first — no video editor to download.",
@@ -658,26 +1150,56 @@
         ]
       },
       "content": [
-        { "type": "paragraph", "text": "Most screen recordings don't need editing so much as tightening. The middle — the actual walkthrough — is fine. It's the first few seconds of finding the right tab and the last few of reaching for the stop button that make a recording feel amateur. Cutting those two ends is 90% of the edit." },
-        { "type": "heading", "text": "You rarely need a full editor" },
-        { "type": "paragraph", "text": "Downloading a video editor to trim ten seconds off each end is like buying a workshop to hang one picture. For screen recordings, trimming in the browser is faster and there's nothing to install — you're editing the moment you stop recording." },
-        { "type": "heading", "text": "Trimming in the browser" },
-        { "type": "list", "items": [
-          "Stop recording and you land straight in the finished video",
-          "Drag the trim handles in from the start and end of the timeline",
-          "Scrub to preview so your first frame is the point, not the fumbling",
-          "Save — the tightened version keeps the same instant share link"
-        ] },
-        { "type": "paragraph", "text": "No export queue, no rendering wait. If you haven't recorded yet, start with [how to record your screen for free](/blogs/how-to-record-your-screen-for-free)." },
-        { "type": "heading", "text": "What to cut" },
-        { "type": "list", "items": [
-          "The intro fumbling — clearing your throat, finding the window",
-          "Any stretch where you went quiet to think",
-          "The tail end where you're reaching to stop the recording",
-          "Long loads the viewer doesn't need to sit through"
-        ] },
-        { "type": "quote", "text": "A tight recording respects the viewer's time — and the first ten seconds are where you earn the rest." },
-        { "type": "paragraph", "text": "Once it's trimmed, [share the link with anyone, no sign-up required](/blogs/share-screen-recording-instantly-no-signup) — and if you're making something more polished, the same trim is the last step of a [product demo video](/blogs/how-to-make-product-demo-video). [Record and trim your first clip free](/signup)." }
+        {
+          "type": "paragraph",
+          "text": "Most screen recordings don't need editing so much as tightening. The middle — the actual walkthrough — is fine. It's the first few seconds of finding the right tab and the last few of reaching for the stop button that make a recording feel amateur. Cutting those two ends is 90% of the edit."
+        },
+        {
+          "type": "heading",
+          "text": "You rarely need a full editor"
+        },
+        {
+          "type": "paragraph",
+          "text": "Downloading a video editor to trim ten seconds off each end is like buying a workshop to hang one picture. For screen recordings, trimming in the browser is faster and there's nothing to install — you're editing the moment you stop recording."
+        },
+        {
+          "type": "heading",
+          "text": "Trimming in the browser"
+        },
+        {
+          "type": "list",
+          "items": [
+            "Stop recording and you land straight in the finished video",
+            "Drag the trim handles in from the start and end of the timeline",
+            "Scrub to preview so your first frame is the point, not the fumbling",
+            "Save — the tightened version keeps the same instant share link"
+          ]
+        },
+        {
+          "type": "paragraph",
+          "text": "No export queue, no rendering wait. If you haven't recorded yet, start with [how to record your screen for free](/blogs/how-to-record-your-screen-for-free)."
+        },
+        {
+          "type": "heading",
+          "text": "What to cut"
+        },
+        {
+          "type": "list",
+          "items": [
+            "The intro fumbling — clearing your throat, finding the window",
+            "Any stretch where you went quiet to think",
+            "The tail end where you're reaching to stop the recording",
+            "Long loads the viewer doesn't need to sit through"
+          ]
+        },
+        {
+          "type": "quote",
+          "text": "A tight recording respects the viewer's time — and the first ten seconds are where you earn the rest."
+        },
+        {
+          "type": "paragraph",
+          "text": "Once it's trimmed, [share the link with anyone, no sign-up required](/blogs/share-screen-recording-instantly-no-signup) — and if you're making something more polished, the same trim is the last step of a [product demo video](/blogs/how-to-make-product-demo-video). [Record and trim your first clip free](/signup)."
+        }
       ]
     }
   ]
