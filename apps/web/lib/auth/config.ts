@@ -28,7 +28,8 @@ export const authConfig = {
       const { pathname } = request.nextUrl;
 
       const isPublic =
-        ["/", "/login", "/signup", "/terms", "/privacy"].includes(pathname) ||
+        ["/", "/login", "/signup", "/terms", "/privacy", "/blogs"].includes(pathname) ||
+        pathname.startsWith("/blogs/") ||
         pathname.startsWith("/watch/") ||
         pathname.startsWith("/embed/") ||
         pathname.startsWith("/invite/");
