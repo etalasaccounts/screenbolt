@@ -8,7 +8,7 @@ export const metadata: Metadata = {
   description:
     "Create your free Screenbolt account now. Record, edit, and share your screen in seconds. No credit card required.",
   alternates: {
-    canonical: "https://screenbolt.app/signup",
+    canonical: "https://screenbolt.com/signup",
   },
   robots: {
     index: false,

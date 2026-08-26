@@ -1,6 +1,6 @@
-import Image from "next/image";
 import { Icon } from "@iconify/react";
 import { Reveal } from "./reveal";
+import { LandingNav } from "./landing-nav";
 
 const LOGOS = [
   "https://qclay.design/lovable/synergy/logo-taa.png",
@@ -31,64 +31,7 @@ export function Hero() {
         }}
       />
 
-      <nav className="fixed left-0 right-0 top-0 z-50 px-4 py-4 md:px-8">
-        <div className="relative flex h-12 items-center">
-          <a href="#" className="flex items-center">
-            <Image
-              src="/logo.svg"
-              alt="Screenbolt"
-              width={100}
-              height={22}
-              className="h-[22px] w-auto"
-              priority
-            />
-          </a>
-
-          <div
-            className="absolute left-1/2 hidden -translate-x-1/2 items-center gap-1 rounded-full border px-2 py-1.5 md:flex"
-            style={{
-              background: "rgba(28,28,28,.75)",
-              borderColor: "rgba(255,255,255,.10)",
-              backdropFilter: "blur(12px)",
-              WebkitBackdropFilter: "blur(12px)",
-            }}
-          >
-            <a
-              href="#"
-              className="rounded-full px-4 py-2 text-[0.875rem] font-normal text-white/80 transition-colors hover:bg-white/10"
-            >
-              Product
-            </a>
-            <a
-              href="#analytics"
-              className="rounded-full px-4 py-2 text-[0.875rem] font-normal text-white/80 transition-colors hover:bg-white/10"
-            >
-              Features
-            </a>
-            <a
-              href="#pricing"
-              className="rounded-full px-4 py-2 text-[0.875rem] font-normal text-white/80 transition-colors hover:bg-white/10"
-            >
-              Pricing
-            </a>
-          </div>
-
-          <div className="ml-auto flex items-center gap-2">
-            <a
-              href="/login"
-              className="hidden rounded-full px-4 py-2 text-[0.875rem] text-white/80 sm:block"
-            >
-              Login
-            </a>
-            <a
-              href="/signup"
-              className="rounded-full bg-white px-5 py-2.5 text-[0.875rem] font-normal text-black"
-            >
-              Start recording
-            </a>
-          </div>
-        </div>
-      </nav>
+      <LandingNav />
 
       <div className="absolute inset-0 z-10 flex flex-col items-center justify-center px-5">
         <Reveal y={-40} duration={900} immediate>

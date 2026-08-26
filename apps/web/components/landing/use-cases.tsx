@@ -42,15 +42,16 @@ export function UseCases() {
             duration={700}
             className="relative min-h-[28rem] overflow-hidden rounded-3xl p-7 lg:min-h-0"
           >
-            <article className="contents">
-              <Image
-                src="/grass-artwork.webp"
-                alt=""
-                fill
-                className="absolute inset-0 z-0 object-cover"
-              />
-              <div className="absolute inset-0 z-[1] bg-black/30" />
+            <Image
+              src="/grass-artwork.webp"
+              alt=""
+              fill
+              sizes="(max-width: 1024px) 100vw, 55vw"
+              className="absolute inset-0 z-0 object-cover"
+            />
+            <div className="absolute inset-0 z-[1] bg-black/30" />
 
+            <article className="contents">
               <Image
                 src="/artwork-korean-women.webp"
                 alt=""
@@ -61,7 +62,7 @@ export function UseCases() {
 
               <div className="absolute right-6 top-[calc(48%+40px)] z-[3] flex items-center gap-2 lg:right-10">
                 <div className="flex items-center gap-2 rounded-full py-2 pl-2.5 pr-4 backdrop-blur-md" style={{ background: "rgba(255,255,255,.15)" }}>
-                  <Image src="/logo.svg" alt="" width={24} height={24} className="h-[22px] w-auto lg:h-[24px]" />
+                  <Image src="/logo.svg" alt="" width={613} height={93} className="h-[22px] w-auto lg:h-[24px]" />
                 </div>
                 <button className="flex h-9 w-9 items-center justify-center rounded-full text-white backdrop-blur-md lg:h-10 lg:w-10" style={{ background: "rgba(255,255,255,.15)" }}>
                   <Icon icon="solar:arrow-right-up-linear" style={{ fontSize: "1rem" }} />
@@ -118,7 +119,7 @@ export function UseCases() {
             duration={700}
             className="relative min-h-[20rem] overflow-hidden rounded-3xl p-7 lg:min-h-0"
           >
-            <Image src="/artwork-savana-horse.webp" alt="" fill className="absolute inset-0 z-0 object-cover" />
+            <Image src="/artwork-savana-horse.webp" alt="" fill sizes="(max-width: 1024px) 100vw, 25vw" className="absolute inset-0 z-0 object-cover" />
             <div className="absolute inset-0 z-[1] bg-black/30" />
             <div className="absolute bottom-7 left-7 right-7 z-[2]">
               <Icon icon="solar:scissors-linear" className="mb-8 text-white/75" style={{ fontSize: "2rem" }} />
@@ -135,7 +136,7 @@ export function UseCases() {
             duration={700}
             className="relative min-h-[20rem] overflow-hidden rounded-3xl p-7 lg:min-h-0"
           >
-            <Image src="/artwork-paper-plan.webp" alt="" fill className="absolute inset-0 z-0 object-cover" />
+            <Image src="/artwork-paper-plan.webp" alt="" fill sizes="(max-width: 1024px) 100vw, 25vw" className="absolute inset-0 z-0 object-cover" />
             <div className="absolute inset-0 z-[1] bg-black/30" />
             <div className="absolute bottom-7 left-7 right-7 z-[2]">
               <Icon icon="solar:share-linear" className="mb-8 text-white/75" style={{ fontSize: "2rem" }} />

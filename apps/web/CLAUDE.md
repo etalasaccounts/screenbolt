@@ -69,6 +69,31 @@ Return via `ok(data)` / `fail(message, code, status)` / `handleApiError(error, c
    - Adding React Query everywhere would create a second cache competing with RSC caching
    - Best for frequently-accessed data with complex refetch strategies
 
+## SEO & Metadata
+
+Production domain is `https://screenbolt.com` — written verbatim in every canonical / OpenGraph / sitemap URL. `metadataBase` in `app/layout.tsx` resolves relative asset paths (e.g. `/opengraph-image.png`) to absolute URLs, which social scrapers require.
+
+**Critical — indexable pages must be allowlisted.** The NextAuth middleware (`proxy.ts`) guards everything except the `isPublic` list in `lib/auth/config.ts`. Static assets (any path containing a dot — `/opengraph-image.png`, `/sitemap.xml`, `/robots.txt`, `/manifest.webmanifest`) are excluded by the matcher regex and are always reachable. Marketing **pages** are not: a path with no dot runs through `authorized()`, so **any new public page MUST be added to `isPublic` or the middleware 307-redirects it to `/login` — invisible to crawlers even while it sits in the sitemap.** Keep `isPublic` and `app/sitemap.ts` in sync. Current public pages: `/`, `/login`, `/signup`, `/terms`, `/privacy`, `/blogs`, `/blogs/*`, `/watch/*`, `/embed/*`, `/invite/*`.
+
+**Where each concern lives:**
+
+| Concern | Where | Notes |
+|---|---|---|
+| Global metadata | `app/layout.tsx` → `metadata` | Title template `%s — Screenbolt`, default title/description, keywords, OG, Twitter, `metadataBase` |
+| Per-page metadata | Each page's `export const metadata` or `generateMetadata` | Always set `alternates.canonical` to the absolute URL |
+| OG / Twitter image | `public/opengraph-image.png` (static, 1536×1024) | Referenced as `/opengraph-image.png`. Do **not** re-add a code-generated `app/opengraph-image.tsx` — it emits duplicate `og:image` tags |
+| Sitemap | `app/sitemap.ts` | `revalidate = 3600`; merges static pages + blog (`listBlogPosts`) + public videos (`VideoService.listPublicVideos`) |
+| Robots | `app/robots.ts` | Allows AI crawlers (GPTBot, ClaudeBot, PerplexityBot, Google-Extended, …) on public paths; disallows `/d*` and `/api*` |
+| PWA manifest | `app/manifest.ts` | Served at `/manifest.webmanifest` |
+| LLM guide | `public/llms.txt` | Static pointer file for LLM crawlers |
+| Structured data | `<script type="application/ld+json">` inside the page component | `SoftwareApplication` on home, `BlogPosting` on blog posts |
+
+**Blog content is file-based, not a DB table.** `lib/blog/posts.json` is read through `lib/blog/blog.ts` (`listBlogPosts` / `getBlogPost` / `listBlogSlugs`), and blog pages are statically generated via `generateStaticParams`. Add a post by appending to `posts.json` — the sitemap and static params pick it up automatically. Note this is a deliberate exception to the seven-layer model: blog copy is editorial content, so it lives in a JSON file rather than behind a service + `lib/db` query.
+
+**`next/image` rules** (enforced only by console warnings, so easy to regress):
+- `logo.svg` is intrinsically **613×93** — every `<Image>` of it must pass `width={613} height={93}`; rendered size stays controlled by the `className` (fixed height + `w-auto`).
+- Every `fill` image needs a `sizes` prop matching its layout column, and its nearest positioned ancestor must actually be positioned (`relative`/`absolute`) — a `display:contents` wrapper (e.g. `className="contents"`) does not count.
+
 ## Verification Checklist
 
 Before any commit in `apps/web`:
@@ -211,3 +236,13 @@ Next.js 16 (App Router), React 19, TypeScript, Tailwind v4, NextAuth, Drizzle OR
 - `PATTERN.md` — all enforcement rules (read once per project)
 - `docs/architecture.md` — system design (7-layer model)
 - `docs/api-contract.md` — frozen extension contracts
+
+<!-- BEGIN:nextjs-agent-rules -->
+
+# This is NOT the Next.js you know
+
+This version has breaking changes — APIs, conventions, and file structure may all differ from your training data. Read the relevant guide in `node_modules/next/dist/docs/` (resolved from this file's directory; in monorepos the `next` package may not be visible from the repo root) before writing any code. Heed deprecation notices.
+
+This block is written and re-added by `next dev` — verify at `node_modules/next/dist/server/lib/generate-agent-files.js`. Removing it from a diff only re-creates the uncommitted change; committing it with your work keeps the tree clean.
+
+<!-- END:nextjs-agent-rules -->

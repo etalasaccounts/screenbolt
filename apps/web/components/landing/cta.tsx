@@ -8,7 +8,7 @@ export function Cta() {
       id="cta"
       className="relative mx-auto mb-10 w-full max-w-[1280px] overflow-hidden rounded-[28px] border border-white/[.12] px-5 py-24 text-center md:px-12 md:py-32"
     >
-      <Image src="/artwork-landscape.webp" alt="" fill className="absolute inset-0 z-0 object-cover" />
+      <Image src="/artwork-landscape.webp" alt="" fill sizes="(max-width: 1280px) 100vw, 1280px" className="absolute inset-0 z-0 object-cover" />
       <div className="absolute inset-0 z-[1] bg-black/[.42]" />
       <Reveal y={30} blur={12} duration={800} className="relative z-[2] mx-auto flex max-w-3xl flex-col items-center">
         <p className="mb-5 text-xs font-normal uppercase tracking-[0.16rem] text-white/50">START TODAY</p>

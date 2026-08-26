@@ -8,7 +8,7 @@ export const metadata: Metadata = {
   description:
     "Sign in to your Screenbolt account to manage your screen recordings and shared videos.",
   alternates: {
-    canonical: "https://screenbolt.app/login",
+    canonical: "https://screenbolt.com/login",
   },
   robots: {
     index: false,

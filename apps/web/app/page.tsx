@@ -11,11 +11,11 @@ import { Cta } from "@/components/landing/cta";
 import { Footer } from "@/components/landing/footer";
 
 export const metadata: Metadata = {
-  title: "Screenbolt - Screen Recording & Sharing Made Simple",
+  title: "Free Screen Recorder & Instant Video Sharing",
   description:
-    "Record your screen, share with one click. Free, fast, and easy screen recording and video sharing. Start recording in seconds.",
+    "Record your screen and share it instantly with a link. Screenbolt is a fast, free screen recorder and Loom alternative — HD quality, no download.",
   alternates: {
-    canonical: "https://screenbolt.app/",
+    canonical: "https://screenbolt.com/",
   },
 };
 
@@ -24,7 +24,7 @@ const jsonLd = {
   "@type": "SoftwareApplication",
   name: "Screenbolt",
   description: "Record your screen and share it in seconds. The fastest way to record your screen and share it with anyone.",
-  url: "https://screenbolt.app",
+  url: "https://screenbolt.com",
   applicationCategory: "BusinessApplication",
   operatingSystem: "Web",
   offers: {

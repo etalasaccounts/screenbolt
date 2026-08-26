@@ -51,7 +51,7 @@ export function TimeSavedBanner({ timeSaved }: { timeSaved: TimeSaved }) {
       {/* Same treatment as the landing page's "Capture your screen in seconds"
           card: the grass artwork under a black/30 wash, which is what keeps the
           white type readable over the photo. */}
-      <Image src="/grass-artwork.webp" alt="" fill className="absolute inset-0 z-0 object-cover" />
+      <Image src="/grass-artwork.webp" alt="" fill sizes="100vw" className="absolute inset-0 z-0 object-cover" />
       <div className="absolute inset-0 z-[1] bg-black/30" />
 
       <div className="relative z-[2] flex flex-col gap-4 px-6 py-5 sm:flex-row sm:items-center sm:justify-between">

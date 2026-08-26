@@ -47,3 +47,4 @@ next-env.d.ts
 *.old
 *.backup-old.svg
 .worktrees/
+.commandcode/
