@@ -148,7 +148,7 @@ export const workspaceInvites = pgTable("workspace_invites", {
 export const sourceEnum = pgEnum("source", ["local", "bunny", "drive", "dropbox"]);
 
 export const planEnum = pgEnum("plan", ["free", "pro", "business"]);
-export const subscriptionStatusEnum = pgEnum("subscription_status", ["active", "expired", "cancelled"]);
+export const subscriptionStatusEnum = pgEnum("subscription_status", ["active", "cancelling", "expired", "cancelled"]);
 
 export const subscriptions = pgTable("subscriptions", {
   id: text("id")

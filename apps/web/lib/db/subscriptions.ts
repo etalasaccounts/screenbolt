@@ -1,4 +1,4 @@
-import { eq, and, lt } from "drizzle-orm";
+import { eq, and, lt, or } from "drizzle-orm";
 import { db } from "@/lib/db";
 import { subscriptions } from "@/lib/db/schema";
 import type { Subscription } from "@/lib/db/schema";
@@ -6,7 +6,7 @@ import type { Subscription } from "@/lib/db/schema";
 export type UpsertSubscriptionData = {
   userId: string;
   plan: "free" | "pro" | "business";
-  status: "active" | "expired" | "cancelled";
+  status: "active" | "cancelling" | "expired" | "cancelled";
   midtransOrderId?: string | null;
   midtransTransactionId?: string | null;
   currentPeriodStart?: Date | null;
@@ -44,8 +44,19 @@ export async function expireSubscriptions(): Promise<void> {
     .set({ status: "expired", plan: "free", updatedAt: new Date() })
     .where(
       and(
-        eq(subscriptions.status, "active"),
+        or(eq(subscriptions.status, "active"), eq(subscriptions.status, "cancelling")),
         lt(subscriptions.currentPeriodEnd, new Date()),
       ),
     );
+}
+
+export async function cancelSubscriptionAtPeriodEnd(userId: string): Promise<Subscription | null> {
+  const existing = await getUserSubscription(userId);
+  if (!existing || existing.status !== "active") return null;
+  const [row] = await db
+    .update(subscriptions)
+    .set({ status: "cancelling", updatedAt: new Date() })
+    .where(eq(subscriptions.userId, userId))
+    .returning();
+  return row ?? null;
 }

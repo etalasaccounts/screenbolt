@@ -24,16 +24,24 @@ interface ShellWorkspace {
   name: string;
 }
 
+const PLAN_BADGE: Record<"free" | "pro" | "business", { label: string; className: string }> = {
+  free: { label: "Free", className: "bg-black/[.06] text-[#090b0c]/50" },
+  pro: { label: "Pro", className: "bg-violet-100 text-violet-700" },
+  business: { label: "Business", className: "bg-amber-100 text-amber-700" },
+};
+
 export function Sidebar({
   user,
   workspaces,
   activeWorkspaceId,
   activeWorkspaceMemberCount,
+  plan = "free",
 }: {
   user: ShellUser | null;
   workspaces: ShellWorkspace[];
   activeWorkspaceId: string | null;
   activeWorkspaceMemberCount: number;
+  plan?: "free" | "pro" | "business";
 }) {
   const router = useRouter();
   const pathname = usePathname();
@@ -253,7 +261,12 @@ export function Sidebar({
               )}
             </span>
             <div className="min-w-0 flex-1">
-              <p className="truncate text-[0.8125rem] font-medium text-[#090b0c]">{user.name ?? "Account"}</p>
+              <div className="flex items-center gap-1.5">
+                <p className="truncate text-[0.8125rem] font-medium text-[#090b0c]">{user.name ?? "Account"}</p>
+                <span className={`shrink-0 rounded px-1.5 py-0.5 text-[0.625rem] font-semibold leading-none ${PLAN_BADGE[plan].className}`}>
+                  {PLAN_BADGE[plan].label}
+                </span>
+              </div>
               <p className="truncate text-[0.75rem] text-[#090b0c]/50">{user.email}</p>
             </div>
             <button

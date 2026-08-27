@@ -3,7 +3,7 @@
 import { useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { Toaster } from "sonner";
-import { useCurrentUser, useWorkspaces } from "@/lib/hooks/use-account-data";
+import { useCurrentUser, useWorkspaces, useBillingPlan } from "@/lib/hooks/use-account-data";
 import { Sidebar } from "@/components/shell/sidebar";
 import { QueryProvider } from "@/components/shell/query-provider";
 
@@ -19,6 +19,7 @@ function DashboardShellInner({ children }: { children: React.ReactNode }) {
   const router = useRouter();
   const { data: user, isLoading: userLoading, error: userError } = useCurrentUser();
   const { data: workspaces = [] } = useWorkspaces();
+  const { data: billing } = useBillingPlan();
 
   useEffect(() => {
     if (userError) {
@@ -44,6 +45,7 @@ function DashboardShellInner({ children }: { children: React.ReactNode }) {
         workspaces={workspaces}
         activeWorkspaceId={user.activeWorkspaceId ?? null}
         activeWorkspaceMemberCount={activeWorkspace?.memberCount ?? 1}
+        plan={(billing?.plan ?? "free") as "free" | "pro" | "business"}
       />
       <main className="mx-auto w-full max-w-[1280px] flex-1 px-4 py-8 md:px-8">{children}</main>
       <Toaster position="bottom-center" />

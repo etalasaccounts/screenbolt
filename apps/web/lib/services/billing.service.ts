@@ -1,6 +1,6 @@
 import { getUserPlan, getPlanLimits, type PlanLimits } from "@/lib/billing/plans";
-import { createSnapToken, verifyWebhookSignature } from "@/lib/billing/midtrans";
-import { getUserSubscription, upsertSubscription, expireSubscriptions } from "@/lib/db/subscriptions";
+import { createSnapToken, verifyWebhookSignature, getTransactionStatus, isSuccessfulTransaction } from "@/lib/billing/midtrans";
+import { getUserSubscription, upsertSubscription, expireSubscriptions, cancelSubscriptionAtPeriodEnd } from "@/lib/db/subscriptions";
 
 const PLAN_PRICES: Record<"pro" | "business", number> = {
   pro: 50000,
@@ -32,8 +32,10 @@ export class BillingService {
     userEmail: string,
     userName: string,
     plan: "pro" | "business",
-  ): Promise<{ snapToken: string; redirectUrl: string }> {
-    const orderId = `screenbolt-${plan}-${userId}-${Date.now()}`;
+  ): Promise<{ snapToken: string; redirectUrl: string; orderId: string }> {
+    const uid = userId.replace(/-/g, ""); // 32 hex chars, no hyphens
+    const rand = Math.random().toString(36).slice(2, 6);
+    const orderId = `sb-${plan}-${uid}-${rand}`; // max 49 chars (business)
     const { token: snapToken, redirectUrl } = await createSnapToken({
       orderId,
       grossAmount: PLAN_PRICES[plan],
@@ -41,7 +43,7 @@ export class BillingService {
       customerEmail: userEmail,
       planLabel: PLAN_LABELS[plan],
     });
-    return { snapToken, redirectUrl };
+    return { snapToken, redirectUrl, orderId };
   }
 
   /**
@@ -60,19 +62,20 @@ export class BillingService {
     const serverKey = process.env.MIDTRANS_SERVER_KEY;
     if (!serverKey) throw new Error("MIDTRANS_SERVER_KEY is not set");
 
-    const { order_id, transaction_status, status_code, gross_amount, signature_key, transaction_id } = payload;
+    const { order_id, transaction_status, status_code, gross_amount, signature_key, transaction_id, fraud_status } = payload;
 
     const expected = verifyWebhookSignature(order_id, status_code, gross_amount, serverKey);
     if (expected !== signature_key) return { valid: false };
 
-    // orderId format: screenbolt-${plan}-${userId}-${timestamp}
-    // plan has no hyphens; timestamp is last segment; userId is everything in between
+    // orderId format: sb-${plan}-${uuid32nohyphens}-${rand4}
     const parts = order_id.split("-");
-    // parts[0]="screenbolt", parts[1]=plan, parts[last]=timestamp, parts[2..last-1]=userId
+    // parts[0]="sb", parts[1]=plan, parts[2]=uuid32, parts[3]=rand4
     const plan = parts[1] as "pro" | "business";
-    const userId = parts.slice(2, parts.length - 1).join("-");
+    const uid = parts[2]; // 32 hex chars
+    // reinsert hyphens: 8-4-4-4-12
+    const userId = `${uid.slice(0,8)}-${uid.slice(8,12)}-${uid.slice(12,16)}-${uid.slice(16,20)}-${uid.slice(20)}`;
 
-    if (transaction_status === "settlement" || transaction_status === "capture") {
+    if (isSuccessfulTransaction(transaction_status, fraud_status)) {
       const now = new Date();
       const periodEnd = new Date(now.getTime() + 30 * 24 * 60 * 60 * 1000);
       await upsertSubscription({
@@ -95,6 +98,53 @@ export class BillingService {
     }
 
     return { valid: true };
+  }
+
+  /**
+   * Verify a transaction by orderId via Midtrans status API and activate subscription if settled.
+   * Used after SNAP onSuccess callback when webhook cannot reach localhost in dev.
+   */
+  static async verifyAndActivate(
+    orderId: string,
+  ): Promise<{ activated: boolean; status: string }> {
+    const txn = await getTransactionStatus(orderId);
+    const { transaction_status, transaction_id } = txn;
+
+    if (!isSuccessfulTransaction(transaction_status, txn.fraud_status)) {
+      return { activated: false, status: transaction_status };
+    }
+
+    // orderId format: sb-${plan}-${uuid32nohyphens}-${rand4}
+    const parts = orderId.split("-");
+    const plan = parts[1] as "pro" | "business";
+    const uid = parts[2];
+    const userId = `${uid.slice(0,8)}-${uid.slice(8,12)}-${uid.slice(12,16)}-${uid.slice(16,20)}-${uid.slice(20)}`;
+
+    // Skip upsert if webhook already activated this exact order — avoids
+    // a double-write race in prod where both this endpoint and the Midtrans
+    // webhook fire within seconds of each other.
+    const existing = await getUserSubscription(userId);
+    if (existing?.status === "active" && existing.midtransOrderId === orderId) {
+      return { activated: true, status: transaction_status };
+    }
+
+    const now = new Date();
+    await upsertSubscription({
+      userId,
+      plan,
+      status: "active",
+      midtransOrderId: orderId,
+      midtransTransactionId: transaction_id,
+      currentPeriodStart: now,
+      currentPeriodEnd: new Date(now.getTime() + 30 * 24 * 60 * 60 * 1000),
+    });
+    return { activated: true, status: transaction_status };
+  }
+
+  static async cancelSubscription(userId: string): Promise<{ cancelled: boolean; periodEnd: string | null }> {
+    const row = await cancelSubscriptionAtPeriodEnd(userId);
+    if (!row) return { cancelled: false, periodEnd: null };
+    return { cancelled: true, periodEnd: row.currentPeriodEnd?.toISOString() ?? null };
   }
 
   static async runDailyExpiry(): Promise<void> {
