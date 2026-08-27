@@ -5,7 +5,7 @@ import { BillingService } from "@/lib/services/billing.service";
 import { ok, fail, handleApiError } from "@/lib/shared/api-response";
 
 const bodySchema = z.object({
-  plan: z.enum(["pro", "business"]),
+  orderId: z.string().min(1),
 });
 
 export async function POST(request: NextRequest) {
@@ -15,18 +15,11 @@ export async function POST(request: NextRequest) {
 
     const body = await request.json();
     const parsed = bodySchema.safeParse(body);
-    if (!parsed.success) return fail("Invalid plan", "VALIDATION_ERROR", 400);
+    if (!parsed.success) return fail("orderId is required", "VALIDATION_ERROR", 400);
 
-    const { plan } = parsed.data;
-    const { snapToken, redirectUrl, orderId } = await BillingService.createCheckoutToken(
-      user.id,
-      user.email ?? "",
-      user.name ?? user.email ?? "User",
-      plan,
-    );
-
-    return ok({ snapToken, redirectUrl, orderId });
+    const result = await BillingService.verifyAndActivate(parsed.data.orderId);
+    return ok(result);
   } catch (error) {
-    return handleApiError(error, "POST /api/billing/checkout");
+    return handleApiError(error, "POST /api/billing/verify");
   }
 }

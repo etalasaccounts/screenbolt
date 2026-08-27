@@ -35,9 +35,9 @@ export const PLAN_LIMITS: Record<"free" | "pro" | "business", PlanLimits> = {
 export async function getUserPlan(userId: string): Promise<"free" | "pro" | "business"> {
   const sub = await getUserSubscription(userId);
   if (!sub) return "free";
-  if (sub.status !== "active") return "free";
   if (sub.currentPeriodEnd && sub.currentPeriodEnd < new Date()) return "free";
-  return sub.plan;
+  if (sub.status === "active" || sub.status === "cancelling") return sub.plan;
+  return "free";
 }
 
 export function getPlanLimits(plan: "free" | "pro" | "business"): PlanLimits {

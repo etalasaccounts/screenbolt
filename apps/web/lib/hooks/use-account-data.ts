@@ -58,6 +58,18 @@ async function fetchCloudConnections(): Promise<CloudConfig> {
   return body.data;
 }
 
+type BillingPlanData = {
+  plan: string;
+  subscription: { status: string; currentPeriodEnd: string | null } | null;
+};
+
+async function fetchBillingPlan(): Promise<BillingPlanData> {
+  const res = await fetch("/api/billing/plan");
+  if (!res.ok) throw new Error("Failed to load billing plan");
+  const body = await res.json();
+  return { plan: body.data.plan, subscription: body.data.subscription ?? null };
+}
+
 const queryConfig = {
   staleTime: 1000 * 60 * 5, // 5 minutes
   gcTime: 1000 * 60 * 10, // 10 minutes
@@ -93,6 +105,14 @@ export function useCloudConnections() {
   return useQuery({
     queryKey: ["cloud-config"],
     queryFn: fetchCloudConnections,
+    ...queryConfig,
+  });
+}
+
+export function useBillingPlan() {
+  return useQuery({
+    queryKey: ["billing-plan"],
+    queryFn: fetchBillingPlan,
     ...queryConfig,
   });
 }

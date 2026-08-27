@@ -32,7 +32,7 @@ export async function createSnapToken(
     },
     item_details: [
       {
-        id: params.orderId,
+        id: "item-1",
         price: params.grossAmount,
         quantity: 1,
         name: params.planLabel,
@@ -51,11 +51,52 @@ export async function createSnapToken(
 
   if (!response.ok) {
     const text = await response.text();
+    console.error(`[Midtrans] ${response.status} | key prefix: ${serverKey.slice(0, 12)} | body: ${text}`);
     throw new Error(`Midtrans SNAP error ${response.status}: ${text}`);
   }
 
   const data = await response.json();
   return { token: data.token, redirectUrl: data.redirect_url };
+}
+
+const STATUS_BASE_URL = IS_PRODUCTION
+  ? "https://api.midtrans.com/v2"
+  : "https://api.sandbox.midtrans.com/v2";
+
+export type TransactionStatusResponse = {
+  order_id: string;
+  transaction_status: string;
+  status_code: string;
+  gross_amount: string;
+  transaction_id: string;
+  fraud_status?: string;
+};
+
+/** Docs: success = settlement|capture AND fraud_status (if present) = accept */
+export function isSuccessfulTransaction(
+  transactionStatus: string,
+  fraudStatus?: string,
+): boolean {
+  if (transactionStatus !== "settlement" && transactionStatus !== "capture") return false;
+  if (fraudStatus && fraudStatus !== "accept") return false;
+  return true;
+}
+
+export async function getTransactionStatus(orderId: string): Promise<TransactionStatusResponse> {
+  const serverKey = process.env.MIDTRANS_SERVER_KEY;
+  if (!serverKey) throw new Error("MIDTRANS_SERVER_KEY is not set");
+
+  const credentials = Buffer.from(`${serverKey}:`).toString("base64");
+  const response = await fetch(`${STATUS_BASE_URL}/${orderId}/status`, {
+    headers: { Authorization: `Basic ${credentials}` },
+  });
+
+  if (!response.ok) {
+    const text = await response.text();
+    throw new Error(`Midtrans status check error ${response.status}: ${text}`);
+  }
+
+  return response.json();
 }
 
 export function verifyWebhookSignature(

@@ -50,6 +50,13 @@
       "when": 1787563678232,
       "tag": "0006_panoramic_guardian",
       "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "7",
+      "when": 1787814741813,
+      "tag": "0007_heavy_switch",
+      "breakpoints": true
     }
   ]
 }

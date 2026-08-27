@@ -47,7 +47,7 @@ const SHARED_EDITOR_PACKAGES = [
 // guide) -- a bare absolute filesystem path resolves the *specifier* but
 // Turbopack then fails to load it, so route every target through this.
 const toAlias = (absPath: string) => {
-  const rel = path.relative(__dirname, absPath);
+  const rel = path.relative(__dirname, absPath).replace(/\\/g, "/");
   return rel.startsWith(".") ? rel : `./${rel}`;
 };
 
