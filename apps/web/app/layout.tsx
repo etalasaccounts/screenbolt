@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import { Inter_Tight, Instrument_Serif } from "next/font/google";
 import { RecordingProvider } from "@/components/record/recording-provider";
+import Script from "next/script";
 import "./globals.css";
 
 const interTight = Inter_Tight({
@@ -130,6 +131,11 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
     >
       <body className="bg-[#f5f5f2] text-[#090b0c]">
         <RecordingProvider>{children}</RecordingProvider>
+        <Script
+          defer
+          src="https://cloud.umami.is/script.js"
+          data-website-id="fae5d93f-d673-44ae-8cfe-a77ce20332d4"
+        />
       </body>
     </html>
   );
