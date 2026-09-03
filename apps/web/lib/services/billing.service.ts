@@ -58,6 +58,7 @@ export class BillingService {
     gross_amount: string;
     signature_key: string;
     transaction_id: string;
+    fraud_status?: string;
   }): Promise<{ valid: boolean }> {
     const serverKey = process.env.MIDTRANS_SERVER_KEY;
     if (!serverKey) throw new Error("MIDTRANS_SERVER_KEY is not set");
