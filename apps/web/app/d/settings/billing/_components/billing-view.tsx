@@ -36,12 +36,13 @@ const PLAN_DETAILS: Record<
   {
     label: string;
     price: string;
+    priceSuffix?: string;
     features: { text: string; included: boolean }[];
   }
 > = {
   free: {
     label: "Free",
-    price: "Rp0/bln",
+    price: "$0",
     features: [
       { text: "15 videos", included: true },
       { text: "5 min/video", included: true },
@@ -50,7 +51,8 @@ const PLAN_DETAILS: Record<
   },
   pro: {
     label: "Pro",
-    price: "Rp50.000/bln",
+    price: "$10",
+    priceSuffix: "/mo",
     features: [
       { text: "Unlimited videos", included: true },
       { text: "30 min/video", included: true },
@@ -59,7 +61,8 @@ const PLAN_DETAILS: Record<
   },
   business: {
     label: "Business",
-    price: "Rp100.000/bln",
+    price: "$25",
+    priceSuffix: "/mo",
     features: [
       { text: "Unlimited videos", included: true },
       { text: "Unlimited duration", included: true },
@@ -266,7 +269,7 @@ export function BillingView({
         </div>
       )}
 
-      <section className="rounded-3xl border border-black/[.08] bg-white p-6 sm:p-7">
+      <section className="p-6 sm:p-7">
         <div className="grid gap-4 sm:grid-cols-3">
           {(["free", "pro", "business"] as const).map((p) => {
             const d = PLAN_DETAILS[p];
@@ -277,15 +280,18 @@ export function BillingView({
                 className={`flex flex-col gap-4 rounded-2xl border p-7 min-h-72 transition-shadow duration-200 ${
                   isCurrent
                     ? "border-transparent bg-[#090b0c]"
-                    : "border-black/[.08] hover:shadow-md hover:border-black/[.15] cursor-pointer"
+                    : "border-black/[.08] bg-white hover:shadow-md hover:border-black/[.15] cursor-pointer"
                 }`}
               >
                 <div>
                   <p className={`mb-0.5 text-[0.9375rem] font-medium ${isCurrent ? "text-white" : ""}`}>
                     {d.label}
                   </p>
-                  <p className={`text-[0.8125rem] ${isCurrent ? "text-white/50" : "text-[#090b0c]/45"}`}>
+                  <p className={`mt-4 text-[3rem] font-normal leading-none tracking-tight ${isCurrent ? "text-white" : "text-[#090b0c]"}`}>
                     {d.price}
+                    {d.priceSuffix && (
+                      <span className={`text-sm ${isCurrent ? "text-white/40" : "text-[#090b0c]/40"}`}>{d.priceSuffix}</span>
+                    )}
                   </p>
                 </div>
                 <ul className="flex flex-col gap-2 text-[0.8125rem]">
@@ -318,7 +324,7 @@ export function BillingView({
                 ) : p === "free" ? (
                   <button
                     disabled
-                    className="mt-auto w-full rounded-xl border border-black/[.08] py-2 text-[0.8125rem] font-medium text-[#090b0c]/35 cursor-default"
+                    className="mt-auto w-full rounded-xl bg-[#090b0c] py-2 text-[0.8125rem] font-medium text-white cursor-default"
                   >
                     Free
                   </button>
