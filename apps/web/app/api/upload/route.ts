@@ -25,12 +25,12 @@ export async function POST(request: NextRequest) {
   try {
     let user = await getCurrentUser();
     if (!user) user = await getCurrentUserOrToken(request);
-    if (!user) return NextResponse.json({ success: false, error: "Unauthorized" }, { status: 401 });
-    if (!user.activeWorkspaceId) return NextResponse.json({ success: false, error: "No active workspace" }, { status: 400 });
+    if (!user) return NextResponse.json({ success: false, error: "Unauthorized", details: null }, { status: 401 });
+    if (!user.activeWorkspaceId) return NextResponse.json({ success: false, error: "No active workspace", details: null }, { status: 400 });
 
     if (!UploadService.checkStorageConfiguration()) {
       return NextResponse.json(
-        { success: false, error: "Storage is not configured (BUNNY_STORAGE_ZONE/BUNNY_STORAGE_ACCESS_KEY/BUNNY_PULL_ZONE_HOST missing)" },
+        { success: false, error: "Storage is not configured (BUNNY_STORAGE_ZONE/BUNNY_STORAGE_ACCESS_KEY/BUNNY_PULL_ZONE_HOST missing)", details: null },
         { status: 503 },
       );
     }
@@ -41,7 +41,7 @@ export async function POST(request: NextRequest) {
 
     const video = formData.get("video");
     if (!(video instanceof File)) {
-      return NextResponse.json({ success: false, error: "No video file provided" }, { status: 400 });
+      return NextResponse.json({ success: false, error: "No video file provided", details: null }, { status: 400 });
     }
     if (video.size > MAX_SIZE) {
       return NextResponse.json(
@@ -79,6 +79,6 @@ export async function POST(request: NextRequest) {
     );
   } catch (error) {
     console.error("POST /api/upload", error);
-    return NextResponse.json({ success: false, error: "Internal server error" }, { status: 500 });
+    return NextResponse.json({ success: false, error: "Internal server error", details: null }, { status: 500 });
   }
 }

@@ -91,7 +91,7 @@ const EXEMPT = {
       "Public endpoint: the unpaired extension polls pairing status by code alone. The code is the bearer credential. Frozen external contract with Chrome extension; response shape is audited separately by contract-frozen rule.",
   },
   "app/api/upload/route.ts": {
-    rules: ["envelope", "no-manual-status"],
+    rules: ["envelope", "no-manual-status", "response-shape"],
     reason:
       "Frozen external contract with web and extension clients; response shape is audited separately by contract-frozen rule.",
   },
