@@ -2,7 +2,6 @@ import { NextRequest, NextResponse } from "next/server";
 
 import { getCurrentUser, getCurrentUserOrToken } from "@/lib/auth/server-auth";
 import { assertVideoQuota, assertDurationAllowed } from "@/lib/billing/plans";
-import { fail, handleApiError } from "@/lib/shared/api-response";
 import { UploadService } from "@/lib/services/upload.service";
 
 /**
@@ -26,14 +25,13 @@ export async function POST(request: NextRequest) {
   try {
     let user = await getCurrentUser();
     if (!user) user = await getCurrentUserOrToken(request);
-    if (!user) return fail("Unauthorized", "UNAUTHORIZED", 401);
-    if (!user.activeWorkspaceId) return fail("No active workspace", "VALIDATION_ERROR", 400);
+    if (!user) return NextResponse.json({ success: false, error: "Unauthorized" }, { status: 401 });
+    if (!user.activeWorkspaceId) return NextResponse.json({ success: false, error: "No active workspace" }, { status: 400 });
 
     if (!UploadService.checkStorageConfiguration()) {
-      return fail(
-        "Storage is not configured (BUNNY_STORAGE_ZONE/BUNNY_STORAGE_ACCESS_KEY/BUNNY_PULL_ZONE_HOST missing)",
-        "SERVICE_UNAVAILABLE",
-        503,
+      return NextResponse.json(
+        { success: false, error: "Storage is not configured (BUNNY_STORAGE_ZONE/BUNNY_STORAGE_ACCESS_KEY/BUNNY_PULL_ZONE_HOST missing)" },
+        { status: 503 },
       );
     }
 
@@ -43,13 +41,12 @@ export async function POST(request: NextRequest) {
 
     const video = formData.get("video");
     if (!(video instanceof File)) {
-      return fail("No video file provided", "VALIDATION_ERROR", 400);
+      return NextResponse.json({ success: false, error: "No video file provided" }, { status: 400 });
     }
     if (video.size > MAX_SIZE) {
-      return fail(
-        `File too large (${(video.size / 1024 / 1024).toFixed(1)}MB). Use the chunked upload API.`,
-        "FILE_TOO_LARGE",
-        413,
+      return NextResponse.json(
+        { success: false, error: `File too large (${(video.size / 1024 / 1024).toFixed(1)}MB). Use the chunked upload API.`, details: "FILE_TOO_LARGE" },
+        { status: 413 },
       );
     }
 
@@ -81,6 +78,7 @@ export async function POST(request: NextRequest) {
       { status: 201 },
     );
   } catch (error) {
-    return handleApiError(error, "POST /api/upload");
+    console.error("POST /api/upload", error);
+    return NextResponse.json({ success: false, error: "Internal server error" }, { status: 500 });
   }
 }
