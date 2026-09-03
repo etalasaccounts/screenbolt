@@ -19,7 +19,7 @@ const PLANS = [
     tagline: "For individuals who record often.",
     features: ["Unlimited videos & length", "AI titles & transcripts", "Remove filler words", "View counts & time saved"],
     cta: "Go Pro",
-    href: "/login?callbackUrl=/d/settings/billing?plan=pro",
+    href: "/d/settings/billing",
     variant: "dark" as const,
   },
   {
@@ -29,7 +29,7 @@ const PLANS = [
     tagline: "For teams who need more.",
     features: ["Everything in Pro", "Shared workspace", "Workspace time-saved report", "SSO & admin controls"],
     cta: "Go Business",
-    href: "/login?callbackUrl=/d/settings/billing?plan=business",
+    href: "/d/settings/billing",
     variant: "outline" as const,
   },
 ];
