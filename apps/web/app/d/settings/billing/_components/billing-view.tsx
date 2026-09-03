@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useQueryClient } from "@tanstack/react-query";
 import Link from "next/link";
@@ -28,6 +28,7 @@ interface BillingViewProps {
   subscription: { status: string; currentPeriodEnd: string | null } | null;
   clientKey: string;
   isProduction: boolean;
+  autoCheckout?: "pro" | "business";
 }
 
 const PLAN_DETAILS: Record<
@@ -72,6 +73,7 @@ export function BillingView({
   subscription,
   clientKey,
   isProduction,
+  autoCheckout,
 }: BillingViewProps) {
   const router = useRouter();
   const queryClient = useQueryClient();
@@ -84,6 +86,7 @@ export function BillingView({
   const [cancelling, setCancelling] = useState(false);
   const [showCancelConfirm, setShowCancelConfirm] = useState(false);
   const orderIdRef = useRef<string | null>(null);
+  const autoCheckoutFired = useRef(false);
 
   const refreshBilling = () => {
     queryClient.invalidateQueries({ queryKey: ["billing-plan"] });
@@ -176,6 +179,14 @@ export function BillingView({
       setLoading(null);
     }
   };
+
+  useEffect(() => {
+    if (autoCheckout && !autoCheckoutFired.current && livePlan === "free") {
+      autoCheckoutFired.current = true;
+      handleUpgrade(autoCheckout);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [autoCheckout]);
 
   return (
     <div className="mx-auto max-w-5xl">
