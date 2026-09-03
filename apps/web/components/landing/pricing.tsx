@@ -8,6 +8,7 @@ const PLANS = [
     tagline: "For getting started.",
     features: ["Up to 25 videos", "5-minute recording limit", "Screen + camera", "Instant link sharing"],
     cta: "Start free",
+    href: "/login",
     variant: "outline" as const,
   },
   {
@@ -18,6 +19,7 @@ const PLANS = [
     tagline: "For individuals who record often.",
     features: ["Unlimited videos & length", "AI titles & transcripts", "Remove filler words", "View counts & time saved"],
     cta: "Go Pro",
+    href: "/d/settings/billing",
     variant: "dark" as const,
   },
   {
@@ -26,7 +28,8 @@ const PLANS = [
     priceSuffix: "/user/mo",
     tagline: "For teams who need more.",
     features: ["Everything in Pro", "Shared workspace", "Workspace time-saved report", "SSO & admin controls"],
-    cta: "Contact sales",
+    cta: "Go Business",
+    href: "/d/settings/billing",
     variant: "outline" as const,
   },
 ];
@@ -90,7 +93,7 @@ export function Pricing() {
                   ))}
                 </ul>
                 <a
-                  href="#"
+                  href={plan.href}
                   className={
                     dark
                       ? "mt-auto flex items-center justify-between rounded-full bg-[#f5f5f2] px-5 py-3 text-xs font-normal uppercase tracking-wider text-[#090b0c] transition-opacity hover:opacity-80"
