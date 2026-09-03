@@ -4,9 +4,15 @@ import { getUserPlan } from "@/lib/billing/plans";
 import { BillingService } from "@/lib/services/billing.service";
 import { BillingView } from "./_components/billing-view";
 
-export default async function BillingPage() {
+export default async function BillingPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ plan?: string }>;
+}) {
   const user = await getCurrentUser();
   if (!user) redirect("/login");
+
+  const { plan: planParam } = await searchParams;
 
   const [plan, subscription] = await Promise.all([
     getUserPlan(user.id),
@@ -15,6 +21,8 @@ export default async function BillingPage() {
 
   const clientKey = process.env.MIDTRANS_CLIENT_KEY ?? "";
   const isProduction = process.env.MIDTRANS_IS_PRODUCTION === "true";
+  const autoCheckout =
+    planParam === "pro" || planParam === "business" ? planParam : undefined;
 
   return (
     <BillingView
@@ -30,6 +38,7 @@ export default async function BillingPage() {
       }
       clientKey={clientKey}
       isProduction={isProduction}
+      autoCheckout={autoCheckout}
     />
   );
 }
