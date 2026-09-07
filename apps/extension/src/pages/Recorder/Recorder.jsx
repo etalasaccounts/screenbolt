@@ -3001,8 +3001,15 @@ const Recorder = () => {
     preloadWebCodecsModules();
     // Kick off the IDB clear in the background so startRecording's await
     // resolves immediately. Safe to re-run if it doesn't actually fire.
+    // Skip if a post-stop editor is still open — chunks haven't been read yet.
     if (!prewarmChunksClearRef.current) {
-      prewarmChunksClearRef.current = chunksStore.clear().catch(() => {});
+      prewarmChunksClearRef.current = chrome.storage.local
+        .get(["postStopEditorOpening"])
+        .then(({ postStopEditorOpening }) => {
+          if (postStopEditorOpening) return;
+          return chunksStore.clear();
+        })
+        .catch(() => {});
     }
     // Pre-open the OPFS writer in parallel. Default-on path: WebCodecs +
     // OPFS. If startRecording's preflight ends up wanting IDB instead, the

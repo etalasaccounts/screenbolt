@@ -104,6 +104,15 @@ const releasePostStopEditorLock = async (overrides = {}) => {
   });
 };
 
+const createEditorTab = (url, callback) => {
+  chrome.tabs.create({ url, active: true }, (tab) => {
+    if (tab?.windowId) {
+      chrome.windows.update(tab.windowId, { focused: true }).catch(() => {});
+    }
+    callback(tab);
+  });
+};
+
 const handleEditorOpenFailed = async (editorUrl, lastError) => {
   diagEvent("editor-open-failed", {
     editorUrl,
@@ -242,9 +251,7 @@ export const stopRecording = async () => {
       ? `?mode=postStop&recordingId=${encodeURIComponent(postStopRecordingId)}`
       : "?mode=postStop";
     const wcUrl = `editor.html${query}`;
-    chrome.tabs.create(
-      { url: wcUrl, active: true },
-      (tab) => {
+    createEditorTab(wcUrl, (tab) => {
         if (chrome.runtime.lastError || !tab?.id) {
           handleEditorOpenFailed(wcUrl, chrome.runtime.lastError?.message);
           return;
@@ -282,8 +289,7 @@ export const stopRecording = async () => {
               "editor tab never reached status=complete within 30s",
             ),
         );
-      },
-    );
+      });
 
     chrome.runtime.sendMessage({ type: "turn-off-pip" });
   } else if (duration > maxDuration) {
@@ -294,9 +300,7 @@ export const stopRecording = async () => {
       ? `?mode=postStop&recordingId=${encodeURIComponent(postStopRecordingId)}`
       : "?mode=postStop";
     const viewerUrl = `editor.html${query}&view=1`;
-    chrome.tabs.create(
-      { url: viewerUrl, active: true },
-      (tab) => {
+    createEditorTab(viewerUrl, (tab) => {
         if (chrome.runtime.lastError || !tab?.id) {
           handleEditorOpenFailed(viewerUrl, chrome.runtime.lastError?.message);
           return;
@@ -334,8 +338,7 @@ export const stopRecording = async () => {
               "editor tab never reached status=complete within 30s",
             ),
         );
-      },
-    );
+      });
 
     chrome.runtime.sendMessage({ type: "turn-off-pip" });
   } else {
@@ -345,7 +348,7 @@ export const stopRecording = async () => {
       ? `?mode=postStop&recordingId=${encodeURIComponent(postStopRecordingId)}`
       : "?mode=postStop";
     const editorUrl = `editor.html${query}`;
-    chrome.tabs.create({ url: editorUrl, active: true }, (tab) => {
+    createEditorTab(editorUrl, (tab) => {
       if (chrome.runtime.lastError || !tab?.id) {
         handleEditorOpenFailed(editorUrl, chrome.runtime.lastError?.message);
         return;
@@ -549,13 +552,8 @@ export const handleStopRecordingTab = async (request) => {
       diagEvent("editor-open", { type: "editor", via: "stop-tab" });
       const editorUrl = "editor.html";
       // Open editor immediately in postStop mode (WebCodecs only)
-      chrome.tabs.create(
-        {
-          url: `${editorUrl}?mode=postStop&recordingId=${encodeURIComponent(
-            recordingId,
-          )}`,
-          active: true,
-        },
+      createEditorTab(
+        `${editorUrl}?mode=postStop&recordingId=${encodeURIComponent(recordingId)}`,
         (tab) => {
           if (chrome.runtime.lastError || !tab?.id) {
             const errMsg = chrome.runtime.lastError?.message || "tab-create-failed";
@@ -636,7 +634,7 @@ export const handleStopRecordingTab = async (request) => {
       });
       perfMark("BG.stopRecording editor-tab-create.start", { editorUrl });
       const endTabLoad = perfSpan("BG.stopRecording editor-tab-load");
-      chrome.tabs.create({ url: editorUrl, active: true }, (tab) => {
+      createEditorTab(editorUrl, (tab) => {
         if (chrome.runtime.lastError || !tab?.id) {
           const errMsg = chrome.runtime.lastError?.message || "tab-create-failed";
           console.error("❌ Failed to open post-stop editor:", errMsg);
