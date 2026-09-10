@@ -95,6 +95,11 @@ const EXEMPT = {
     reason:
       "Frozen external contract with web and extension clients; response shape is audited separately by contract-frozen rule.",
   },
+  "app/api/videos/[id]/pin/verify/route.ts": {
+    rules: ["auth"],
+    reason:
+      "Public endpoint: PIN verification for protected videos. No user session required — any viewer with the correct PIN may verify.",
+  },
   "app/api/billing/webhook/route.ts": {
     rules: ["auth"],
     reason:
@@ -134,11 +139,25 @@ function walk(dir, out = []) {
   return out;
 }
 
-/** Extract a handler's body by brace matching from its opening `{`. */
+/** Extract a handler's body by brace matching from its opening `{`.
+ * Skips past the parameter list so `{ params }` destructuring doesn't confuse it. */
 function handlerBody(src, startIdx) {
-  const open = src.indexOf("{", startIdx);
-  if (open === -1) return "";
+  // Skip past function parameters by matching parens from the first `(`
+  const parenStart = src.indexOf("(", startIdx);
+  if (parenStart === -1) return "";
   let depth = 0;
+  let afterParams = parenStart;
+  for (let i = parenStart; i < src.length; i++) {
+    if (src[i] === "(") depth++;
+    else if (src[i] === ")") {
+      depth--;
+      if (depth === 0) { afterParams = i + 1; break; }
+    }
+  }
+  // Now find the opening { of the function body (after the closing paren)
+  const open = src.indexOf("{", afterParams);
+  if (open === -1) return "";
+  depth = 0;
   for (let i = open; i < src.length; i++) {
     const c = src[i];
     if (c === "{") depth++;
@@ -165,7 +184,7 @@ function findHandlers(src) {
 }
 
 function checkRoute(absPath) {
-  const rel = path.relative(WEB_DIR, absPath);
+  const rel = path.relative(WEB_DIR, absPath).replace(/\\/g, "/");
   const src = readFileSync(absPath, "utf8");
   const violations = [];
 

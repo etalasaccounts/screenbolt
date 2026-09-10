@@ -107,6 +107,18 @@ export async function updateVideoTitle(id: string, title: string) {
   return video;
 }
 
+export async function updateVideoPin(
+  id: string,
+  data: { pinEnabled: boolean; pin: string | null },
+) {
+  const [video] = await db
+    .update(videos)
+    .set({ ...data, updatedAt: new Date() })
+    .where(eq(videos.id, id))
+    .returning();
+  return video;
+}
+
 export async function updateVideo(
   id: string,
   data: {

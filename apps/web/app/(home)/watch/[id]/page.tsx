@@ -10,6 +10,7 @@ import { CommentSection, type SerializedComment } from "@/components/shell/comme
 import { CopyLinkButton } from "@/components/shell/copy-link-button";
 import { ShareDialog } from "@/components/shell/share-dialog";
 import { VideoTitle } from "@/components/shell/video-title";
+import { WatchPageClient } from "./_components/watch-page-client";
 
 export async function generateMetadata({
   params,
@@ -97,60 +98,72 @@ export default async function WatchPage({
   if (!video) notFound();
 
   const playbackUrl = video.videoUrl;
+  const isOwner = user?.id === video.user.id;
 
   // The owner opening their own recording is not an audience.
   const viewerCount = countExternalViewers(video.videoViews, video.user.id);
+
+  // Owner always bypasses PIN gate; viewers must enter PIN if enabled
+  const requiresPin = video.pinEnabled && !isOwner;
 
   return (
     <div className="mx-auto max-w-4xl">
       <ViewTracker videoId={video.id} />
 
-      <div className="flex items-start justify-between gap-4">
-        {/* flex-1 so the rename input (w-full) gets the real available width.
-            Without it this column sizes to its content, and in edit mode that
-            content is a bare <input> whose intrinsic width is ~20 characters --
-            which collapsed the column and clipped the start of longer titles. */}
-        <div className="min-w-0 flex-1">
-          <VideoTitle videoId={video.id} title={video.title} editable={user?.id === video.user.id} />
-          <div className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1 text-[0.875rem] text-[#090b0c]/50">
-            <span className="flex items-center gap-1.5">
-              <span className="flex h-5 w-5 items-center justify-center rounded-full bg-[#090b0c] text-[0.5625rem] font-medium text-white">
-                {getUserInitials(video.user.name ?? video.user.email ?? "?")}
+      <WatchPageClient videoId={video.id} pinEnabled={requiresPin}>
+        <div className="flex items-start justify-between gap-4">
+          {/* flex-1 so the rename input (w-full) gets the real available width.
+              Without it this column sizes to its content, and in edit mode that
+              content is a bare <input> whose intrinsic width is ~20 characters --
+              which collapsed the column and clipped the start of longer titles. */}
+          <div className="min-w-0 flex-1">
+            <VideoTitle videoId={video.id} title={video.title} editable={isOwner} />
+            <div className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1 text-[0.875rem] text-[#090b0c]/50">
+              <span className="flex items-center gap-1.5">
+                <span className="flex h-5 w-5 items-center justify-center rounded-full bg-[#090b0c] text-[0.5625rem] font-medium text-white">
+                  {getUserInitials(video.user.name ?? video.user.email ?? "?")}
+                </span>
+                {video.user.name ?? video.user.email ?? "Unknown"}
               </span>
-              {video.user.name ?? video.user.email ?? "Unknown"}
-            </span>
-            <span>·</span>
-            <span>{formatDate(video.createdAt)}</span>
-            {video.duration ? (
-              <>
-                <span>·</span>
-                <span>{formatDuration(video.duration)}</span>
-              </>
-            ) : null}
-            <span>·</span>
-            <span>
-              {viewerCount} {viewerCount === 1 ? "view" : "views"}
-            </span>
+              <span>·</span>
+              <span>{formatDate(video.createdAt)}</span>
+              {video.duration ? (
+                <>
+                  <span>·</span>
+                  <span>{formatDuration(video.duration)}</span>
+                </>
+              ) : null}
+              <span>·</span>
+              <span>
+                {viewerCount} {viewerCount === 1 ? "view" : "views"}
+              </span>
+            </div>
           </div>
+          {/* Sharing controls are for people who have somewhere to share this to
+              from inside Screenbolt. An anonymous visitor is the recipient of a
+              share link, not a sharer -- they already have the URL in their
+              address bar, and handing them an embed snippet would let them mount
+              someone else's video on their own site. */}
+          {user && (
+            <div className="flex items-center gap-2">
+              <CopyLinkButton videoId={video.id} />
+              <ShareDialog
+                videoId={video.id}
+                isOwner={isOwner}
+                initialIsPublic={video.isPublic}
+                initialPinEnabled={video.pinEnabled}
+                initialPin={isOwner ? video.pin : null}
+              />
+            </div>
+          )}
         </div>
-        {/* Sharing controls are for people who have somewhere to share this to
-            from inside Screenbolt. An anonymous visitor is the recipient of a
-            share link, not a sharer -- they already have the URL in their
-            address bar, and handing them an embed snippet would let them mount
-            someone else's video on their own site. */}
-        {user && (
-          <div className="flex items-center gap-2">
-            <CopyLinkButton videoId={video.id} />
-            <ShareDialog videoId={video.id} isOwner={user.id === video.user.id} initialIsPublic={video.isPublic} />
-          </div>
-        )}
-      </div>
 
-      <div className="mt-5">
-        <VideoPlayer src={playbackUrl} poster={video.thumbnailUrl ?? undefined} title={video.title} />
-      </div>
+        <div className="mt-5">
+          <VideoPlayer src={playbackUrl} poster={video.thumbnailUrl ?? undefined} title={video.title} />
+        </div>
 
-      <CommentSection videoId={video.id} comments={serializeComments(video.comments)} isAuthenticated={!!user} />
+        <CommentSection videoId={video.id} comments={serializeComments(video.comments)} isAuthenticated={!!user} />
+      </WatchPageClient>
     </div>
   );
 }
