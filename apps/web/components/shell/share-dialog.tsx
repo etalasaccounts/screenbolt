@@ -52,17 +52,20 @@ export function ShareDialog({
 
   async function copyLink() {
     try {
-      if (pinEnabled && pin) {
-        await navigator.clipboard.writeText(
-          `Video: ${getShareUrl()}\nPIN: ${pin}`,
-        );
-        toast.success("Link & PIN copied to clipboard");
-      } else {
-        await navigator.clipboard.writeText(getShareUrl());
-        toast.success("Link copied to clipboard");
-      }
+      await navigator.clipboard.writeText(getShareUrl());
+      toast.success("Link copied to clipboard");
     } catch {
       toast.error("Could not copy to clipboard");
+    }
+  }
+
+  async function copyPin() {
+    if (!pin) return;
+    try {
+      await navigator.clipboard.writeText(pin);
+      toast.success("PIN copied to clipboard");
+    } catch {
+      toast.error("Could not copy PIN");
     }
   }
 
@@ -180,8 +183,8 @@ export function ShareDialog({
                 </button>
               </div>
 
-              {/* Copy link button */}
-              <div className="mb-5">
+              {/* Copy link + PIN buttons */}
+              <div className="mb-5 flex flex-col gap-2">
                 <button
                   type="button"
                   onClick={copyLink}
@@ -190,14 +193,21 @@ export function ShareDialog({
                   <Icon icon="solar:copy-linear" style={{ fontSize: "1rem" }} className="shrink-0 text-[#090b0c]/50" />
                   <div className="min-w-0 flex-1">
                     <div className="truncate text-[#090b0c]/70">{getShareUrl()}</div>
-                    {pinEnabled && pin && (
-                      <div className="mt-0.5 text-[0.75rem] text-[#090b0c]/45">PIN: {pin}</div>
-                    )}
                   </div>
-                  <span className="shrink-0 text-[0.75rem] font-medium text-[#090b0c]/50">
-                    {pinEnabled ? "Copy link & PIN" : "Copy link"}
-                  </span>
+                  <span className="shrink-0 text-[0.75rem] font-medium text-[#090b0c]/50">Copy link</span>
                 </button>
+                {pinEnabled && pin && (
+                  <button
+                    type="button"
+                    onClick={copyPin}
+                    className="flex w-full items-center gap-2 rounded-xl border border-black/[.08] bg-black/[.02] px-4 py-3 text-[0.8125rem] transition-colors hover:bg-black/[.04]"
+                  >
+                    <Icon icon="solar:lock-linear" style={{ fontSize: "1rem" }} className="shrink-0 text-[#090b0c]/50" />
+                    <span className="font-mono font-medium tracking-[0.1em] text-[#090b0c]/70">{pin}</span>
+                    <div className="flex-1" />
+                    <span className="shrink-0 text-[0.75rem] font-medium text-[#090b0c]/50">Copy PIN</span>
+                  </button>
+                )}
               </div>
 
               {/* Owner-only controls */}
@@ -243,13 +253,13 @@ export function ShareDialog({
                   </div>
 
                   {/* Search engine indexing */}
-                  <div className="pt-4">
+                  <div className={`pt-4 ${pinEnabled ? "pointer-events-none opacity-40" : ""}`}>
                     <label className="flex items-center gap-3 cursor-pointer">
                       <input
                         type="checkbox"
-                        checked={isPublic}
+                        checked={pinEnabled ? false : isPublic}
                         onChange={handleTogglePublic}
-                        disabled={busy}
+                        disabled={busy || pinEnabled}
                         className="h-4 w-4 cursor-pointer"
                       />
                       <div className="flex-1">
@@ -257,7 +267,7 @@ export function ShareDialog({
                           Allow search engines to index this video
                         </div>
                         <div className="text-[0.75rem] text-[#090b0c]/55">
-                          Off by default. Your link keeps working either way.
+                          {pinEnabled ? "Disabled when PIN protection is on." : "Off by default. Your link keeps working either way."}
                         </div>
                       </div>
                     </label>
@@ -266,26 +276,32 @@ export function ShareDialog({
               )}
 
               {/* Embed section */}
-              <div className="mt-4 border-t border-black/[.08] pt-4">
+              <div className={`mt-4 border-t border-black/[.08] pt-4 ${pinEnabled ? "pointer-events-none opacity-40" : ""}`}>
                 <label className="block text-[0.8125rem] font-medium mb-2 text-[#090b0c]/70">
                   Embed on your website
                 </label>
-                <textarea
-                  ref={textareaRef}
-                  rows={3}
-                  readOnly
-                  value={getEmbedCode()}
-                  onFocus={handleTextareaFocus}
-                  className="w-full rounded-xl border border-black/[.08] bg-black/[.02] p-3 font-mono text-[0.75rem] resize-none focus:outline-none"
-                />
-                <button
-                  type="button"
-                  onClick={copyEmbedCode}
-                  className="mt-2 flex h-9 shrink-0 items-center gap-1.5 rounded-full border border-black/[.12] bg-white px-4 text-[0.875rem] transition-colors hover:bg-black/[.04]"
-                >
-                  <Icon icon="solar:copy-linear" style={{ fontSize: "0.9375rem" }} />
-                  Copy code
-                </button>
+                {pinEnabled ? (
+                  <p className="text-[0.75rem] text-[#090b0c]/55">Embed is disabled when PIN protection is on.</p>
+                ) : (
+                  <>
+                    <textarea
+                      ref={textareaRef}
+                      rows={3}
+                      readOnly
+                      value={getEmbedCode()}
+                      onFocus={handleTextareaFocus}
+                      className="w-full rounded-xl border border-black/[.08] bg-black/[.02] p-3 font-mono text-[0.75rem] resize-none focus:outline-none"
+                    />
+                    <button
+                      type="button"
+                      onClick={copyEmbedCode}
+                      className="mt-2 flex h-9 shrink-0 items-center gap-1.5 rounded-full border border-black/[.12] bg-white px-4 text-[0.875rem] transition-colors hover:bg-black/[.04]"
+                    >
+                      <Icon icon="solar:copy-linear" style={{ fontSize: "0.9375rem" }} />
+                      Copy code
+                    </button>
+                  </>
+                )}
               </div>
             </div>
           </div>
