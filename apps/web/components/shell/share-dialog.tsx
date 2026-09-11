@@ -69,6 +69,16 @@ export function ShareDialog({
     }
   }
 
+  async function copyBoth() {
+    if (!pin) return;
+    try {
+      await navigator.clipboard.writeText(`${getShareUrl()}\nPIN: ${pin}`);
+      toast.success("Link & PIN copied to clipboard");
+    } catch {
+      toast.error("Could not copy");
+    }
+  }
+
   async function copyEmbedCode() {
     try {
       await navigator.clipboard.writeText(getEmbedCode());
@@ -197,16 +207,25 @@ export function ShareDialog({
                   <span className="shrink-0 text-[0.75rem] font-medium text-[#090b0c]/50">Copy link</span>
                 </button>
                 {pinEnabled && pin && (
-                  <button
-                    type="button"
-                    onClick={copyPin}
-                    className="flex w-full items-center gap-2 rounded-xl border border-black/[.08] bg-black/[.02] px-4 py-3 text-[0.8125rem] transition-colors hover:bg-black/[.04]"
-                  >
-                    <Icon icon="solar:lock-linear" style={{ fontSize: "1rem" }} className="shrink-0 text-[#090b0c]/50" />
-                    <span className="font-mono font-medium tracking-[0.1em] text-[#090b0c]/70">{pin}</span>
-                    <div className="flex-1" />
-                    <span className="shrink-0 text-[0.75rem] font-medium text-[#090b0c]/50">Copy PIN</span>
-                  </button>
+                  <>
+                    <button
+                      type="button"
+                      onClick={copyPin}
+                      className="flex w-full items-center gap-2 rounded-xl border border-black/[.08] bg-black/[.02] px-4 py-3 text-[0.8125rem] transition-colors hover:bg-black/[.04]"
+                    >
+                      <Icon icon="solar:lock-linear" style={{ fontSize: "1rem" }} className="shrink-0 text-[#090b0c]/50" />
+                      <span className="font-mono font-medium tracking-[0.1em] text-[#090b0c]/70">{pin}</span>
+                      <div className="flex-1" />
+                      <span className="shrink-0 text-[0.75rem] font-medium text-[#090b0c]/50">Copy PIN</span>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={copyBoth}
+                      className="self-center text-[0.75rem] text-[#090b0c]/40 underline-offset-2 hover:text-[#090b0c]/60 hover:underline"
+                    >
+                      Copy link &amp; PIN
+                    </button>
+                  </>
                 )}
               </div>
 
