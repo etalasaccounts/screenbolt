@@ -180,6 +180,8 @@ export const videos = pgTable("videos", {
   duration: doublePrecision("duration"), // duration in seconds
   source: sourceEnum("source").default("bunny").notNull(),
   isPublic: boolean("is_public").default(false).notNull(),
+  pinEnabled: boolean("pin_enabled").default(false).notNull(),
+  pin: text("pin"),
   userId: text("user_id")
     .notNull()
     .references(() => users.id, { onDelete: "cascade" }),
