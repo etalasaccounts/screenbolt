@@ -184,11 +184,11 @@ export function ShareDialog({
               </div>
 
               {/* Copy link + PIN buttons */}
-              <div className="mb-5 flex gap-2">
+              <div className="mb-5 flex flex-col gap-2">
                 <button
                   type="button"
                   onClick={copyLink}
-                  className="flex flex-1 items-center gap-2 rounded-xl border border-black/[.08] bg-black/[.02] px-4 py-3 text-left text-[0.8125rem] transition-colors hover:bg-black/[.04]"
+                  className="flex w-full items-center gap-2 rounded-xl border border-black/[.08] bg-black/[.02] px-4 py-3 text-left text-[0.8125rem] transition-colors hover:bg-black/[.04]"
                 >
                   <Icon icon="solar:copy-linear" style={{ fontSize: "1rem" }} className="shrink-0 text-[#090b0c]/50" />
                   <div className="min-w-0 flex-1">
@@ -200,11 +200,12 @@ export function ShareDialog({
                   <button
                     type="button"
                     onClick={copyPin}
-                    className="flex items-center gap-1.5 rounded-xl border border-black/[.08] bg-black/[.02] px-3 py-3 text-[0.8125rem] transition-colors hover:bg-black/[.04]"
+                    className="flex w-full items-center gap-2 rounded-xl border border-black/[.08] bg-black/[.02] px-4 py-3 text-[0.8125rem] transition-colors hover:bg-black/[.04]"
                   >
                     <Icon icon="solar:lock-linear" style={{ fontSize: "1rem" }} className="shrink-0 text-[#090b0c]/50" />
                     <span className="font-mono font-medium tracking-[0.1em] text-[#090b0c]/70">{pin}</span>
-                    <span className="text-[0.75rem] font-medium text-[#090b0c]/50">Copy PIN</span>
+                    <div className="flex-1" />
+                    <span className="shrink-0 text-[0.75rem] font-medium text-[#090b0c]/50">Copy PIN</span>
                   </button>
                 )}
               </div>
