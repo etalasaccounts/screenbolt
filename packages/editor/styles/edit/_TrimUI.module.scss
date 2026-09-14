@@ -22,6 +22,27 @@
   align-items: center;
   gap: 8px;
 }
+.speedControl {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  margin-left: 8px;
+  border-left: 1px solid $color-border;
+  padding-left: 8px;
+
+  button {
+    padding: 6px 8px;
+    font-size: 12px;
+    font-weight: 500;
+    min-width: unset;
+  }
+}
+
+.speedActive {
+  background-color: $color-primary !important;
+  color: #fff !important;
+}
+
 .controlsRight {
   display: flex;
   align-items: center;

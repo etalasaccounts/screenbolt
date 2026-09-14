@@ -23,6 +23,12 @@ const VideoPlayer = (props) => {
     }
   }, [contentState.time]);
 
+  useEffect(() => {
+    if (playerRef.current && playerRef.current.plyr) {
+      playerRef.current.plyr.speed = contentState.playbackSpeed;
+    }
+  }, [contentState.playbackSpeed]);
+
   const options = useMemo(
     () => ({
       controls: ["play", "mute", "captions", "settings", "pip", "fullscreen"],

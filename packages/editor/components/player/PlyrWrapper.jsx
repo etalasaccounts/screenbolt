@@ -80,6 +80,12 @@ const PlyrWrapper = forwardRef(function PlyrWrapper({ id, source, options }, ref
       },
       play: () => el.play(),
       pause: () => el.pause(),
+      get speed() {
+        return el.playbackRate;
+      },
+      set speed(v) {
+        el.playbackRate = v;
+      },
     };
     return () => {
       facadeRef.current = null;

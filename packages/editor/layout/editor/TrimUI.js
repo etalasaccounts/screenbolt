@@ -10,6 +10,9 @@ const URL = "/assets/";
 const TrimIcon = URL + "editor/icons/trim.svg";
 const RemoveIcon = URL + "editor/icons/trash.svg";
 const MuteIcon = URL + "editor/icons/mute.svg";
+const SpeedIcon = URL + "editor/icons/speed.svg";
+
+const SPEEDS = [0.5, 1, 1.5, 2];
 const UndoIcon = URL + "editor/icons/undo.svg";
 const RedoIcon = URL + "editor/icons/redo.svg";
 const TimeIcon = URL + "editor/icons/time.svg";
@@ -105,6 +108,19 @@ const TrimUI = (props) => {
          : "")
        : chrome.i18n.getMessage("sandboxEditorMuteButton")}
      </button>
+     <div className={styles.speedControl}>
+      {SPEEDS.map((s) => (
+       <button
+        key={s}
+        className={`button simpleButton ${contentState.playbackSpeed === s ? styles.speedActive : ""}`}
+        onClick={() =>
+         setContentState((prev) => ({ ...prev, playbackSpeed: s }))
+        }
+       >
+        {s}x
+       </button>
+      ))}
+     </div>
     </div>
     <div className={styles.timeWrap}>
      <ReactSVG src={TimeIcon} />
