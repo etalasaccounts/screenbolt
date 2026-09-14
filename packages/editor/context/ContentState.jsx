@@ -362,6 +362,7 @@ const ContentState = (props) => {
     reviewEligible: false,
     backupBlob: null,
     recordingMeta: null,
+    playbackSpeed: 1,
   };
 
   const [contentState, _setContentState] = useState(defaultState);
