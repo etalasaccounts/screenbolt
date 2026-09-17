@@ -66,6 +66,9 @@ export function SourcePanel({
     y: 32,
   }));
 
+  const screenSupported =
+    typeof navigator !== "undefined" && typeof navigator.mediaDevices?.getDisplayMedia === "function";
+
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === "Escape" && mode === "prepare" && onClose) {
@@ -124,8 +127,9 @@ export function SourcePanel({
             <button
               type="button"
               onClick={() => onSelectRecordingType?.("screen")}
-              disabled={starting}
+              disabled={starting || !screenSupported}
               aria-pressed={recordingType === "screen"}
+              title={!screenSupported ? "Screen recording requires Chrome or Edge on desktop" : undefined}
               className={`flex flex-1 items-center justify-center gap-2 rounded-lg px-3 py-2.5 text-[0.9375rem] font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed ${
                 recordingType === "screen"
                   ? "bg-white/[.20] text-white"

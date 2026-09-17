@@ -172,6 +172,12 @@ export function useScreenRecorder({ onScreenShareEnded }: UseScreenRecorderArgs 
       recordingSourceRef.current = source;
       try {
         if (source === "screen") {
+          if (typeof navigator.mediaDevices?.getDisplayMedia !== "function") {
+            throw new Error(
+              "Screen recording isn't supported in this browser. Open Screenbolt in Chrome or Edge on a desktop computer.",
+            );
+          }
+
           // If a previous screen stream exists, remove its ended event listener
           if (screenStreamRef.current && screenStreamEndedHandlerRef.current) {
             screenStreamRef.current.getVideoTracks()[0]?.removeEventListener("ended", screenStreamEndedHandlerRef.current);

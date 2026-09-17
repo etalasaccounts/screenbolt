@@ -62,7 +62,11 @@ export function RecordingProvider({ children }: { children: React.ReactNode }) {
   const [phase, setPhase] = useState<Phase>("idle");
   const [starting, setStarting] = useState(false);
   const [recordedBlob, setRecordedBlob] = useState<Blob | null>(null);
-  const [recordingType, setRecordingType] = useState<"screen" | "camera">("screen");
+  const [recordingType, setRecordingType] = useState<"screen" | "camera">(() =>
+    typeof navigator !== "undefined" && typeof navigator.mediaDevices?.getDisplayMedia === "function"
+      ? "screen"
+      : "camera",
+  );
 
   const phaseRef = useRef<Phase>(phase);
   phaseRef.current = phase;
