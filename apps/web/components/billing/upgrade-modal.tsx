@@ -48,7 +48,7 @@ export function UpgradeModal({
 
       if (!window.snap) {
         const isProduction =
-          process.env.NEXT_PUBLIC_MIDTRANS_IS_PRODUCTION === "true";
+          process.env.NEXT_PUBLIC_MIDTRANS_PROD === "true";
         await new Promise<void>((resolve, reject) => {
           const script = document.createElement("script");
           script.src = isProduction
