@@ -110,7 +110,7 @@ export default async function WatchPage({
     <div className="mx-auto max-w-4xl">
       <ViewTracker videoId={video.id} />
 
-      <WatchPageClient videoId={video.id} pinEnabled={requiresPin}>
+      <WatchPageClient videoId={video.id} pinEnabled={requiresPin} trackView={!isOwner}>
         <div className="flex items-start justify-between gap-4">
           {/* flex-1 so the rename input (w-full) gets the real available width.
               Without it this column sizes to its content, and in edit mode that
@@ -146,7 +146,7 @@ export default async function WatchPage({
               someone else's video on their own site. */}
           {user && (
             <div className="flex items-center gap-2">
-              <CopyLinkButton videoId={video.id} />
+              <CopyLinkButton videoId={video.id} pinEnabled={video.pinEnabled} />
               <ShareDialog
                 videoId={video.id}
                 isOwner={isOwner}
