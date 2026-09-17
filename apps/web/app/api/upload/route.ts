@@ -21,8 +21,19 @@ const MAX_SIZE = 500 * 1024 * 1024;
  * For large files, use the chunked flow instead:
  *   POST /api/upload/init → PUT /api/upload/part (xN) → POST /api/upload/complete
  */
+function trackUmamiEvent(event: string, data: Record<string, string>) {
+  const websiteId = process.env.NEXT_PUBLIC_UMAMI_WEBSITE_ID;
+  if (!websiteId) return;
+  fetch("https://cloud.umami.is/api/send", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ type: "event", payload: { website: websiteId, name: event, data } }),
+  }).catch(() => {});
+}
+
 export async function POST(request: NextRequest) {
   try {
+    const isExtension = request.headers.get("authorization")?.startsWith("Bearer sbt_") ?? false;
     let user = await getCurrentUser();
     if (!user) user = await getCurrentUserOrToken(request);
     if (!user) return NextResponse.json({ success: false, error: "Unauthorized", details: null }, { status: 401 });
@@ -73,6 +84,7 @@ export async function POST(request: NextRequest) {
       thumbnail,
     );
 
+    trackUmamiEvent("video-saved", { source: isExtension ? "extension" : "web" });
     return NextResponse.json(
       { success: true, url: result.url, video: result.video, service: "bunny" },
       { status: 201 },

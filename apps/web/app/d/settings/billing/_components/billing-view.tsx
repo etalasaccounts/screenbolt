@@ -103,6 +103,7 @@ export function BillingView({
       const data = await res.json();
       if (data.data?.cancelled) {
         toast.success("Subscription cancelled. You'll keep access until the period ends.");
+        window.umami?.track("subscription-cancelled");
         refreshBilling();
       } else {
         toast.error(data.error?.message ?? "Could not cancel subscription.");
