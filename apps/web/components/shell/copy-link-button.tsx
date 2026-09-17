@@ -3,12 +3,13 @@
 import { toast } from "sonner";
 import { Icon } from "@iconify/react";
 
-export function CopyLinkButton({ videoId }: { videoId: string }) {
+export function CopyLinkButton({ videoId, pinEnabled = false }: { videoId: string; pinEnabled?: boolean }) {
   async function copy() {
     const url = `${window.location.origin}/watch/${videoId}`;
     try {
       await navigator.clipboard.writeText(url);
       toast.success("Link copied to clipboard");
+      window.umami?.track("video-shared", { has_pin: pinEnabled });
     } catch {
       toast.error("Could not copy link");
     }

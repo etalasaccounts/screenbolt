@@ -26,6 +26,7 @@ export function VideoPlayer({
       playsInline
       preload="metadata"
       title={title}
+      onPlay={() => window.umami?.track("video-played")}
     />
   );
 }

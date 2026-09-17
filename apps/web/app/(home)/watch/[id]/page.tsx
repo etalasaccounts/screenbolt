@@ -146,7 +146,7 @@ export default async function WatchPage({
               someone else's video on their own site. */}
           {user && (
             <div className="flex items-center gap-2">
-              <CopyLinkButton videoId={video.id} />
+              <CopyLinkButton videoId={video.id} pinEnabled={video.pinEnabled} />
               <ShareDialog
                 videoId={video.id}
                 isOwner={isOwner}

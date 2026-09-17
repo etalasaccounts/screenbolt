@@ -37,6 +37,7 @@ export function VideoCard({ video }: { video: VideoCardData }) {
     try {
       await navigator.clipboard.writeText(url);
       toast.success("Link copied to clipboard");
+      window.umami?.track("video-shared", { has_pin: false });
     } catch {
       toast.error("Could not copy link");
     }
@@ -69,6 +70,7 @@ export function VideoCard({ video }: { video: VideoCardData }) {
     try {
       await apiFetch(`/api/videos/${video.id}`, { method: "DELETE" });
       toast.success("Video deleted");
+      window.umami?.track("video-deleted");
       queryClient.invalidateQueries({ queryKey: ["videos"] });
     } catch (err) {
       toast.error(err instanceof ApiClientError ? err.message : "Could not delete video");

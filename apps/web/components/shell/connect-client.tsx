@@ -17,6 +17,7 @@ export function ConnectClient({ code }: { code: string }) {
     try {
       await apiPost("/api/extension/pair/approve", { code, label: "Chrome extension" });
       setState("approved");
+      window.umami?.track("extension-connected");
     } catch (err) {
       setError(err instanceof ApiClientError ? err.message : "Something went wrong. Please try again.");
       setState("error");
