@@ -155,6 +155,12 @@ export function SourcePanel({
             </button>
           </div>
 
+          {!screenSupported && (
+            <p className="mb-3 text-center text-[0.75rem] text-white/40">
+              Screen recording requires Chrome or Edge on desktop
+            </p>
+          )}
+
           <DeviceRow
             icon={cameraEnabled ? "material-symbols:videocam" : "material-symbols:videocam-off"}
             label="Camera"
