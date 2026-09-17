@@ -117,6 +117,7 @@ export function RecordingProvider({ children }: { children: React.ReactNode }) {
     const started = recorder.beginRecording();
     if (started) {
       setPhase("recording");
+      window.umami?.track("recording-started", { type: recordingType });
     } else {
       toast.error("Could not start recording");
       recorder.cancel();
@@ -125,12 +126,14 @@ export function RecordingProvider({ children }: { children: React.ReactNode }) {
   }
 
   async function handleStop() {
+    const elapsedMs = recorder.elapsedMs;
     const result = await recorder.stop();
     if (!result) {
       toast.error("Recording failed — no data was captured");
       setPhase("idle");
       return;
     }
+    window.umami?.track("recording-stopped", { duration_seconds: Math.round(elapsedMs / 1000) });
     setRecordedBlob(result.blob);
     setPhase("editing");
   }

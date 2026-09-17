@@ -1,6 +1,6 @@
 "use client";
 
-import { useSyncExternalStore, useState } from "react";
+import { useSyncExternalStore, useState, useEffect } from "react";
 import { PinGate } from "@/components/shell/pin-gate";
 
 const noopSubscribe = () => () => {};
@@ -8,10 +8,12 @@ const noopSubscribe = () => () => {};
 export function WatchPageClient({
   videoId,
   pinEnabled,
+  trackView = false,
   children,
 }: {
   videoId: string;
   pinEnabled: boolean;
+  trackView?: boolean;
   children: React.ReactNode;
 }) {
   const sessionKey = `pin-unlocked-${videoId}`;
@@ -26,6 +28,11 @@ export function WatchPageClient({
 
   const [manuallyUnlocked, setManuallyUnlocked] = useState(false);
   const unlocked = storedUnlocked || manuallyUnlocked;
+
+  useEffect(() => {
+    if (trackView) window.umami?.track("video-viewed", { has_pin: pinEnabled });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   if (!unlocked) return <PinGate videoId={videoId} onUnlock={() => setManuallyUnlocked(true)} />;
   return <>{children}</>;
