@@ -35,6 +35,7 @@ export function UploadButton() {
           setStatus(phase === "finishing" ? "Finishing…" : `Uploading… ${percent}%`),
       });
       toast.success("Video uploaded");
+      window.umami?.track("video-saved", { source: "web" });
       queryClient.invalidateQueries({ queryKey: ["videos"] });
     } catch (error) {
       toast.error(error instanceof Error ? error.message : "Upload failed");

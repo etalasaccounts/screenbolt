@@ -63,6 +63,7 @@ export function UpgradeModal({
 
       window.snap!.pay(data.data.snapToken, {
         onSuccess: () => {
+          window.umami?.track("subscription-started", { plan });
           window.location.reload();
         },
         onPending: () => {

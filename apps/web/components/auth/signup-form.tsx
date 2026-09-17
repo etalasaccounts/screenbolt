@@ -41,6 +41,7 @@ export function SignupForm({
         router.push(callbackUrl === "/home" ? "/login" : `/login?callbackUrl=${encodeURIComponent(callbackUrl)}`);
         return;
       }
+      window.umami?.track("signup-completed", { method: "email" });
       router.push(callbackUrl);
       router.refresh();
     } catch (err) {
@@ -55,7 +56,7 @@ export function SignupForm({
         <>
           <button
             type="button"
-            onClick={() => signIn("google", { callbackUrl })}
+            onClick={() => { window.umami?.track("signup-completed", { method: "google" }); signIn("google", { callbackUrl }); }}
             className="flex h-12 w-full items-center justify-center gap-2 rounded-full border border-black/[.12] bg-white text-[0.9375rem] transition-colors hover:bg-black/[.04]"
           >
             <Icon icon="logos:google-icon" style={{ fontSize: "1.1rem" }} />
