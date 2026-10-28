@@ -1,6 +1,7 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
+import * as AlertDialog from "@radix-ui/react-alert-dialog";
 import Link from "next/link";
 import { useQueryClient } from "@tanstack/react-query";
 import { Icon } from "@iconify/react";
@@ -28,6 +29,24 @@ export function VideoCard({ video }: { video: VideoCardData }) {
   // never picked it up. Invalidating the query is the actual refresh.
   const queryClient = useQueryClient();
   const [menuOpen, setMenuOpen] = useState(false);
+  const [confirmDelete, setConfirmDelete] = useState(false);
+  const menuRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!menuOpen) return;
+    function dismiss(event: PointerEvent) {
+      if (!menuRef.current?.contains(event.target as Node)) setMenuOpen(false);
+    }
+    function escape(event: KeyboardEvent) {
+      if (event.key === "Escape") setMenuOpen(false);
+    }
+    document.addEventListener("pointerdown", dismiss);
+    document.addEventListener("keydown", escape);
+    return () => {
+      document.removeEventListener("pointerdown", dismiss);
+      document.removeEventListener("keydown", escape);
+    };
+  }, [menuOpen]);
   const [renaming, setRenaming] = useState(false);
   const [title, setTitle] = useState(video.title);
   const [busy, setBusy] = useState(false);
@@ -71,9 +90,11 @@ export function VideoCard({ video }: { video: VideoCardData }) {
       await apiFetch(`/api/videos/${video.id}`, { method: "DELETE" });
       toast.success("Video deleted");
       window.umami?.track("video-deleted");
-      queryClient.invalidateQueries({ queryKey: ["videos"] });
+      setConfirmDelete(false);
+      await queryClient.invalidateQueries({ queryKey: ["videos"] });
     } catch (err) {
       toast.error(err instanceof ApiClientError ? err.message : "Could not delete video");
+    } finally {
       setBusy(false);
     }
   }
@@ -92,8 +113,8 @@ export function VideoCard({ video }: { video: VideoCardData }) {
   }
 
   return (
-    <div className="group relative aspect-video overflow-hidden rounded-3xl bg-[#090b0c] transition-transform duration-300 hover:-translate-y-0.5">
-      <Link href={`/watch/${video.id}`} className="absolute inset-0 block">
+    <div className={`group relative aspect-video rounded-3xl bg-[#090b0c] transition-transform duration-300 hover:-translate-y-0.5 ${menuOpen ? "z-30" : ""}`}>
+      <Link href={`/watch/${video.id}`} className="absolute inset-0 block overflow-hidden rounded-3xl">
         {video.thumbnailUrl ? (
           // eslint-disable-next-line @next/next/no-img-element
           <img
@@ -113,7 +134,7 @@ export function VideoCard({ video }: { video: VideoCardData }) {
       {/* Bottom scrim -- same idea as the landing page's image cards
           (testimonials/SmartCards, analytics), text sits directly on the
           artwork instead of in a white panel below it. */}
-      <div className="pointer-events-none absolute inset-x-0 bottom-0 z-[1] h-2/3 bg-gradient-to-t from-black/85 via-black/25 to-transparent" />
+      <div className="pointer-events-none absolute inset-x-0 bottom-0 z-[1] h-2/3 rounded-b-3xl bg-gradient-to-t from-black/85 via-black/25 to-transparent" />
 
       {video.duration ? (
         <span className="pointer-events-none absolute left-3 top-3 z-[2] rounded-full px-2.5 py-1 text-[0.75rem] font-normal tracking-tight text-white backdrop-blur-md" style={{ background: "rgba(0,0,0,.45)" }}>
@@ -121,9 +142,11 @@ export function VideoCard({ video }: { video: VideoCardData }) {
         </span>
       ) : null}
 
-      <div className="absolute right-3 top-3 z-[3] opacity-0 transition-opacity duration-150 group-hover:opacity-100 focus-within:opacity-100">
+      <div ref={menuRef} className="absolute right-3 top-3 z-[3]">
         <button
           type="button"
+          aria-label="Video actions"
+          aria-expanded={menuOpen}
           onClick={() => setMenuOpen((v) => !v)}
           className="flex h-8 w-8 items-center justify-center rounded-full text-white backdrop-blur-md transition-colors hover:bg-white/25"
           style={{ background: "rgba(255,255,255,.15)" }}
@@ -133,7 +156,6 @@ export function VideoCard({ video }: { video: VideoCardData }) {
 
         {menuOpen && (
           <>
-            <div className="fixed inset-0 z-40" onClick={() => setMenuOpen(false)} />
             <div className="absolute right-0 z-50 mt-1 w-44 rounded-2xl border border-black/[.08] bg-white/95 p-1.5 shadow-[0_12px_40px_rgba(0,0,0,.12)] backdrop-blur-xl">
               <button
                 type="button"
@@ -170,7 +192,7 @@ export function VideoCard({ video }: { video: VideoCardData }) {
               </button>
               <button
                 type="button"
-                onClick={deleteVideo}
+                onClick={() => { setMenuOpen(false); setConfirmDelete(true); }}
                 disabled={busy}
                 className="flex w-full items-center gap-2 rounded-lg px-2.5 py-2 text-left text-[0.875rem] text-red-600 hover:bg-red-50"
               >
@@ -180,6 +202,24 @@ export function VideoCard({ video }: { video: VideoCardData }) {
           </>
         )}
       </div>
+
+      <AlertDialog.Root open={confirmDelete} onOpenChange={setConfirmDelete}>
+        <AlertDialog.Portal>
+          <AlertDialog.Overlay className="fixed inset-0 z-[100] bg-black/50" />
+          <AlertDialog.Content className="fixed left-1/2 top-1/2 z-[101] w-[min(90vw,26rem)] -translate-x-1/2 -translate-y-1/2 rounded-2xl bg-white p-6 shadow-xl">
+            <AlertDialog.Title className="text-lg font-semibold text-[#090b0c]">Delete video?</AlertDialog.Title>
+            <AlertDialog.Description className="mt-2 text-sm text-neutral-600">
+              Remove “{video.title}” from Screenbolt? This cannot be undone. A copy may remain in its storage provider.
+            </AlertDialog.Description>
+            <div className="mt-6 flex justify-end gap-2">
+              <AlertDialog.Cancel disabled={busy} className="rounded-lg px-4 py-2 text-sm hover:bg-neutral-100">Cancel</AlertDialog.Cancel>
+              <button type="button" disabled={busy} onClick={() => void deleteVideo()} className="rounded-lg bg-red-600 px-4 py-2 text-sm text-white hover:bg-red-700 disabled:opacity-50">
+                {busy ? "Deleting…" : "Delete video"}
+              </button>
+            </div>
+          </AlertDialog.Content>
+        </AlertDialog.Portal>
+      </AlertDialog.Root>
 
       <div className="absolute inset-x-0 bottom-0 z-[2] p-4">
         {renaming ? (
